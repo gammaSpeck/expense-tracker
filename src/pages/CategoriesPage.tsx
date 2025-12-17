@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Plus, Trash2, Edit, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,54 +18,58 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { CategoryIcon } from '@/components/categories/CategoryIcon';
-import { CategoryForm } from '@/components/categories/CategoryForm';
-import { useCategories, useCategoryExpenseCounts } from '@/hooks/useExpenseData';
-import { deleteCategory, getExpensesByCategory } from '@/lib/db';
-import { Category } from '@/types/expense';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
+import { CategoryForm } from "@/components/categories/CategoryForm";
+import {
+  useCategories,
+  useCategoryExpenseCounts,
+} from "@/hooks/useExpenseData";
+import { deleteCategory, getExpensesByCategory } from "@/lib/db";
+import { Category } from "@/types/expense";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function CategoriesPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const categories = useCategories();
   const expenseCounts = useCategoryExpenseCounts();
-  
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteData, setDeleteData] = useState<{
     category: Category;
     expenseCount: number;
   } | null>(null);
-  const [deleteAction, setDeleteAction] = useState<'move' | 'cascade'>('move');
-  const [moveToCategory, setMoveToCategory] = useState<string>('');
+  const [deleteAction, setDeleteAction] = useState<"move" | "cascade">("move");
+  const [moveToCategory, setMoveToCategory] = useState<string>("");
 
   const handleDelete = async () => {
     if (!deleteData) return;
-    
+
     try {
-      if (deleteAction === 'move') {
+      if (deleteAction === "move") {
         await deleteCategory(deleteData.category.id, moveToCategory);
       } else {
         await deleteCategory(deleteData.category.id);
       }
-      toast({ title: 'Category deleted' });
-    } catch (error: any) {
+      toast({ title: "Category deleted" });
+    } catch (error: unknown) {
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete category',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete category",
+        variant: "destructive",
       });
     }
     setDeleteData(null);
@@ -73,18 +77,18 @@ export default function CategoriesPage() {
 
   const handleDeleteClick = async (category: Category) => {
     // Check if it's the "Others" category
-    if (category.name === 'Others' && category.isDefault) {
+    if (category.name === "Others" && category.isDefault) {
       toast({
-        title: 'Cannot delete',
+        title: "Cannot delete",
         description: 'The "Others" category cannot be deleted',
-        variant: 'destructive',
+        variant: "destructive",
       });
       return;
     }
 
     const count = expenseCounts[category.id] || 0;
-    const othersCategory = categories.find((c) => c.name === 'Others');
-    setMoveToCategory(othersCategory?.id || '');
+    const othersCategory = categories.find((c) => c.name === "Others");
+    setMoveToCategory(othersCategory?.id || "");
     setDeleteData({ category, expenseCount: count });
   };
 
@@ -115,9 +119,9 @@ export default function CategoriesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
             className={cn(
-              'p-4 rounded-xl bg-card border border-border/50',
-              'flex items-center gap-3',
-              'hover:border-primary/20 transition-colors'
+              "p-4 rounded-xl bg-card border border-border/50",
+              "flex items-center gap-3",
+              "hover:border-primary/20 transition-colors"
             )}
           >
             <CategoryIcon
@@ -125,7 +129,7 @@ export default function CategoriesPage() {
               color={category.color}
               size="lg"
             />
-            
+
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{category.name}</p>
               <p className="text-sm text-muted-foreground">
@@ -188,27 +192,38 @@ export default function CategoriesPage() {
       <AlertDialog open={!!deleteData} onOpenChange={() => setDeleteData(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete "{deleteData?.category.name}"?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete "{deleteData?.category.name}"?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {deleteData?.expenseCount ? (
                 <>
-                  This category has {deleteData.expenseCount} expenses. What would you like to do?
+                  This category has {deleteData.expenseCount} expenses. What
+                  would you like to do?
                 </>
               ) : (
-                'This action cannot be undone.'
+                "This action cannot be undone."
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           {deleteData && deleteData.expenseCount > 0 && (
             <div className="space-y-4 py-4">
-              <RadioGroup value={deleteAction} onValueChange={(v) => setDeleteAction(v as 'move' | 'cascade')}>
+              <RadioGroup
+                value={deleteAction}
+                onValueChange={(v) => setDeleteAction(v as "move" | "cascade")}
+              >
                 <div className="flex items-start space-x-3">
                   <RadioGroupItem value="move" id="move" />
                   <div className="space-y-1">
-                    <Label htmlFor="move">Move expenses to another category</Label>
-                    {deleteAction === 'move' && (
-                      <Select value={moveToCategory} onValueChange={setMoveToCategory}>
+                    <Label htmlFor="move">
+                      Move expenses to another category
+                    </Label>
+                    {deleteAction === "move" && (
+                      <Select
+                        value={moveToCategory}
+                        onValueChange={setMoveToCategory}
+                      >
                         <SelectTrigger className="w-full mt-2">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -218,7 +233,11 @@ export default function CategoriesPage() {
                             .map((c) => (
                               <SelectItem key={c.id} value={c.id}>
                                 <div className="flex items-center gap-2">
-                                  <CategoryIcon icon={c.icon} color={c.color} size="sm" />
+                                  <CategoryIcon
+                                    icon={c.icon}
+                                    color={c.color}
+                                    size="sm"
+                                  />
                                   {c.name}
                                 </div>
                               </SelectItem>
@@ -248,7 +267,12 @@ export default function CategoriesPage() {
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive hover:bg-destructive/90"
-              disabled={deleteAction === 'move' && deleteData && deleteData.expenseCount > 0 && !moveToCategory}
+              disabled={
+                deleteAction === "move" &&
+                deleteData &&
+                deleteData.expenseCount > 0 &&
+                !moveToCategory
+              }
             >
               Delete
             </AlertDialogAction>
