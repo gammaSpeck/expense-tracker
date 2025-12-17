@@ -27,7 +27,7 @@ export function CategoryIcon({ icon, color, size = 'md', className }: CategoryIc
   return (
     <div
       className={cn(
-        'category-icon flex-shrink-0',
+        'category-icon shrink-0',
         sizeClasses[size],
         className
       )}
