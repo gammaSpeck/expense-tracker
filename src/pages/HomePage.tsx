@@ -1,14 +1,19 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { Search, Plus, ArrowRight } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ExpenseList } from '@/components/expenses/ExpenseCard';
-import { useMonthSummary, useRecentExpenses, useCategories, useFilteredExpenses } from '@/hooks/useExpenseData';
-import { deleteExpense } from '@/lib/db';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { Search, Plus, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ExpenseList } from "@/components/expenses/ExpenseCard";
+import {
+  useMonthSummary,
+  useRecentExpenses,
+  useCategories,
+  useFilteredExpenses,
+} from "@/hooks/useExpenseData";
+import { deleteExpense } from "@/lib/db";
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,33 +23,36 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Expense } from '@/types/expense';
+} from "@/components/ui/alert-dialog";
+import { Expense } from "@/types/expense";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
-  
-  const { total, totalExcludingAdhoc, monthStart, monthEnd } = useMonthSummary();
+
+  const { total, totalExcludingAdhoc, monthStart, monthEnd } =
+    useMonthSummary();
   const categories = useCategories();
   const filteredExpenses = useFilteredExpenses({ search });
-  const displayExpenses = search ? filteredExpenses : filteredExpenses.slice(0, 10);
+  const displayExpenses = search
+    ? filteredExpenses
+    : filteredExpenses.slice(0, 10);
 
   const handleExpenseClick = (expense: Expense) => {
     navigate(`/expense/${expense.id}`);
   };
 
   const handleDuplicate = (expense: Expense) => {
-    navigate('/add', { 
-      state: { 
+    navigate("/add", {
+      state: {
         duplicate: {
           ...expense,
-          date: format(new Date(), 'yyyy-MM-dd'),
-          time: format(new Date(), 'HH:mm'),
-        }
-      }
+          date: format(new Date(), "yyyy-MM-dd"),
+          time: format(new Date(), "HH:mm"),
+        },
+      },
     });
   };
 
@@ -56,9 +64,13 @@ export default function HomePage() {
     if (!expenseToDelete) return;
     try {
       await deleteExpense(expenseToDelete.id);
-      toast({ title: 'Expense deleted' });
+      toast({ title: "Expense deleted" });
     } catch (error) {
-      toast({ title: 'Error', description: 'Failed to delete', variant: 'destructive' });
+      toast({
+        title: "Error",
+        description: "Failed to delete",
+        variant: "destructive",
+      });
     }
     setExpenseToDelete(null);
   };
@@ -72,14 +84,16 @@ export default function HomePage() {
         className="summary-card"
       >
         <p className="text-sm opacity-80">This Month's Expenses</p>
-        <p className="text-3xl font-bold mt-1">₹{total.toLocaleString('en-IN')}</p>
+        <p className="text-3xl font-bold mt-1">
+          ₹{total.toLocaleString("en-IN")}
+        </p>
         {totalExcludingAdhoc !== total && (
           <p className="text-sm opacity-70 mt-1">
-            Excluding Adhoc: ₹{totalExcludingAdhoc.toLocaleString('en-IN')}
+            Excluding Adhoc: ₹{totalExcludingAdhoc.toLocaleString("en-IN")}
           </p>
         )}
         <p className="text-xs opacity-60 mt-2">
-          {format(monthStart, 'd MMM')} - {format(monthEnd, 'd MMM yyyy')}
+          {format(monthStart, "d MMM")} - {format(monthEnd, "d MMM yyyy")}
         </p>
       </motion.div>
 
@@ -108,13 +122,13 @@ export default function HomePage() {
       >
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">
-            {search ? 'Search Results' : 'Recent Transactions'}
+            {search ? "Search Results" : "Recent Transactions"}
           </h2>
           {!search && displayExpenses.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/transactions')}
+              onClick={() => navigate("/transactions")}
               className="text-primary"
             >
               See All
@@ -130,14 +144,18 @@ export default function HomePage() {
           onDuplicate={handleDuplicate}
           onEdit={handleEdit}
           onDelete={(expense) => setExpenseToDelete(expense)}
-          emptyMessage={search ? 'No matching expenses' : 'No expenses yet. Add your first one!'}
+          emptyMessage={
+            search
+              ? "No matching expenses"
+              : "No expenses yet. Add your first one!"
+          }
         />
 
         {search && filteredExpenses.length > 10 && (
           <p className="text-center text-sm text-muted-foreground">
-            Showing 10 of {filteredExpenses.length} results.{' '}
+            Showing 10 of {filteredExpenses.length} results.{" "}
             <button
-              onClick={() => navigate('/transactions', { state: { search } })}
+              onClick={() => navigate("/transactions", { state: { search } })}
               className="text-primary hover:underline"
             >
               View all
@@ -148,7 +166,7 @@ export default function HomePage() {
 
       {/* FAB */}
       <button
-        onClick={() => navigate('/add')}
+        onClick={() => navigate("/add")}
         className="fab"
         aria-label="Add expense"
       >
@@ -156,17 +174,24 @@ export default function HomePage() {
       </button>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
+      <AlertDialog
+        open={!!expenseToDelete}
+        onOpenChange={() => setExpenseToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this expense? This action cannot be undone.
+              Are you sure you want to delete this expense? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

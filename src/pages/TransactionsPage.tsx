@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Search, ArrowLeft, Filter, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ExpenseList } from '@/components/expenses/ExpenseCard';
-import { useCategories, useFilteredExpenses } from '@/hooks/useExpenseData';
-import { deleteExpense } from '@/lib/db';
-import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { motion } from "framer-motion";
+import { Search, ArrowLeft, Filter, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ExpenseList } from "@/components/expenses/ExpenseCard";
+import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
+import { deleteExpense } from "@/lib/db";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,18 +18,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Expense } from '@/types/expense';
+} from "@/components/ui/alert-dialog";
+import { Expense } from "@/types/expense";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const initialSearch = location.state?.search || '';
-  
+  const initialSearch = location.state?.search || "";
+
   const [search, setSearch] = useState(initialSearch);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
-  
+
   const categories = useCategories();
   const expenses = useFilteredExpenses({ search });
 
@@ -38,14 +38,14 @@ export default function TransactionsPage() {
   };
 
   const handleDuplicate = (expense: Expense) => {
-    navigate('/add', { 
-      state: { 
+    navigate("/add", {
+      state: {
         duplicate: {
           ...expense,
-          date: format(new Date(), 'yyyy-MM-dd'),
-          time: format(new Date(), 'HH:mm'),
-        }
-      }
+          date: format(new Date(), "yyyy-MM-dd"),
+          time: format(new Date(), "HH:mm"),
+        },
+      },
     });
   };
 
@@ -57,9 +57,13 @@ export default function TransactionsPage() {
     if (!expenseToDelete) return;
     try {
       await deleteExpense(expenseToDelete.id);
-      toast({ title: 'Expense deleted' });
+      toast({ title: "Expense deleted" });
     } catch (error) {
-      toast({ title: 'Error', description: 'Failed to delete', variant: 'destructive' });
+      toast({
+        title: "Error",
+        description: "Failed to delete",
+        variant: "destructive",
+      });
     }
     setExpenseToDelete(null);
   };
@@ -100,7 +104,7 @@ export default function TransactionsPage() {
           />
           {search && (
             <button
-              onClick={() => setSearch('')}
+              onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded"
             >
               <X className="h-4 w-4 text-muted-foreground" />
@@ -109,7 +113,8 @@ export default function TransactionsPage() {
         </div>
         {expenses.length > 0 && (
           <p className="text-xs text-muted-foreground mt-2">
-            Showing {expenses.length} transaction{expenses.length !== 1 ? 's' : ''}
+            Showing {expenses.length} transaction
+            {expenses.length !== 1 ? "s" : ""}
           </p>
         )}
       </motion.div>
@@ -128,22 +133,31 @@ export default function TransactionsPage() {
           onEdit={handleEdit}
           onDelete={(expense) => setExpenseToDelete(expense)}
           grouped
-          emptyMessage={search ? 'No matching transactions' : 'No transactions yet'}
+          emptyMessage={
+            search ? "No matching transactions" : "No transactions yet"
+          }
         />
       </motion.div>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
+      <AlertDialog
+        open={!!expenseToDelete}
+        onOpenChange={() => setExpenseToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this expense? This action cannot be undone.
+              Are you sure you want to delete this expense? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

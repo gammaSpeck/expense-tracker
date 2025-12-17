@@ -1,8 +1,8 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ExpenseForm } from '@/components/expenses/ExpenseForm';
+import { useNavigate, useLocation } from "react-router";
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 
 export default function AddExpensePage() {
   const navigate = useNavigate();
@@ -26,13 +26,13 @@ export default function AddExpensePage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">
-            {duplicateData ? 'Duplicate Expense' : 'Add Expense'}
+            {duplicateData ? "Duplicate Expense" : "Add Expense"}
           </h1>
         </div>
 
         <ExpenseForm
           expense={duplicateData}
-          onSuccess={() => navigate('/')}
+          onSuccess={() => navigate("/")}
           onCancel={() => navigate(-1)}
         />
       </motion.div>
