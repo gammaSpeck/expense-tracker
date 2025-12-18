@@ -1,0 +1,21 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          # Release Please will use the default GITHUB_TOKEN
+          # The default token is sufficient for creating releases and PRs
+          release-type: node
+          target-branch: ${{ github.ref_name }}

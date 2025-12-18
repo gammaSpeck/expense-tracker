@@ -7,8 +7,8 @@ export function AboutSection() {
       <h3 className="text-base font-semibold">Expense Tracker</h3>
 
       <div className="text-xs text-muted-foreground space-y-0.5">
-        <p>Version v0.0.2</p>
-        <p>Last Updated: December 2025</p>
+        <p>Version v{__APP_VERSION__}</p>
+        <p>Last Updated: {__BUILD_TIME__}</p>
       </div>
 
       <div className="text-xs">
