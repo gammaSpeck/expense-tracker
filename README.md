@@ -1,73 +1,124 @@
-# Welcome to your Lovable project
+# 🚀 Expense Tracker PWA
 
-## Project info
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Vite](https://img.shields.io/badge/Built%20With-Vite-blue)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-18.3.1-61dafb)](https://react.dev/)
+[![Dexie.js](https://img.shields.io/badge/IndexedDB-Dexie.js-4.2.1-10b981)](https://dexie.org/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-4.1.18-38bdf8)](https://tailwindcss.com/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-ff9800)](https://web.dev/progressive-web-apps/)
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## 🎉 Welcome!
 
-There are several ways of editing your application.
+**Expense Tracker** is a privacy-first, offline-friendly, installable PWA for tracking and analyzing your personal expenses. No accounts, no backend, just pure fun and financial freedom! 🌈💸
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 📦 Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Offline-first**: All data stored locally in your browser (IndexedDB via Dexie.js)
+- **Mobile & Desktop**: Responsive, touch-friendly UI
+- **PWA**: Installable on any device, works offline
+- **Dark Mode**: Default, with light/system toggle
+- **Expense CRUD**: Add, edit, delete, duplicate expenses
+- **Categories**: Customizable, color-coded, with icons
+- **Tags**: Smart suggestions, usage stats, rename/delete
+- **Charts & Analysis**: Pie/bar charts, monthly summaries
+- **Export/Import**: CSV/JSON export, easy restore
+- **Factory Reset**: Nuke all data (if you dare!)
+- **Fun UI**: Modern, animated, accessible, and energetic
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🖼️ Screenshots
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+<!-- Add screenshots/gifs here! -->
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="400" />
+  <img src="docs/screenshots/add-expense.png" alt="Add Expense" width="400" />
+  <img src="docs/screenshots/analysis.png" alt="Analysis" width="400" />
+</p>
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Quick Start
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# 1. Clone the repo
+$ git clone https://github.com/gammaSpeck/expense-tracker.git
+$ cd expense-tracker
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 2. Install dependencies
+$ bun install # or npm install / pnpm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# 3. Start the dev server
+$ bun run dev # or npm run dev / pnpm dev
+
+# 4. Open http://localhost:5173 in your browser
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Tech Stack
 
-**Use GitHub Codespaces**
+- **Vite** (blazing fast dev/build)
+- **React** (TypeScript)
+- **shadcn/ui** (Radix UI primitives)
+- **Tailwind CSS v4** (CSS-first config)
+- **Dexie.js** (IndexedDB wrapper)
+- **Lucide React** (icons)
+- **Recharts** (charts)
+- **date-fns** (date utils)
+- **browser-image-compression** (attachments)
+- **React Hook Form + Zod** (forms/validation)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## ✨ Roadmap
 
-This project is built with:
+- [x] Expense CRUD
+- [x] Category CRUD
+- [x] Tag management
+- [x] Charts & analysis
+- [x] Export/import
+- [ ] PWA support
+- [ ] Multi-language support
+- [ ] More themes
+- [ ] Community features
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 🧑‍💻 Credits
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+- [Dexie.js](https://dexie.org/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Lucide Icons](https://lucide.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Vite](https://vitejs.dev/)
+- [Recharts](https://recharts.org/)
+- [date-fns](https://date-fns.org/)
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## 📄 License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+MIT © [gammaSpeck](https://github.com/gammaSpeck)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## 🌟 Show Your Support
+
+If you love this project, give it a ⭐️! Share your feedback, ideas, and screenshots!
+
+---
+
+## 🗺️ Community & Links
+
+- [Issues](https://github.com/gammaSpeck/expense-tracker/issues)
+- [Discussions](https://github.com/gammaSpeck/expense-tracker/discussions)
+- [Releases](https://github.com/gammaSpeck/expense-tracker/releases)
+
+---
+
+> Built with 💚 for privacy, fun, and financial clarity!
