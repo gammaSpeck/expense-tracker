@@ -1,4 +1,4 @@
-import { Github } from "lucide-react";
+import { Github, Lock, Folder } from "lucide-react";
 
 export function AboutSection() {
   return (
@@ -34,7 +34,10 @@ export function AboutSection() {
 
         <div className="space-y-2">
           <div className="p-3 rounded-lg bg-muted/50">
-            <p className="font-medium text-sm mb-2">🔒 Fully Local & Private</p>
+            <span className="inline-flex items-center gap-2 font-medium text-sm mb-2">
+              <Lock className="h-4 w-4" />
+              Fully Local & Private
+            </span>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• No backend server exists</li>
               <li>• All data stored on your device</li>
@@ -44,7 +47,10 @@ export function AboutSection() {
           </div>
 
           <div className="p-3 rounded-lg bg-muted/50">
-            <p className="font-medium text-sm mb-2">📂 Open Source</p>
+            <span className="inline-flex items-center gap-2 font-medium text-sm mb-2">
+              <Folder className="h-4 w-4" />
+              Open Source
+            </span>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>• MIT Licensed</li>
               <li>• Contributions welcome</li>

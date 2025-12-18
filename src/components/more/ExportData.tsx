@@ -1,17 +1,38 @@
 import { useState } from "react";
-import { Download } from "lucide-react";
+import { Download, CalendarIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { exportAllData, getAllCategories } from "@/lib/db";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export function ExportData() {
-  const [format, setFormat] = useState<"csv" | "json">("csv");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [open, setOpen] = useState(false);
+  const [formatType, setFormatType] = useState<"csv" | "json">("csv");
+  const [fromDate, setFromDate] = useState<Date | undefined>();
+  const [toDate, setToDate] = useState<Date | undefined>();
   const [isExporting, setIsExporting] = useState(false);
+
+  const resetForm = () => {
+    setFormatType("csv");
+    setFromDate(undefined);
+    setToDate(undefined);
+  };
 
   async function handleExport() {
     setIsExporting(true);
@@ -21,12 +42,14 @@ export function ExportData() {
       // Filter by date range if provided
       let expenses = data.expenses;
       if (fromDate && toDate) {
+        const fromDateStr = format(fromDate, "yyyy-MM-dd");
+        const toDateStr = format(toDate, "yyyy-MM-dd");
         expenses = expenses.filter(
-          (e) => e.date >= fromDate && e.date <= toDate
+          (e) => e.date >= fromDateStr && e.date <= toDateStr
         );
       }
 
-      if (format === "csv") {
+      if (formatType === "csv") {
         const csv = generateCSV(expenses, data.categories);
         downloadFile(csv, `expenses-${Date.now()}.csv`, "text/csv");
       } else {
@@ -44,6 +67,8 @@ export function ExportData() {
       }
 
       toast.success(`Exported ${expenses.length} expenses`);
+      resetForm();
+      setOpen(false);
     } catch (error) {
       toast.error("Export failed");
     } finally {
@@ -51,63 +76,141 @@ export function ExportData() {
     }
   }
 
+  const clearDates = () => {
+    setFromDate(undefined);
+    setToDate(undefined);
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-sm text-muted-foreground">Date Range (Optional)</Label>
-        <div className="flex gap-2">
-          <Input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="flex-1"
-            placeholder="From"
-          />
-          <Input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="flex-1"
-            placeholder="To"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-sm text-muted-foreground">Format</Label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setFormat("csv")}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              format === "csv"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted hover:bg-muted/80"
-            }`}
-          >
-            CSV
-          </button>
-          <button
-            onClick={() => setFormat("json")}
-            className={`flex-1 py-2 rounded-lg transition-all ${
-              format === "json"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted hover:bg-muted/80"
-            }`}
-          >
-            JSON
-          </button>
-        </div>
-      </div>
-
+    <>
       <Button
-        onClick={handleExport}
-        disabled={isExporting}
-        className="w-full"
+        onClick={() => setOpen(true)}
+        variant="outline"
+        className="w-full justify-start"
       >
         <Download className="h-4 w-4 mr-2" />
-        {isExporting ? "Exporting..." : "Export Data"}
+        Export Data
       </Button>
-    </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export Data</DialogTitle>
+            <DialogDescription>
+              Export your expenses and categories. By default, all expenses will
+              be exported.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Date Range Filter */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm text-muted-foreground">
+                  Date Range (Optional)
+                </Label>
+                {(fromDate || toDate) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearDates}
+                    className="h-6 text-xs"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Clear
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !fromDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {fromDate ? format(fromDate, "MMM dd") : "From"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={fromDate}
+                      onSelect={setFromDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !toDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {toDate ? format(toDate, "MMM dd") : "To"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={toDate}
+                      onSelect={setToDate}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Format Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Format</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setFormatType("csv")}
+                  className={`py-2 rounded-lg transition-all ${
+                    formatType === "csv"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  CSV
+                </button>
+                <button
+                  onClick={() => setFormatType("json")}
+                  className={`py-2 rounded-lg transition-all ${
+                    formatType === "json"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  JSON
+                </button>
+              </div>
+            </div>
+
+            {/* Export Button */}
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="w-full"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
