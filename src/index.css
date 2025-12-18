@@ -591,6 +591,13 @@ layer(base);
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Hide scrollbars globally */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
   }
 
   /* Hide scrollbar but keep functionality */
@@ -602,19 +609,13 @@ layer(base);
     display: none;
   }
 
-  /* Custom scrollbar for desktop */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  /* Hide all scrollbars globally */
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/30;
+  *::-webkit-scrollbar {
+    display: none;
   }
 }
 

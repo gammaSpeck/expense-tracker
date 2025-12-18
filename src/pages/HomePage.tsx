@@ -111,22 +111,6 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      {/* Search */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="relative"
-      >
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by description, category, or tag..."
-          className="pl-10"
-        />
-      </motion.div>
-
       {/* Recent Transactions */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
