@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router";
 
 export function FactoryReset() {
-  const [stage, setStage] = useState<"initial" | "warning" | "confirm">("initial");
+  const [stage, setStage] = useState<"initial" | "warning" | "confirm">(
+    "initial"
+  );
   const [confirmText, setConfirmText] = useState("");
   const [isResetting, setIsResetting] = useState(false);
   const navigate = useNavigate();
@@ -44,14 +46,15 @@ export function FactoryReset() {
 
   if (stage === "confirm") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-2 text-destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <span className="font-medium">Final Confirmation</span>
+          <AlertTriangle className="h-4 w-4" />
+          <span className="text-sm font-medium">Final Confirmation</span>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Type <span className="font-mono font-bold">DELETE ALL DATA</span> to confirm:
+        <p className="text-xs text-muted-foreground">
+          Type <span className="font-mono font-bold">DELETE ALL DATA</span> to
+          confirm:
         </p>
 
         <Input
@@ -87,13 +90,13 @@ export function FactoryReset() {
 
   if (stage === "warning") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-2 text-destructive">
-          <AlertTriangle className="h-5 w-5" />
-          <span className="font-medium">Factory Reset Warning</span>
+          <AlertTriangle className="h-4 w-4" />
+          <span className="text-sm font-medium">Factory Reset Warning</span>
         </div>
 
-        <div className="text-sm space-y-2">
+        <div className="text-xs space-y-2">
           <p className="font-medium">This will permanently delete:</p>
           <ul className="list-disc list-inside text-muted-foreground space-y-1">
             <li>All expenses</li>

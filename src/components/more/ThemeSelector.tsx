@@ -16,7 +16,7 @@ export function ThemeSelector() {
         <button
           key={value}
           onClick={() => setTheme(value)}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all text-sm ${
             theme === value
               ? "bg-primary text-primary-foreground"
               : "bg-muted hover:bg-muted/80"

@@ -594,6 +594,10 @@ layer(base);
     /* Hide scrollbars globally */
     -ms-overflow-style: none;
     scrollbar-width: none;
+    /* Prevent horizontal overflow */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 
   body::-webkit-scrollbar {
