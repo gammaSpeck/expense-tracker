@@ -1,0 +1,19 @@
+# Changelog
+
+## 1.0.0 (2025-12-19)
+
+
+### Features
+
+* **ci:** add GitHub Actions workflow to update latest release on tag push ([00a9dca](https://github.com/gammaSpeck/expense-tracker/commit/00a9dca6b767cf6cfc3922693fe93f1cb7bd0a6e))
+* enhance mobile responsiveness and update UI components ([12bf17e](https://github.com/gammaSpeck/expense-tracker/commit/12bf17e87c4d5e92eef032f6110b0dd53894b2bf))
+* implement PWA support with manifest and icons ([#5](https://github.com/gammaSpeck/expense-tracker/issues/5)) ([a34fd2e](https://github.com/gammaSpeck/expense-tracker/commit/a34fd2e6d3de77bfa5a602419fa28af789ace2e7))
+* update project metadata and release please ([#3](https://github.com/gammaSpeck/expense-tracker/issues/3)) ([e6518f6](https://github.com/gammaSpeck/expense-tracker/commit/e6518f685c9fe09886932fdeac97e2b054cd3105))
+* updated many packages to latest versions ([#1](https://github.com/gammaSpeck/expense-tracker/issues/1)) ([be55523](https://github.com/gammaSpeck/expense-tracker/commit/be55523d36c2a4f90375f12940454b9a46eaef89))
+
+
+### Bug Fixes
+
+* **netlify:** add _redirects configuration for netlify deploy issue ([2c890a1](https://github.com/gammaSpeck/expense-tracker/commit/2c890a1d6ad1f7d37aec8d34c820d0f59ec504cf))
+* **ui:** refactor FloatingActionButton component and integrate it into HomePage ([ee98e63](https://github.com/gammaSpeck/expense-tracker/commit/ee98e63b6b6bf9c29f6b65c5ad5fa4740ebcd3a3))
+* **ui:** ui fixes across the app and responsive fixes ([#2](https://github.com/gammaSpeck/expense-tracker/issues/2)) ([b52be47](https://github.com/gammaSpeck/expense-tracker/commit/b52be475ed5e68bc3a58cde6e2d0f5a390fc1607))
