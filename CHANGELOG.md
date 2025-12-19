@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.0...v1.0.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* **pwa:** add missing mobile-web-app-capable meta tag for PWA support for ios ([051b8dc](https://github.com/gammaSpeck/expense-tracker/commit/051b8dcae9a3df4fe2a2d9ca796d87a1fd68476c))
+
 ## 1.0.0 (2025-12-19)
 
 
