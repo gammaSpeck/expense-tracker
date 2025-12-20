@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.1...v1.0.2) (2025-12-20)
+
+
+### Bug Fixes
+
+* **expense-form:** fixed duplicate transaction UX ([6519c7e](https://github.com/gammaSpeck/expense-tracker/commit/6519c7e32d849ff2738414640f4e1e98c3cc344f))
+* **expense-form:** improve styling for description, tags, and time input fields ([141e8db](https://github.com/gammaSpeck/expense-tracker/commit/141e8dbea70fe4b1c346d185097c2f212a38915f))
+* **expense-form:** update value type to allow null and improve validation error messages ([6fe7b3b](https://github.com/gammaSpeck/expense-tracker/commit/6fe7b3bae20df673014df559b060f5baf4dc7fd4))
+
 ## [1.0.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.0...v1.0.1) (2025-12-19)
 
 
