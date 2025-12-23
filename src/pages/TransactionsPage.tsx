@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";
 import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/lib/db";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -24,7 +24,6 @@ import { Expense } from "@/types/expense";
 export default function TransactionsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
   const initialSearch = location.state?.search || "";
 
   const [search, setSearch] = useState(initialSearch);
@@ -57,13 +56,9 @@ export default function TransactionsPage() {
     if (!expenseToDelete) return;
     try {
       await deleteExpense(expenseToDelete.id);
-      toast({ title: "Expense deleted" });
+      toast.success("Expense deleted");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete");
     }
     setExpenseToDelete(null);
   };

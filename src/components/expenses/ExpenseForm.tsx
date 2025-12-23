@@ -38,9 +38,9 @@ import {
 } from "@/lib/db";
 import { CalendarIcon, Clock, Plus, X, ImagePlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
 import { CategoryForm } from "@/components/categories/CategoryForm";
 import imageCompression from "browser-image-compression";
+import { toast } from "sonner";
 
 const expenseSchema = z.object({
   value: z
@@ -102,7 +102,6 @@ export function ExpenseForm({
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     expense?.attachment
   );
-  const { toast } = useToast();
 
   const now = new Date();
   const defaultValues: ExpenseFormData = initDefaults(expense, duplicate);
@@ -169,11 +168,7 @@ export function ExpenseForm({
       };
       reader.readAsDataURL(compressed);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to compress image",
-        variant: "destructive",
-      });
+      toast.error("Failed to compress image");
     }
   };
 
@@ -186,18 +181,14 @@ export function ExpenseForm({
     try {
       if (expense) {
         await updateExpense(expense.id, data);
-        toast({ title: "Expense updated" });
+        toast.success("Expense updated");
       } else {
         await addExpense(data);
-        toast({ title: "Expense added" });
+        toast.success("Expense added");
       }
       onSuccess?.();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save expense",
-        variant: "destructive",
-      });
+      toast.error("Failed to save expense");
     }
   };
 

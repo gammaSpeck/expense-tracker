@@ -1,21 +1,21 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CategoryFormData } from '@/types/expense';
-import { addCategory, updateCategory, getCategoryByName } from '@/lib/db';
-import { IconPicker } from '@/components/categories/CategoryIcon';
-import { ColorPicker } from '@/components/categories/ColorPicker';
-import { CATEGORY_COLORS } from '@/lib/db';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CategoryFormData } from "@/types/expense";
+import { addCategory, updateCategory, getCategoryByName } from "@/lib/db";
+import { IconPicker } from "@/components/categories/CategoryIcon";
+import { ColorPicker } from "@/components/categories/ColorPicker";
+import { CATEGORY_COLORS } from "@/lib/db";
+import { toast } from "sonner";
 
 const categorySchema = z.object({
-  name: z.string().min(1, 'Name required').max(30, 'Max 30 characters'),
-  icon: z.string().min(1, 'Icon required'),
-  color: z.string().min(1, 'Color required'),
+  name: z.string().min(1, "Name required").max(30, "Max 30 characters"),
+  icon: z.string().min(1, "Icon required"),
+  color: z.string().min(1, "Color required"),
 });
 
 interface CategoryFormProps {
@@ -24,9 +24,11 @@ interface CategoryFormProps {
   onCancel?: () => void;
 }
 
-export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
-  const { toast } = useToast();
-  
+export function CategoryForm({
+  category,
+  onSuccess,
+  onCancel,
+}: CategoryFormProps) {
   const defaultValues: CategoryFormData = category
     ? {
         name: category.name,
@@ -34,9 +36,10 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         color: category.color,
       }
     : {
-        name: '',
-        icon: 'Tag',
-        color: CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)],
+        name: "",
+        icon: "Tag",
+        color:
+          CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)],
       };
 
   const {
@@ -50,8 +53,8 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
     defaultValues,
   });
 
-  const selectedIcon = watch('icon');
-  const selectedColor = watch('color');
+  const selectedIcon = watch("icon");
+  const selectedColor = watch("color");
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
@@ -59,11 +62,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
       if (!category || category.name !== data.name) {
         const existing = await getCategoryByName(data.name);
         if (existing) {
-          toast({
-            title: 'Error',
-            description: 'A category with this name already exists',
-            variant: 'destructive',
-          });
+          toast.error("A category with this name already exists");
           return;
         }
       }
@@ -72,18 +71,14 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
       if (category) {
         await updateCategory(category.id, data);
         id = category.id;
-        toast({ title: 'Category updated' });
+        toast.success("Category updated");
       } else {
         id = await addCategory(data);
-        toast({ title: 'Category created' });
+        toast.success("Category created");
       }
       onSuccess?.(id);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to save category',
-        variant: 'destructive',
-      });
+      toast.error("Failed to save category");
     }
   };
 
@@ -95,7 +90,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         <Input
           id="name"
           placeholder="Category name"
-          {...register('name')}
+          {...register("name")}
           autoFocus
         />
         {errors.name && (
@@ -108,7 +103,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         <Label>Icon</Label>
         <IconPicker
           value={selectedIcon}
-          onChange={(icon) => setValue('icon', icon)}
+          onChange={(icon) => setValue("icon", icon)}
           color={selectedColor}
         />
       </div>
@@ -118,19 +113,24 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         <Label>Color</Label>
         <ColorPicker
           value={selectedColor}
-          onChange={(color) => setValue('color', color)}
+          onChange={(color) => setValue("color", color)}
         />
       </div>
 
       {/* Actions */}
       <div className="flex gap-3 pt-4">
         {onCancel && (
-          <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={onCancel}
+          >
             Cancel
           </Button>
         )}
         <Button type="submit" className="flex-1" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : category ? 'Update' : 'Create'}
+          {isSubmitting ? "Saving..." : category ? "Update" : "Create"}
         </Button>
       </div>
     </form>

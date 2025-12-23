@@ -13,7 +13,7 @@ import {
   useFilteredExpenses,
 } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/lib/db";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +43,6 @@ export function FloatingActionButton() {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const isMobile = useIsMobile();
@@ -80,13 +79,9 @@ export default function HomePage() {
     if (!expenseToDelete) return;
     try {
       await deleteExpense(expenseToDelete.id);
-      toast({ title: "Expense deleted" });
+      toast.success("Expense deleted");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete");
     }
     setExpenseToDelete(null);
   };

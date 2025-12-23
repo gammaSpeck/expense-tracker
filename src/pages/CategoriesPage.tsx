@@ -37,11 +37,9 @@ import {
 } from "@/hooks/useExpenseData";
 import { deleteCategory } from "@/lib/db";
 import { Category } from "@/types/expense";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function CategoriesPage() {
-  const { toast } = useToast();
   const categories = useCategories();
   const expenseCounts = useCategoryExpenseCounts();
 
@@ -63,14 +61,11 @@ export default function CategoriesPage() {
       } else {
         await deleteCategory(deleteData.category.id);
       }
-      toast({ title: "Category deleted" });
+      toast.success("Category deleted");
     } catch (error: unknown) {
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to delete category",
-        variant: "destructive",
-      });
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete category"
+      );
     }
     setDeleteData(null);
   };
@@ -78,11 +73,7 @@ export default function CategoriesPage() {
   const handleDeleteClick = async (category: Category) => {
     // Check if it's the "Others" category
     if (category.name === "Others" && category.isDefault) {
-      toast({
-        title: "Cannot delete",
-        description: 'The "Others" category cannot be deleted',
-        variant: "destructive",
-      });
+      toast.error('The "Others" category cannot be deleted');
       return;
     }
 
