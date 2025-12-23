@@ -187,7 +187,6 @@ export function ExpenseForm({
       if (expense) {
         await updateExpense(expense.id, data);
         toast({ title: "Expense updated" });
-        return;
       } else {
         await addExpense(data);
         toast({ title: "Expense added" });
