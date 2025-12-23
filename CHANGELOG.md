@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.2...v1.0.3) (2025-12-23)
+
+
+### Bug Fixes
+
+* UX expense updates and improve toast notifications ([#8](https://github.com/gammaSpeck/expense-tracker/issues/8)) ([81496a2](https://github.com/gammaSpeck/expense-tracker/commit/81496a297554af40d94281cf2abf2a2d490a8989))
+
 ## [1.0.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.1...v1.0.2) (2025-12-20)
 
 
