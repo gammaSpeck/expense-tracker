@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.3...v1.1.0) (2025-12-26)
+
+
+### Features
+
+* implement PWA reload prompt for version updates and offline readiness ([#12](https://github.com/gammaSpeck/expense-tracker/issues/12)) ([9fe7c90](https://github.com/gammaSpeck/expense-tracker/commit/9fe7c90df837ba1797a6cb106e977f96430b5267))
+
+
+### Bug Fixes
+
+* **expense-card:** resolve overflow issue for expense description and improve formatting ([#10](https://github.com/gammaSpeck/expense-tracker/issues/10)) ([26dbdd5](https://github.com/gammaSpeck/expense-tracker/commit/26dbdd57ac28a6c81d01b86737caa0541240ac6d))
+
 ## [1.0.3](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.2...v1.0.3) (2025-12-23)
 
 
