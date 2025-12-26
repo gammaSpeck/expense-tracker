@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { useEffect } from "react";
 import { initializeDatabase } from "@/lib/db";
 
@@ -48,6 +49,7 @@ const App = () => (
         <BrowserRouter>
           <AppContent />
         </BrowserRouter>
+        <ReloadPrompt />
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

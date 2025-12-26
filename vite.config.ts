@@ -18,8 +18,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       manifest: false, // Check public/site.webmanifest
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp}"],
+      },
     }),
   ].filter(Boolean),
   resolve: {
