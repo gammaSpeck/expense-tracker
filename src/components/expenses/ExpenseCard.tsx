@@ -1,16 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, formatDistanceToNow, parseISO, isToday, isYesterday } from 'date-fns';
-import { CategoryIcon } from '@/components/categories/CategoryIcon';
-import { Expense, Category, ContextMenuAction } from '@/types/expense';
-import { cn } from '@/lib/utils';
-import { Paperclip, Copy, Edit, Trash2 } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  format,
+  formatDistanceToNow,
+  parseISO,
+  isToday,
+  isYesterday,
+} from "date-fns";
+import { CategoryIcon } from "@/components/categories/CategoryIcon";
+import { Expense, Category, ContextMenuAction } from "@/types/expense";
+import { cn } from "@/lib/utils";
+import { Paperclip, Copy, Edit, Trash2 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+} from "@/components/ui/context-menu";
 
 interface ExpenseCardProps {
   expense: Expense;
@@ -36,8 +42,8 @@ export function ExpenseCard({
 
   const formatRelativeDate = (dateStr: string) => {
     const date = parseISO(dateStr);
-    if (isToday(date)) return 'Today';
-    if (isYesterday(date)) return 'Yesterday';
+    if (isToday(date)) return "Today";
+    if (isYesterday(date)) return "Yesterday";
     return formatDistanceToNow(date, { addSuffix: true });
   };
 
@@ -65,10 +71,7 @@ export function ExpenseCard({
 
   const cardContent = (
     <div
-      className={cn(
-        'expense-card',
-        isLongPressing && 'long-press-active'
-      )}
+      className={cn("expense-card", isLongPressing && "long-press-active")}
       onClick={onClick}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -77,14 +80,14 @@ export function ExpenseCard({
       onMouseLeave={handleTouchEnd}
     >
       <CategoryIcon
-        icon={category?.icon || 'MoreHorizontal'}
-        color={category?.color || '#64748B'}
+        icon={category?.icon || "MoreHorizontal"}
+        color={category?.color || "#64748B"}
         size="md"
       />
 
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">
-          {expense.description || category?.name || 'Expense'}
+        <p className="font-medium text-sm truncate overflow-ellipsis whitespace-nowrap max-w-50 sm:max-w-[16rem]">
+          {expense.description || category?.name || "Expense"}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
           {showDate && (
@@ -95,7 +98,10 @@ export function ExpenseCard({
           {expense.tags.length > 0 && (
             <div className="flex items-center gap-1 overflow-hidden">
               {expense.tags.slice(0, 2).map((tag) => (
-                <span key={tag} className="tag-badge text-[10px] truncate max-w-16">
+                <span
+                  key={tag}
+                  className="tag-badge text-[10px] truncate max-w-16"
+                >
                   {tag}
                 </span>
               ))}
@@ -111,7 +117,7 @@ export function ExpenseCard({
 
       <div className="flex flex-col items-end gap-1">
         <span className="font-semibold text-sm">
-          ₹{expense.value.toLocaleString('en-IN')}
+          ₹{expense.value.toLocaleString("en-IN")}
         </span>
         <div className="flex items-center gap-1">
           {expense.isAdhoc && (
@@ -127,9 +133,7 @@ export function ExpenseCard({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
-        {cardContent}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
       <ContextMenuContent className="w-48">
         <ContextMenuItem onClick={onDuplicate}>
           <Copy className="h-4 w-4 mr-2" />
@@ -139,7 +143,10 @@ export function ExpenseCard({
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </ContextMenuItem>
-        <ContextMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+        <ContextMenuItem
+          onClick={onDelete}
+          className="text-destructive focus:text-destructive"
+        >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </ContextMenuItem>
@@ -167,7 +174,7 @@ export function ExpenseList({
   onEdit,
   onDelete,
   grouped = false,
-  emptyMessage = 'No expenses yet',
+  emptyMessage = "No expenses yet",
 }: ExpenseListProps) {
   const getCategoryById = (id: string) => categories.find((c) => c.id === id);
 
@@ -216,13 +223,15 @@ export function ExpenseList({
     return acc;
   }, {} as Record<string, Expense[]>);
 
-  const sortedDates = Object.keys(grouped_expenses).sort((a, b) => b.localeCompare(a));
+  const sortedDates = Object.keys(grouped_expenses).sort((a, b) =>
+    b.localeCompare(a)
+  );
 
   const getDateLabel = (dateStr: string) => {
     const date = parseISO(dateStr);
-    if (isToday(date)) return 'Today';
-    if (isYesterday(date)) return 'Yesterday';
-    return format(date, 'EEEE, d MMM');
+    if (isToday(date)) return "Today";
+    if (isYesterday(date)) return "Yesterday";
+    return format(date, "EEEE, d MMM");
   };
 
   return (
