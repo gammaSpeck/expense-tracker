@@ -6,6 +6,7 @@ import { Search, Plus, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import {
   useMonthSummary,
   useRecentExpenses,
@@ -49,6 +50,7 @@ export default function HomePage() {
 
   const { total, totalExcludingAdhoc, monthStart, monthEnd } =
     useMonthSummary();
+  const { currency, formatValue } = useCurrency();
   const categories = useCategories();
   const filteredExpenses = useFilteredExpenses({ search });
   const displayExpenses = search
@@ -96,11 +98,13 @@ export default function HomePage() {
       >
         <p className="text-sm opacity-80">This Month's Expenses</p>
         <p className="text-3xl font-bold mt-1">
-          ₹{total.toLocaleString("en-IN")}
+          {currency.symbol}
+          {formatValue(total)}
         </p>
         {totalExcludingAdhoc !== total && (
           <p className="text-sm opacity-70 mt-1">
-            Excluding Adhoc: ₹{totalExcludingAdhoc.toLocaleString("en-IN")}
+            Excluding Adhoc: {currency.symbol}
+            {formatValue(totalExcludingAdhoc)}
           </p>
         )}
         <p className="text-xs opacity-60 mt-2">

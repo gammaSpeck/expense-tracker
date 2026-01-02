@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 import { Palette, Database, Info, AlertTriangle } from "lucide-react";
 import { ThemeSelector } from "@/components/more/ThemeSelector";
+
 import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { AboutSection } from "@/components/more/AboutSection";
 import { FactoryReset } from "@/components/more/FactoryReset";
+import CurrencyDropdown from "@/components/more/CurrencyDropdown";
 
 export default function MorePage() {
   return (
@@ -29,6 +31,14 @@ export default function MorePage() {
             Appearance
           </h2>
           <ThemeSelector />
+        </div>
+
+        {/* Currency Selector */}
+        <div className="p-3 rounded-xl bg-card border border-border/50 space-y-3">
+          <h2 className="text-sm font-medium flex items-center gap-2">
+            Currency
+          </h2>
+          <CurrencyDropdown />
         </div>
 
         {/* Data Management */}

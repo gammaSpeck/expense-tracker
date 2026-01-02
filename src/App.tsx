@@ -17,6 +17,8 @@ import EditExpensePage from "./pages/EditExpensePage";
 import MorePage from "./pages/MorePage";
 import NotFound from "./pages/NotFound";
 
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
+
 const queryClient = new QueryClient();
 
 function AppContent() {
@@ -43,15 +45,17 @@ function AppContent() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Sonner position="top-right" duration={3000} />
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-        <ReloadPrompt />
-      </TooltipProvider>
-    </ThemeProvider>
+    <CurrencyProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Sonner position="top-right" duration={3000} />
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+          <ReloadPrompt />
+        </TooltipProvider>
+      </ThemeProvider>
+    </CurrencyProvider>
   </QueryClientProvider>
 );
 

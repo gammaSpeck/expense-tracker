@@ -41,12 +41,13 @@ import { cn } from "@/lib/utils";
 import { CategoryForm } from "@/components/categories/CategoryForm";
 import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const expenseSchema = z.object({
   value: z
     .number({ error: "Amount is required" })
     .positive("Must be positive")
-    .max(10000000, "Maximum ₹1 Crore"),
+    .max(10000000, "Maximum 10,000,000"),
   category: z.string().min(1, "Category required"),
   description: z.string().optional(),
   tags: z.array(z.string()).max(4, "Maximum 4 tags"),
@@ -105,6 +106,7 @@ export function ExpenseForm({
 
   const now = new Date();
   const defaultValues: ExpenseFormData = initDefaults(expense, duplicate);
+  const { currency } = useCurrency();
 
   const {
     register,
@@ -215,7 +217,7 @@ export function ExpenseForm({
           <Label htmlFor="value">Amount</Label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
-              ₹
+              {currency.symbol}
             </span>
             <Input
               id="value"
@@ -409,7 +411,7 @@ export function ExpenseForm({
                       onSelect={(date) =>
                         field.onChange(date ? format(date, "yyyy-MM-dd") : "")
                       }
-                      initialFocus
+                      autoFocus
                       className="pointer-events-auto"
                     />
                   </PopoverContent>

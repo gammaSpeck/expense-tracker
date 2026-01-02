@@ -10,6 +10,7 @@ import {
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { Expense, Category, ContextMenuAction } from "@/types/expense";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { Paperclip, Copy, Edit, Trash2 } from "lucide-react";
 import {
   ContextMenu,
@@ -117,7 +118,7 @@ export function ExpenseCard({
 
       <div className="flex flex-col items-end gap-1">
         <span className="font-semibold text-sm">
-          ₹{expense.value.toLocaleString("en-IN")}
+          <ExpenseValue value={expense.value} />
         </span>
         <div className="flex items-center gap-1">
           {expense.isAdhoc && (
@@ -152,6 +153,16 @@ export function ExpenseCard({
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
+  );
+}
+
+function ExpenseValue({ value }: { value: number }) {
+  const { currency, formatValue } = useCurrency();
+  return (
+    <>
+      {currency.symbol}
+      {formatValue(value)}
+    </>
   );
 }
 

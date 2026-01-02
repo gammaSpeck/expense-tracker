@@ -33,29 +33,33 @@ import {
 } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/lib/db";
 import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Custom tooltip for pie chart
 const CustomPieTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0];
-    const percentage = ((data.value / data.payload.total) * 100).toFixed(1);
-    return (
-      <div
-        className="px-3 py-2 rounded-lg shadow-lg border"
-        style={{
-          backgroundColor: data.payload.color,
-          borderColor: data.payload.color,
-        }}
-      >
-        <p className="font-medium text-white">{data.name}</p>
-        <p className="text-white/90">₹{data.value.toLocaleString("en-IN")}</p>
-        <p className="text-white/80 text-sm">{percentage}%</p>
-      </div>
-    );
-  }
-  return null;
+  const { currency } = useCurrency();
+
+  if (!active || !payload || !payload?.length) return null;
+
+  const data = payload[0];
+  const percentage = ((data.value / data.payload.total) * 100).toFixed(1);
+  return (
+    <div
+      className="px-3 py-2 rounded-lg shadow-lg border"
+      style={{
+        backgroundColor: data.payload.color,
+        borderColor: data.payload.color,
+      }}
+    >
+      <p className="font-medium text-white">{data.name}</p>
+      <p className="text-white/90">
+        {currency.symbol}
+        {data.value.toLocaleString(currency.locale)}
+      </p>
+      <p className="text-white/80 text-sm">{percentage}%</p>
+    </div>
+  );
 };
 
 export default function AnalysisPage() {
@@ -81,6 +85,7 @@ export default function AnalysisPage() {
   };
 
   const summary = useAnalysisSummary(filters);
+  const { currency, formatValue } = useCurrency();
 
   const handleExportCSV = async () => {
     try {
@@ -294,7 +299,8 @@ export default function AnalysisPage() {
             <span className="text-xs">Total</span>
           </div>
           <p className="text-xl font-bold">
-            ₹{summary.totalExpenses.toLocaleString("en-IN")}
+            {currency.symbol}
+            {formatValue(summary.totalExpenses)}
           </p>
         </div>
 
@@ -312,7 +318,8 @@ export default function AnalysisPage() {
             <span className="text-xs">Average</span>
           </div>
           <p className="text-xl font-bold">
-            ₹{Math.round(summary.averageExpense).toLocaleString("en-IN")}
+            {currency.symbol}
+            {formatValue(Math.round(summary.averageExpense))}
           </p>
         </div>
 
@@ -388,7 +395,8 @@ export default function AnalysisPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-medium">
-                      ₹{cat.total.toLocaleString("en-IN")}
+                      {currency.symbol}
+                      {formatValue(cat.total)}
                     </span>
                     <span className="text-muted-foreground w-12 text-right">
                       {cat.percentage.toFixed(1)}%
@@ -426,11 +434,13 @@ export default function AnalysisPage() {
                       fontSize: 10,
                       fill: "hsl(var(--muted-foreground))",
                     }}
-                    tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+                    tickFormatter={(value) =>
+                      `${currency.symbol}${(value / 1000).toFixed(0)}k`
+                    }
                   />
                   <Tooltip
                     formatter={(value: number) => [
-                      `₹${value.toLocaleString("en-IN")}`,
+                      `${currency.symbol}${formatValue(value)}`,
                       "Amount",
                     ]}
                     contentStyle={{
