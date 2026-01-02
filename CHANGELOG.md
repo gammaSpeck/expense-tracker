@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.1.0...v1.2.0) (2026-01-02)
+
+
+### Features
+
+* **ui:** allow user preference of a default currency symbol ([#14](https://github.com/gammaSpeck/expense-tracker/issues/14)) ([124da70](https://github.com/gammaSpeck/expense-tracker/commit/124da706dcc6e3eb7b04373b6be0adbe6715feee))
+
 ## [1.1.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.0.3...v1.1.0) (2025-12-26)
 
 
