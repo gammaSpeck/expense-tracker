@@ -125,7 +125,7 @@ export function ExpenseForm({
 
   // Load tag suggestions
   useEffect(() => {
-    getTagSuggestions(10).then(setTagSuggestions);
+    getTagSuggestions().then(setTagSuggestions);
   }, []);
 
   // Filter suggestions based on description and input
@@ -137,9 +137,9 @@ export function ExpenseForm({
   );
 
   const addTag = (tag: string) => {
-    if (tags.length < 4 && !tags.includes(tag)) {
+    if (tags.length < 4 && !tags.includes(tag))
       setValue("tags", [...tags, tag]);
-    }
+
     setTagInput("");
   };
 
@@ -343,9 +343,7 @@ export function ExpenseForm({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    if (tagInput.trim()) {
-                      addTag(tagInput.trim());
-                    }
+                    if (tagInput.trim()) addTag(tagInput.trim());
                   }
                 }}
                 placeholder="Add tag"

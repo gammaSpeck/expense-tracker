@@ -245,7 +245,9 @@ export async function getAllTags(): Promise<TagMetadata[]> {
   return db.tagMetadata.orderBy("count").reverse().toArray();
 }
 
-export async function getTagSuggestions(limit: number = 10): Promise<string[]> {
+export async function getTagSuggestions(
+  limit: number = 100
+): Promise<string[]> {
   const tags = await db.tagMetadata
     .orderBy("count")
     .reverse()
