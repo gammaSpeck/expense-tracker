@@ -24,7 +24,7 @@ import {
 
 export function useExpenses() {
   const expenses = useLiveQuery(() => getAllExpenses(), [], []);
-  return expenses;
+  return expenses as Expense[];
 }
 
 export function useCategories() {

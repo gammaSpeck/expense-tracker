@@ -50,7 +50,7 @@ export default function HomePage() {
     useMonthSummary();
   const { currency, formatValue } = useCurrency();
   const categories = useCategories();
-  const displayExpenses = useFilteredExpenses().slice(0, 10);
+  const displayExpenses = useRecentExpenses(10);
 
   const handleExpenseClick = (expense: Expense) => {
     navigate(`/expense/${expense.id}`);
