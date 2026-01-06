@@ -101,7 +101,7 @@ export function ExpenseCard({
               {expense.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="tag-badge text-[10px] truncate max-w-16"
+                  className="tag-badge text-[10px] truncate max-w-20"
                 >
                   {tag}
                 </span>
