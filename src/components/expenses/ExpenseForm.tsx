@@ -73,7 +73,7 @@ function initDefaults(expense?: Expense, duplicate?: Expense): ExpenseFormData {
       description: "",
       tags: [],
       date: format(now, "yyyy-MM-dd"),
-      time: format(now, "HH:mm"),
+      time: format(now, "hh:mm"),
       isAdhoc: false,
       attachment: undefined,
     };
