@@ -44,7 +44,6 @@ export function FloatingActionButton() {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const isMobile = useIsMobile();
 
@@ -52,10 +51,7 @@ export default function HomePage() {
     useMonthSummary();
   const { currency, formatValue } = useCurrency();
   const categories = useCategories();
-  const filteredExpenses = useFilteredExpenses({ search });
-  const displayExpenses = search
-    ? filteredExpenses
-    : filteredExpenses.slice(0, 10);
+  const displayExpenses = useFilteredExpenses().slice(0, 10);
 
   const handleExpenseClick = (expense: Expense) => {
     navigate(`/expense/${expense.id}`);
@@ -120,10 +116,8 @@ export default function HomePage() {
         className="space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            {search ? "Search Results" : "Recent Transactions"}
-          </h2>
-          {!search && displayExpenses.length > 0 && (
+          <h2 className="text-lg font-semibold">Recent Transactions</h2>
+          {displayExpenses.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
@@ -143,24 +137,8 @@ export default function HomePage() {
           onDuplicate={handleDuplicate}
           onEdit={handleEdit}
           onDelete={(expense) => setExpenseToDelete(expense)}
-          emptyMessage={
-            search
-              ? "No matching expenses"
-              : "No expenses yet. Add your first one!"
-          }
+          emptyMessage={"No expenses yet. Add your first one!"}
         />
-
-        {search && filteredExpenses.length > 10 && (
-          <p className="text-center text-sm text-muted-foreground">
-            Showing 10 of {filteredExpenses.length} results.{" "}
-            <button
-              onClick={() => navigate("/transactions", { state: { search } })}
-              className="text-primary hover:underline"
-            >
-              View all
-            </button>
-          </p>
-        )}
       </motion.div>
 
       {/* FAB */}

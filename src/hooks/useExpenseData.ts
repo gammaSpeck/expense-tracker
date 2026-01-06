@@ -1,8 +1,26 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, getAllExpenses, getAllCategories, getAllTags } from '@/lib/db';
-import { Expense, Category, TagMetadata, ExpenseFilters, AnalysisSummary, CategorySummary, DailySummary } from '@/types/expense';
-import { useMemo } from 'react';
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, isWithinInterval, format } from 'date-fns';
+import { useLiveQuery } from "dexie-react-hooks";
+import { db, getAllExpenses, getAllCategories, getAllTags } from "@/lib/db";
+import {
+  Expense,
+  Category,
+  TagMetadata,
+  ExpenseFilters,
+  AnalysisSummary,
+  CategorySummary,
+  DailySummary,
+} from "@/types/expense";
+import { useMemo } from "react";
+import {
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  parseISO,
+  isWithinInterval,
+  format,
+} from "date-fns";
 
 export function useExpenses() {
   const expenses = useLiveQuery(() => getAllExpenses(), [], []);
@@ -39,7 +57,7 @@ export function useExpense(id: string | undefined) {
 
 export function useCategoryExpenseCounts() {
   const expenses = useExpenses();
-  
+
   return useMemo(() => {
     const counts: Record<string, number> = {};
     for (const expense of expenses) {
@@ -49,13 +67,13 @@ export function useCategoryExpenseCounts() {
   }, [expenses]);
 }
 
-export function useFilteredExpenses(filters: ExpenseFilters) {
+export function useFilteredExpenses(filters: ExpenseFilters = {}) {
   const expenses = useExpenses();
   const categories = useCategories();
-  
+
   return useMemo(() => {
     let filtered = [...expenses];
-    
+
     // Search filter
     if (filters.search) {
       const search = filters.search.toLowerCase();
@@ -68,21 +86,21 @@ export function useFilteredExpenses(filters: ExpenseFilters) {
         );
       });
     }
-    
+
     // Category filter
     if (filters.categories && filters.categories.length > 0) {
       filtered = filtered.filter((expense) =>
         filters.categories!.includes(expense.category)
       );
     }
-    
+
     // Tag filter
     if (filters.tags && filters.tags.length > 0) {
       filtered = filtered.filter((expense) =>
         expense.tags.some((tag) => filters.tags!.includes(tag))
       );
     }
-    
+
     // Date range filter
     if (filters.dateRange) {
       filtered = filtered.filter((expense) => {
@@ -93,12 +111,12 @@ export function useFilteredExpenses(filters: ExpenseFilters) {
         });
       });
     }
-    
+
     // Adhoc filter
     if (filters.includeAdhoc === false) {
       filtered = filtered.filter((expense) => !expense.isAdhoc);
     }
-    
+
     return filtered;
   }, [expenses, categories, filters]);
 }
@@ -106,15 +124,19 @@ export function useFilteredExpenses(filters: ExpenseFilters) {
 export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
   const filteredExpenses = useFilteredExpenses(filters);
   const categories = useCategories();
-  
+
   return useMemo(() => {
-    const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.value, 0);
+    const totalExpenses = filteredExpenses.reduce(
+      (sum, exp) => sum + exp.value,
+      0
+    );
     const totalTransactions = filteredExpenses.length;
-    const averageExpense = totalTransactions > 0 ? totalExpenses / totalTransactions : 0;
-    
+    const averageExpense =
+      totalTransactions > 0 ? totalExpenses / totalTransactions : 0;
+
     // Category breakdown
     const categoryTotals: Record<string, { total: number; count: number }> = {};
-    
+
     for (const expense of filteredExpenses) {
       if (!categoryTotals[expense.category]) {
         categoryTotals[expense.category] = { total: 0, count: 0 };
@@ -122,27 +144,27 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
       categoryTotals[expense.category].total += expense.value;
       categoryTotals[expense.category].count += 1;
     }
-    
+
     const categoryBreakdown: CategorySummary[] = Object.entries(categoryTotals)
       .map(([categoryId, { total, count }]) => {
         const category = categories.find((c) => c.id === categoryId);
         return {
           categoryId,
-          categoryName: category?.name || 'Unknown',
-          categoryColor: category?.color || '#64748B',
-          categoryIcon: category?.icon || 'MoreHorizontal',
+          categoryName: category?.name || "Unknown",
+          categoryColor: category?.color || "#64748B",
+          categoryIcon: category?.icon || "MoreHorizontal",
           total,
           count,
           percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
         };
       })
       .sort((a, b) => b.total - a.total);
-    
+
     const topCategory = categoryBreakdown[0] || null;
-    
+
     // Daily trend
     const dailyTotals: Record<string, { total: number; count: number }> = {};
-    
+
     for (const expense of filteredExpenses) {
       if (!dailyTotals[expense.date]) {
         dailyTotals[expense.date] = { total: 0, count: 0 };
@@ -150,11 +172,11 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
       dailyTotals[expense.date].total += expense.value;
       dailyTotals[expense.date].count += 1;
     }
-    
+
     const dailyTrend: DailySummary[] = Object.entries(dailyTotals)
       .map(([date, { total, count }]) => ({ date, total, count }))
       .sort((a, b) => a.date.localeCompare(b.date));
-    
+
     return {
       totalExpenses,
       totalTransactions,
@@ -168,15 +190,15 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
 
 export function useMonthSummary() {
   const expenses = useExpenses();
-  
+
   return useMemo(() => {
     const now = new Date();
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
-    
+
     let total = 0;
     let totalExcludingAdhoc = 0;
-    
+
     for (const expense of expenses) {
       const expenseDate = parseISO(expense.date);
       if (isWithinInterval(expenseDate, { start: monthStart, end: monthEnd })) {
@@ -186,7 +208,7 @@ export function useMonthSummary() {
         }
       }
     }
-    
+
     return {
       total,
       totalExcludingAdhoc,
@@ -198,21 +220,27 @@ export function useMonthSummary() {
 
 export function useRecentExpenses(limit: number = 10) {
   const expenses = useExpenses();
-  
+
   return useMemo(() => {
     return expenses.slice(0, limit);
   }, [expenses, limit]);
 }
 
-export function getDateRangeForPeriod(period: 'week' | 'month' | 'year', customRange?: { start: Date; end: Date }) {
+export function getDateRangeForPeriod(
+  period: "week" | "month" | "year",
+  customRange?: { start: Date; end: Date }
+) {
   const now = new Date();
-  
+
   switch (period) {
-    case 'week':
-      return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
-    case 'month':
+    case "week":
+      return {
+        start: startOfWeek(now, { weekStartsOn: 1 }),
+        end: endOfWeek(now, { weekStartsOn: 1 }),
+      };
+    case "month":
       return { start: startOfMonth(now), end: endOfMonth(now) };
-    case 'year':
+    case "year":
       return { start: startOfYear(now), end: endOfYear(now) };
     default:
       return customRange || { start: startOfMonth(now), end: endOfMonth(now) };
