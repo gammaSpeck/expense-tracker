@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.0...v1.2.1) (2026-01-06)
+
+
+### Bug Fixes
+
+* **ux:** changed expenses list order to be by exp datetime and changed tag suggestion limit to 100 in add expense ([#16](https://github.com/gammaSpeck/expense-tracker/issues/16)) ([ea69f0f](https://github.com/gammaSpeck/expense-tracker/commit/ea69f0fc647059635ae95ad44b4834acb86aae4f))
+
 ## [1.2.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.1.0...v1.2.0) (2026-01-02)
 
 
