@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { getCurrentTime24 } from "@/lib/time";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,7 +74,7 @@ function initDefaults(expense?: Expense, duplicate?: Expense): ExpenseFormData {
       description: "",
       tags: [],
       date: format(now, "yyyy-MM-dd"),
-      time: format(now, "hh:mm"),
+      time: getCurrentTime24(),
       isAdhoc: false,
       attachment: undefined,
     };

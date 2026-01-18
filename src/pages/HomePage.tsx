@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { getCurrentTime24 } from "@/lib/time";
 import { Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";
@@ -62,7 +63,7 @@ export default function HomePage() {
         duplicate: {
           ...expense,
           date: format(new Date(), "yyyy-MM-dd"),
-          time: format(new Date(), "HH:mm"),
+          time: getCurrentTime24(),
         },
       },
     });

@@ -9,6 +9,7 @@ import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/lib/db";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { getCurrentTime24 } from "@/lib/time";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +43,7 @@ export default function TransactionsPage() {
         duplicate: {
           ...expense,
           date: format(new Date(), "yyyy-MM-dd"),
-          time: format(new Date(), "HH:mm"),
+          time: getCurrentTime24(),
         },
       },
     });
