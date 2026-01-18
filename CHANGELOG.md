@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.1...v1.2.2) (2026-01-18)
+
+
+### Bug Fixes
+
+* **time:** add utility functions for consistent 24-hour time handling ([#18](https://github.com/gammaSpeck/expense-tracker/issues/18)) ([835b482](https://github.com/gammaSpeck/expense-tracker/commit/835b482b240126b24fd64a8ac3cd9d5e701f982b))
+
 ## [1.2.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.0...v1.2.1) (2026-01-06)
 
 
