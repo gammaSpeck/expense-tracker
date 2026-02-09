@@ -65,7 +65,7 @@ export default function CategoriesPage() {
       toast.success("Category deleted");
     } catch (error: unknown) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete category"
+        error instanceof Error ? error.message : "Failed to delete category",
       );
     }
     setDeleteData(null);
@@ -89,8 +89,13 @@ export default function CategoriesPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
       >
-        <h1 className="text-xl font-semibold">Categories & Tags</h1>
+        <h1 className="text-xl font-semibold">Categories</h1>
+        <Button onClick={() => setShowCreateDialog(true)} size="sm">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Category
+        </Button>
       </motion.div>
 
       <motion.div
@@ -111,13 +116,6 @@ export default function CategoriesPage() {
           </TabsList>
 
           <TabsContent value="categories" className="space-y-4">
-            <div className="flex justify-end">
-              <Button onClick={() => setShowCreateDialog(true)} size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Category
-              </Button>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {categories.map((category, index) => (
                 <motion.div
@@ -128,7 +126,7 @@ export default function CategoriesPage() {
                   className={cn(
                     "p-4 rounded-xl bg-card border border-border/50",
                     "flex items-center gap-3",
-                    "hover:border-primary/20 transition-colors"
+                    "hover:border-primary/20 transition-colors",
                   )}
                 >
                   <CategoryIcon
