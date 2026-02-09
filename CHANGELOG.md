@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.2...v1.3.0) (2026-02-09)
+
+
+### Features
+
+* **ui:** analysis page redesigned ([#20](https://github.com/gammaSpeck/expense-tracker/issues/20)) ([7836cbd](https://github.com/gammaSpeck/expense-tracker/commit/7836cbda931948ef30e9317e6db15ad913e3d4db))
+
 ## [1.2.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.1...v1.2.2) (2026-01-18)
 
 
