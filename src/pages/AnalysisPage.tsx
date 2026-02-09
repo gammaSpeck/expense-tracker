@@ -38,11 +38,18 @@ import {
   Award,
   ChevronLeft,
   ChevronRight,
+  CalendarIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -58,13 +65,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
+import { cn } from "@/lib/utils";
 import {
   useAnalysisSummary,
   useCategories,
   getDateRangeForPeriod,
 } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/lib/db";
-import { TimePeriod, ExpenseFilters, DateRange, DailySummary } from "@/types/expense";
+import {
+  TimePeriod,
+  ExpenseFilters,
+  DateRange,
+  DailySummary,
+} from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
@@ -80,10 +93,9 @@ const CustomPieTooltip = ({ active, payload }: any) => {
   const percentage = ((data.value / data.payload.total) * 100).toFixed(1);
   return (
     <div
-      className="px-3 py-2 rounded-lg shadow-lg border"
+      className="px-3 py-2 rounded-lg shadow-lg border border-white"
       style={{
         backgroundColor: data.payload.color,
-        borderColor: data.payload.color,
       }}
     >
       <p className="font-medium text-white">{data.name}</p>
@@ -101,7 +113,7 @@ const CustomPieTooltip = ({ active, payload }: any) => {
 function formatPeriodDisplay(
   periodTab: TimePeriod,
   selectedDate: Date,
-  dateRange: DateRange
+  dateRange: DateRange,
 ): string {
   switch (periodTab) {
     case "week": {
@@ -121,7 +133,10 @@ function formatPeriodDisplay(
   }
 }
 
-function getGranularityOptions(periodTab: TimePeriod, customRange?: DateRange): TrendGranularity[] {
+function getGranularityOptions(
+  periodTab: TimePeriod,
+  customRange?: DateRange,
+): TrendGranularity[] {
   switch (periodTab) {
     case "week":
       return ["day"];
@@ -141,7 +156,7 @@ function getGranularityOptions(periodTab: TimePeriod, customRange?: DateRange): 
 
 function aggregateTrendData(
   dailyData: DailySummary[],
-  granularity: TrendGranularity
+  granularity: TrendGranularity,
 ): Array<{ label: string; amount: number }> {
   if (granularity === "day") {
     return dailyData.map((d) => ({
@@ -160,10 +175,7 @@ function aggregateTrendData(
       const label = isSameMonth(weekStart, weekEnd)
         ? `${format(weekStart, "MMM d")}-${format(weekEnd, "d")}`
         : `${format(weekStart, "MMM d")}-${format(weekEnd, "MMM d")}`;
-      weekMap.set(
-        key,
-        (weekMap.get(key) || 0) + d.total
-      );
+      weekMap.set(key, (weekMap.get(key) || 0) + d.total);
       // Store label as well
       if (!weekMap.has(`label_${key}`)) {
         weekMap.set(`label_${key}`, 0);
@@ -212,7 +224,8 @@ export default function AnalysisPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [excludeAdhoc, setExcludeAdhoc] = useState(true);
-  const [trendGranularity, setTrendGranularity] = useState<TrendGranularity>("day");
+  const [trendGranularity, setTrendGranularity] =
+    useState<TrendGranularity>("day");
   const [showExportDialog, setShowExportDialog] = useState(false);
   const categories = useCategories();
 
@@ -226,7 +239,7 @@ export default function AnalysisPage() {
     }
     return getDateRangeForPeriod(
       periodTab as "week" | "month" | "year",
-      selectedDate
+      selectedDate,
     );
   }, [periodTab, selectedDate, customRange]);
 
@@ -241,24 +254,21 @@ export default function AnalysisPage() {
   // Period display
   const periodDisplay = useMemo(
     () => formatPeriodDisplay(periodTab, selectedDate, dateRange),
-    [periodTab, selectedDate, dateRange]
+    [periodTab, selectedDate, dateRange],
   );
 
   // Granularity options
   const granularityOptions = useMemo(
     () => getGranularityOptions(periodTab, customRange),
-    [periodTab, customRange]
+    [periodTab, customRange],
   );
 
   // Reset granularity when period changes
-  const handlePeriodChange = useCallback(
-    (value: string) => {
-      setPeriodTab(value as TimePeriod);
-      setSelectedDate(new Date());
-      setTrendGranularity("day");
-    },
-    []
-  );
+  const handlePeriodChange = useCallback((value: string) => {
+    setPeriodTab(value as TimePeriod);
+    setSelectedDate(new Date());
+    setTrendGranularity("day");
+  }, []);
 
   // Navigation
   const goToPreviousPeriod = useCallback(() => {
@@ -293,12 +303,12 @@ export default function AnalysisPage() {
 
   // Pie chart data
   const nonZeroCategories = summary.categoryBreakdown.filter(
-    (cat) => cat.total > 0
+    (cat) => cat.total > 0,
   );
 
   const totalForPie = nonZeroCategories.reduce(
     (sum, cat) => sum + cat.total,
-    0
+    0,
   );
 
   const pieData = nonZeroCategories.map((cat) => ({
@@ -313,7 +323,7 @@ export default function AnalysisPage() {
   // Bar chart data with granularity
   const barData = useMemo(
     () => aggregateTrendData(summary.dailyTrend, trendGranularity),
-    [summary.dailyTrend, trendGranularity]
+    [summary.dailyTrend, trendGranularity],
   );
 
   // Export handlers
@@ -321,7 +331,15 @@ export default function AnalysisPage() {
     try {
       const data = await exportAllData();
       const csvRows = [
-        ["Date", "Time", "Category", "Description", "Value", "Tags", "IsAdhoc"].join(","),
+        [
+          "Date",
+          "Time",
+          "Category",
+          "Description",
+          "Value",
+          "Tags",
+          "IsAdhoc",
+        ].join(","),
         ...data.expenses.map((e) => {
           const category = categories.find((c) => c.id === e.category);
           return [
@@ -389,10 +407,18 @@ export default function AnalysisPage() {
         {/* Tabs */}
         <Tabs value={periodTab} onValueChange={handlePeriodChange}>
           <TabsList className="w-full">
-            <TabsTrigger value="week" className="flex-1">Week</TabsTrigger>
-            <TabsTrigger value="month" className="flex-1">Month</TabsTrigger>
-            <TabsTrigger value="year" className="flex-1">Year</TabsTrigger>
-            <TabsTrigger value="custom" className="flex-1">Custom</TabsTrigger>
+            <TabsTrigger value="week" className="flex-1">
+              Week
+            </TabsTrigger>
+            <TabsTrigger value="month" className="flex-1">
+              Month
+            </TabsTrigger>
+            <TabsTrigger value="year" className="flex-1">
+              Year
+            </TabsTrigger>
+            <TabsTrigger value="custom" className="flex-1">
+              Custom
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -423,25 +449,75 @@ export default function AnalysisPage() {
 
         {/* Custom date pickers */}
         {periodTab === "custom" && (
-          <div className="flex gap-2">
-            <Input
-              type="date"
-              value={customRange?.start ? format(customRange.start, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                const date = e.target.value ? parseISO(e.target.value) : undefined;
-                if (date) setCustomRange((prev) => ({ start: date, end: prev?.end || date }));
-              }}
-              className="flex-1"
-            />
-            <Input
-              type="date"
-              value={customRange?.end ? format(customRange.end, "yyyy-MM-dd") : ""}
-              onChange={(e) => {
-                const date = e.target.value ? parseISO(e.target.value) : undefined;
-                if (date) setCustomRange((prev) => ({ start: prev?.start || date, end: date }));
-              }}
-              className="flex-1"
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal text-sm",
+                      !customRange?.start && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {customRange?.start
+                      ? format(customRange.start, "PP")
+                      : "Pick start"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customRange?.start}
+                    onSelect={(date) => {
+                      if (date)
+                        setCustomRange((prev) => ({
+                          start: date,
+                          end: prev?.end || date,
+                        }));
+                    }}
+                    autoFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">End Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal text-sm",
+                      !customRange?.end && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {customRange?.end
+                      ? format(customRange.end, "PP")
+                      : "Pick end"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customRange?.end}
+                    onSelect={(date) => {
+                      if (date)
+                        setCustomRange((prev) => ({
+                          start: prev?.start || date,
+                          end: date,
+                        }));
+                    }}
+                    autoFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         )}
 
@@ -468,7 +544,7 @@ export default function AnalysisPage() {
             className="p-4 bg-card rounded-xl border border-border/50"
           >
             <h3 className="text-sm font-medium mb-4">Category Breakdown</h3>
-            <div className="h-64">
+            <div className="h-64 **:outline-none">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -591,7 +667,9 @@ export default function AnalysisPage() {
               {granularityOptions.length > 1 && (
                 <Select
                   value={trendGranularity}
-                  onValueChange={(v) => setTrendGranularity(v as TrendGranularity)}
+                  onValueChange={(v) =>
+                    setTrendGranularity(v as TrendGranularity)
+                  }
                 >
                   <SelectTrigger className="w-24 h-8 text-xs">
                     <SelectValue />
@@ -606,7 +684,7 @@ export default function AnalysisPage() {
                 </Select>
               )}
             </div>
-            <div className="h-64">
+            <div className="h-64 **:outline-none">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
                   <XAxis
