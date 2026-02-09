@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Plus, Trash2, Edit, FolderOpen, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";

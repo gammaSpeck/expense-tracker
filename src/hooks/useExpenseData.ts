@@ -228,21 +228,22 @@ export function useRecentExpenses(limit: number = 10) {
 
 export function getDateRangeForPeriod(
   period: "week" | "month" | "year",
+  anchorDate?: Date,
   customRange?: { start: Date; end: Date }
 ) {
-  const now = new Date();
+  const date = anchorDate || new Date();
 
   switch (period) {
     case "week":
       return {
-        start: startOfWeek(now, { weekStartsOn: 1 }),
-        end: endOfWeek(now, { weekStartsOn: 1 }),
+        start: startOfWeek(date, { weekStartsOn: 1 }),
+        end: endOfWeek(date, { weekStartsOn: 1 }),
       };
     case "month":
-      return { start: startOfMonth(now), end: endOfMonth(now) };
+      return { start: startOfMonth(date), end: endOfMonth(date) };
     case "year":
-      return { start: startOfYear(now), end: endOfYear(now) };
+      return { start: startOfYear(date), end: endOfYear(date) };
     default:
-      return customRange || { start: startOfMonth(now), end: endOfMonth(now) };
+      return customRange || { start: startOfMonth(date), end: endOfMonth(date) };
   }
 }

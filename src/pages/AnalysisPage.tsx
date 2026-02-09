@@ -1,6 +1,24 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { format, parseISO } from "date-fns";
+import {
+  format,
+  parseISO,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  startOfYear,
+  endOfYear,
+  subWeeks,
+  subMonths,
+  subYears,
+  addWeeks,
+  addMonths,
+  addYears,
+  differenceInDays,
+  isSameMonth,
+  getWeek,
+} from "date-fns";
 import {
   PieChart,
   Pie,
@@ -11,14 +29,28 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
-import { Download, TrendingUp, Wallet, Receipt, Award } from "lucide-react";
+import {
+  Download,
+  TrendingUp,
+  Wallet,
+  Receipt,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -32,9 +64,11 @@ import {
   getDateRangeForPeriod,
 } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/lib/db";
-import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
+import { TimePeriod, ExpenseFilters, DateRange, DailySummary } from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
+
+type TrendGranularity = "day" | "week" | "month";
 
 // Custom tooltip for pie chart
 const CustomPieTooltip = ({ active, payload }: any) => {
@@ -62,22 +96,139 @@ const CustomPieTooltip = ({ active, payload }: any) => {
   );
 };
 
+// --- Helper functions ---
+
+function formatPeriodDisplay(
+  periodTab: TimePeriod,
+  selectedDate: Date,
+  dateRange: DateRange
+): string {
+  switch (periodTab) {
+    case "week": {
+      const start = dateRange.start;
+      const end = dateRange.end;
+      if (isSameMonth(start, end)) {
+        return `${format(start, "MMM d")} - ${format(end, "d")}`;
+      }
+      return `${format(start, "MMM d")} - ${format(end, "MMM d")}`;
+    }
+    case "month":
+      return format(selectedDate, "MMM yyyy");
+    case "year":
+      return format(selectedDate, "yyyy");
+    case "custom":
+      return `${format(dateRange.start, "MMM d")} - ${format(dateRange.end, "MMM d, yyyy")}`;
+  }
+}
+
+function getGranularityOptions(periodTab: TimePeriod, customRange?: DateRange): TrendGranularity[] {
+  switch (periodTab) {
+    case "week":
+      return ["day"];
+    case "month":
+      return ["day", "week"];
+    case "year":
+      return ["day", "week", "month"];
+    case "custom": {
+      if (!customRange) return ["day"];
+      const days = differenceInDays(customRange.end, customRange.start);
+      if (days <= 14) return ["day"];
+      if (days <= 90) return ["day", "week"];
+      return ["day", "week", "month"];
+    }
+  }
+}
+
+function aggregateTrendData(
+  dailyData: DailySummary[],
+  granularity: TrendGranularity
+): Array<{ label: string; amount: number }> {
+  if (granularity === "day") {
+    return dailyData.map((d) => ({
+      label: format(parseISO(d.date), "MMM d"),
+      amount: d.total,
+    }));
+  }
+
+  if (granularity === "week") {
+    const weekMap = new Map<string, number>();
+    for (const d of dailyData) {
+      const date = parseISO(d.date);
+      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+      const key = format(weekStart, "yyyy-MM-dd");
+      const label = isSameMonth(weekStart, weekEnd)
+        ? `${format(weekStart, "MMM d")}-${format(weekEnd, "d")}`
+        : `${format(weekStart, "MMM d")}-${format(weekEnd, "MMM d")}`;
+      weekMap.set(
+        key,
+        (weekMap.get(key) || 0) + d.total
+      );
+      // Store label as well
+      if (!weekMap.has(`label_${key}`)) {
+        weekMap.set(`label_${key}`, 0);
+      }
+    }
+
+    // Rebuild properly
+    const weeks = new Map<string, { label: string; amount: number }>();
+    for (const d of dailyData) {
+      const date = parseISO(d.date);
+      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+      const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
+      const key = format(weekStart, "yyyy-MM-dd");
+      if (!weeks.has(key)) {
+        const label = isSameMonth(weekStart, weekEnd)
+          ? `${format(weekStart, "MMM d")}-${format(weekEnd, "d")}`
+          : `${format(weekStart, "MMM d")}-${format(weekEnd, "MMM d")}`;
+        weeks.set(key, { label, amount: 0 });
+      }
+      weeks.get(key)!.amount += d.total;
+    }
+    return Array.from(weeks.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, v]) => v);
+  }
+
+  // month
+  const months = new Map<string, { label: string; amount: number }>();
+  for (const d of dailyData) {
+    const date = parseISO(d.date);
+    const key = format(date, "yyyy-MM");
+    if (!months.has(key)) {
+      months.set(key, { label: format(date, "MMM"), amount: 0 });
+    }
+    months.get(key)!.amount += d.total;
+  }
+  return Array.from(months.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, v]) => v);
+}
+
+// --- Component ---
+
 export default function AnalysisPage() {
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("month");
+  const [periodTab, setPeriodTab] = useState<TimePeriod>("month");
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [excludeAdhoc, setExcludeAdhoc] = useState(true);
+  const [trendGranularity, setTrendGranularity] = useState<TrendGranularity>("day");
   const [showExportDialog, setShowExportDialog] = useState(false);
   const categories = useCategories();
 
+  // Compute date range from period + anchor
   const dateRange = useMemo(() => {
-    if (timePeriod === "custom" && customRange) {
+    if (periodTab === "custom" && customRange) {
       return customRange;
     }
-    if (timePeriod === "custom") {
-      return getDateRangeForPeriod("month");
+    if (periodTab === "custom") {
+      return getDateRangeForPeriod("month", selectedDate);
     }
-    return getDateRangeForPeriod(timePeriod);
-  }, [timePeriod, customRange]);
+    return getDateRangeForPeriod(
+      periodTab as "week" | "month" | "year",
+      selectedDate
+    );
+  }, [periodTab, selectedDate, customRange]);
 
   const filters: ExpenseFilters = {
     dateRange,
@@ -87,20 +238,90 @@ export default function AnalysisPage() {
   const summary = useAnalysisSummary(filters);
   const { currency, formatValue } = useCurrency();
 
+  // Period display
+  const periodDisplay = useMemo(
+    () => formatPeriodDisplay(periodTab, selectedDate, dateRange),
+    [periodTab, selectedDate, dateRange]
+  );
+
+  // Granularity options
+  const granularityOptions = useMemo(
+    () => getGranularityOptions(periodTab, customRange),
+    [periodTab, customRange]
+  );
+
+  // Reset granularity when period changes
+  const handlePeriodChange = useCallback(
+    (value: string) => {
+      setPeriodTab(value as TimePeriod);
+      setSelectedDate(new Date());
+      setTrendGranularity("day");
+    },
+    []
+  );
+
+  // Navigation
+  const goToPreviousPeriod = useCallback(() => {
+    setSelectedDate((prev) => {
+      switch (periodTab) {
+        case "week":
+          return subWeeks(prev, 1);
+        case "month":
+          return subMonths(prev, 1);
+        case "year":
+          return subYears(prev, 1);
+        default:
+          return prev;
+      }
+    });
+  }, [periodTab]);
+
+  const goToNextPeriod = useCallback(() => {
+    setSelectedDate((prev) => {
+      switch (periodTab) {
+        case "week":
+          return addWeeks(prev, 1);
+        case "month":
+          return addMonths(prev, 1);
+        case "year":
+          return addYears(prev, 1);
+        default:
+          return prev;
+      }
+    });
+  }, [periodTab]);
+
+  // Pie chart data
+  const nonZeroCategories = summary.categoryBreakdown.filter(
+    (cat) => cat.total > 0
+  );
+
+  const totalForPie = nonZeroCategories.reduce(
+    (sum, cat) => sum + cat.total,
+    0
+  );
+
+  const pieData = nonZeroCategories.map((cat) => ({
+    name: cat.categoryName,
+    value: cat.total,
+    color: cat.categoryColor,
+    total: totalForPie,
+    percentage:
+      totalForPie > 0 ? ((cat.total / totalForPie) * 100).toFixed(1) : "0",
+  }));
+
+  // Bar chart data with granularity
+  const barData = useMemo(
+    () => aggregateTrendData(summary.dailyTrend, trendGranularity),
+    [summary.dailyTrend, trendGranularity]
+  );
+
+  // Export handlers
   const handleExportCSV = async () => {
     try {
       const data = await exportAllData();
-
       const csvRows = [
-        [
-          "Date",
-          "Time",
-          "Category",
-          "Description",
-          "Value",
-          "Tags",
-          "IsAdhoc",
-        ].join(","),
+        ["Date", "Time", "Category", "Description", "Value", "Tags", "IsAdhoc"].join(","),
         ...data.expenses.map((e) => {
           const category = categories.find((c) => c.id === e.category);
           return [
@@ -114,7 +335,6 @@ export default function AnalysisPage() {
           ].join(",");
         }),
       ];
-
       const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -122,7 +342,6 @@ export default function AnalysisPage() {
       a.download = `expenses-${format(new Date(), "yyyy-MM-dd")}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-
       toast.success("Exported successfully");
       setShowExportDialog(false);
     } catch (error) {
@@ -133,12 +352,7 @@ export default function AnalysisPage() {
   const handleExportJSON = async () => {
     try {
       const data = await exportAllData();
-
-      const exportData = {
-        exportDate: new Date().toISOString(),
-        ...data,
-      };
-
+      const exportData = { exportDate: new Date().toISOString(), ...data };
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: "application/json",
       });
@@ -148,7 +362,6 @@ export default function AnalysisPage() {
       a.download = `expenses-${format(new Date(), "yyyy-MM-dd")}.json`;
       a.click();
       URL.revokeObjectURL(url);
-
       toast.success("Exported successfully");
       setShowExportDialog(false);
     } catch (error) {
@@ -156,114 +369,85 @@ export default function AnalysisPage() {
     }
   };
 
-  const totalForPie = summary.categoryBreakdown.reduce(
-    (sum, cat) => sum + cat.total,
-    0
-  );
-
-  const pieData = summary.categoryBreakdown.map((cat) => ({
-    name: cat.categoryName,
-    value: cat.total,
-    color: cat.categoryColor,
-    total: totalForPie,
-    percentage:
-      totalForPie > 0 ? ((cat.total / totalForPie) * 100).toFixed(1) : "0",
-  }));
-
-  const barData = summary.dailyTrend.map((day) => ({
-    date: format(new Date(day.date), "MMM d"),
-    amount: day.total,
-  }));
-
   return (
     <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
       >
         <h1 className="text-xl font-semibold">Analysis</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowExportDialog(true)}
-        >
-          <Download className="h-4 w-4 mr-1" />
-          Export
-        </Button>
       </motion.div>
 
-      {/* Filters */}
+      {/* Period Selector */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="space-y-4 p-4 bg-card rounded-xl border border-border/50"
+        className="space-y-3 p-4 bg-card rounded-xl border border-border/50"
       >
-        <Tabs
-          value={timePeriod}
-          onValueChange={(v) => setTimePeriod(v as TimePeriod)}
-        >
+        {/* Tabs */}
+        <Tabs value={periodTab} onValueChange={handlePeriodChange}>
           <TabsList className="w-full">
-            <TabsTrigger value="week" className="flex-1">
-              Week
-            </TabsTrigger>
-            <TabsTrigger value="month" className="flex-1">
-              Month
-            </TabsTrigger>
-            <TabsTrigger value="year" className="flex-1">
-              Year
-            </TabsTrigger>
-            <TabsTrigger value="custom" className="flex-1">
-              Custom
-            </TabsTrigger>
+            <TabsTrigger value="week" className="flex-1">Week</TabsTrigger>
+            <TabsTrigger value="month" className="flex-1">Month</TabsTrigger>
+            <TabsTrigger value="year" className="flex-1">Year</TabsTrigger>
+            <TabsTrigger value="custom" className="flex-1">Custom</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        {timePeriod === "custom" && (
+        {/* Period Navigation */}
+        {periodTab !== "custom" && (
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goToPreviousPeriod}
+              aria-label="Previous period"
+              className="h-9 w-9"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <span className="text-sm font-semibold">{periodDisplay}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={goToNextPeriod}
+              aria-label="Next period"
+              className="h-9 w-9"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Custom date pickers */}
+        {periodTab === "custom" && (
           <div className="flex gap-2">
             <Input
               type="date"
-              value={
-                customRange?.start
-                  ? format(customRange.start, "yyyy-MM-dd")
-                  : ""
-              }
+              value={customRange?.start ? format(customRange.start, "yyyy-MM-dd") : ""}
               onChange={(e) => {
-                const date = e.target.value
-                  ? parseISO(e.target.value)
-                  : undefined;
-                if (date)
-                  setCustomRange((prev) => ({
-                    start: date,
-                    end: prev?.end || date,
-                  }));
+                const date = e.target.value ? parseISO(e.target.value) : undefined;
+                if (date) setCustomRange((prev) => ({ start: date, end: prev?.end || date }));
               }}
               className="flex-1"
             />
             <Input
               type="date"
-              value={
-                customRange?.end ? format(customRange.end, "yyyy-MM-dd") : ""
-              }
+              value={customRange?.end ? format(customRange.end, "yyyy-MM-dd") : ""}
               onChange={(e) => {
-                const date = e.target.value
-                  ? parseISO(e.target.value)
-                  : undefined;
-                if (date)
-                  setCustomRange((prev) => ({
-                    start: prev?.start || date,
-                    end: date,
-                  }));
+                const date = e.target.value ? parseISO(e.target.value) : undefined;
+                if (date) setCustomRange((prev) => ({ start: prev?.start || date, end: date }));
               }}
               className="flex-1"
             />
           </div>
         )}
 
+        {/* Exclude Adhoc toggle */}
         <div className="flex items-center justify-between">
-          <Label htmlFor="exclude-adhoc" className="cursor-pointer">
+          <Label htmlFor="exclude-adhoc" className="cursor-pointer text-sm">
             Exclude Adhoc Expenses
           </Label>
           <Switch
@@ -272,87 +456,15 @@ export default function AnalysisPage() {
             onCheckedChange={setExcludeAdhoc}
           />
         </div>
-
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span className="px-2 py-1 bg-muted rounded-full">
-            {format(dateRange.start, "d MMM")} -{" "}
-            {format(dateRange.end, "d MMM yyyy")}
-          </span>
-          {excludeAdhoc && (
-            <span className="px-2 py-1 bg-primary/10 text-primary rounded-full">
-              Excluding Adhoc
-            </span>
-          )}
-        </div>
       </motion.div>
 
-      {/* Summary Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-      >
-        <div className="p-4 bg-card rounded-xl border border-border/50">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Wallet className="h-4 w-4" />
-            <span className="text-xs">Total</span>
-          </div>
-          <p className="text-xl font-bold">
-            {currency.symbol}
-            {formatValue(summary.totalExpenses)}
-          </p>
-        </div>
-
-        <div className="p-4 bg-card rounded-xl border border-border/50">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Receipt className="h-4 w-4" />
-            <span className="text-xs">Transactions</span>
-          </div>
-          <p className="text-xl font-bold">{summary.totalTransactions}</p>
-        </div>
-
-        <div className="p-4 bg-card rounded-xl border border-border/50">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <TrendingUp className="h-4 w-4" />
-            <span className="text-xs">Average</span>
-          </div>
-          <p className="text-xl font-bold">
-            {currency.symbol}
-            {formatValue(Math.round(summary.averageExpense))}
-          </p>
-        </div>
-
-        <div className="p-4 bg-card rounded-xl border border-border/50">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <Award className="h-4 w-4" />
-            <span className="text-xs">Top Category</span>
-          </div>
-          {summary.topCategory ? (
-            <div className="flex items-center gap-2">
-              <CategoryIcon
-                icon={summary.topCategory.categoryIcon}
-                color={summary.topCategory.categoryColor}
-                size="sm"
-              />
-              <span className="font-medium text-sm truncate">
-                {summary.topCategory.categoryName}
-              </span>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No data</p>
-          )}
-        </div>
-      </motion.div>
-
-      {/* Charts */}
+      {/* Category Breakdown */}
       {summary.totalTransactions > 0 ? (
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Pie Chart */}
+        <>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
+            transition={{ delay: 0.1 }}
             className="p-4 bg-card rounded-xl border border-border/50"
           >
             <h3 className="text-sm font-medium mb-4">Category Breakdown</h3>
@@ -379,21 +491,22 @@ export default function AnalysisPage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Legend */}
-            <div className="mt-4 space-y-2">
-              {summary.categoryBreakdown.slice(0, 5).map((cat) => (
+            {/* Legend - ALL non-zero categories */}
+            <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0">
+              {nonZeroCategories.map((cat) => (
                 <div
                   key={cat.categoryId}
                   className="flex items-center justify-between text-sm"
                 >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: cat.categoryColor }}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CategoryIcon
+                      icon={cat.categoryIcon}
+                      color={cat.categoryColor}
+                      size="sm"
                     />
                     <span className="truncate">{cat.categoryName}</span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0 ml-2">
                     <span className="font-medium">
                       {currency.symbol}
                       {formatValue(cat.total)}
@@ -407,19 +520,97 @@ export default function AnalysisPage() {
             </div>
           </motion.div>
 
-          {/* Bar Chart */}
+          {/* Summary Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+          >
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Wallet className="h-4 w-4" />
+                <span className="text-xs">Total</span>
+              </div>
+              <p className="text-xl font-bold">
+                {currency.symbol}
+                {formatValue(summary.totalExpenses)}
+              </p>
+            </div>
+
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Receipt className="h-4 w-4" />
+                <span className="text-xs">Transactions</span>
+              </div>
+              <p className="text-xl font-bold">{summary.totalTransactions}</p>
+            </div>
+
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <TrendingUp className="h-4 w-4" />
+                <span className="text-xs">Average</span>
+              </div>
+              <p className="text-xl font-bold">
+                {currency.symbol}
+                {formatValue(Math.round(summary.averageExpense))}
+              </p>
+            </div>
+
+            <div className="p-4 bg-card rounded-xl border border-border/50">
+              <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                <Award className="h-4 w-4" />
+                <span className="text-xs">Top Category</span>
+              </div>
+              {summary.topCategory ? (
+                <div className="flex items-center gap-2">
+                  <CategoryIcon
+                    icon={summary.topCategory.categoryIcon}
+                    color={summary.topCategory.categoryColor}
+                    size="sm"
+                  />
+                  <span className="font-medium text-sm truncate">
+                    {summary.topCategory.categoryName}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No data</p>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Spending Trend */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="p-4 bg-card rounded-xl border border-border/50"
           >
-            <h3 className="text-sm font-medium mb-4">Spending Trend</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium">Spending Trend</h3>
+              {granularityOptions.length > 1 && (
+                <Select
+                  value={trendGranularity}
+                  onValueChange={(v) => setTrendGranularity(v as TrendGranularity)}
+                >
+                  <SelectTrigger className="w-24 h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {granularityOptions.map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
                   <XAxis
-                    dataKey="date"
+                    dataKey="label"
                     axisLine={false}
                     tickLine={false}
                     tick={{
@@ -435,7 +626,7 @@ export default function AnalysisPage() {
                       fill: "hsl(var(--muted-foreground))",
                     }}
                     tickFormatter={(value) =>
-                      `${currency.symbol}${(value / 1000).toFixed(0)}k`
+                      `${currency.symbol}${value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}`
                     }
                   />
                   <Tooltip
@@ -458,17 +649,33 @@ export default function AnalysisPage() {
               </ResponsiveContainer>
             </div>
           </motion.div>
-        </div>
+        </>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.1 }}
           className="flex flex-col items-center justify-center py-12 text-muted-foreground"
         >
           <p>No expense data for this period</p>
         </motion.div>
       )}
+
+      {/* Export Button */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => setShowExportDialog(true)}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Export
+        </Button>
+      </motion.div>
 
       {/* Export Dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
