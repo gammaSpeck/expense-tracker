@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Download, CalendarIcon, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -10,28 +10,22 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { exportAllData, getAllCategories } from "@/lib/db";
+import { exportAllData } from "@/lib/db";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
 
 export function ExportData() {
   const [open, setOpen] = useState(false);
   const [formatType, setFormatType] = useState<"csv" | "json">("csv");
-  const [fromDate, setFromDate] = useState<Date | undefined>();
-  const [toDate, setToDate] = useState<Date | undefined>();
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [isExporting, setIsExporting] = useState(false);
 
   const resetForm = () => {
     setFormatType("csv");
-    setFromDate(undefined);
-    setToDate(undefined);
+    setFromDate("");
+    setToDate("");
   };
 
   async function handleExport() {
@@ -39,13 +33,10 @@ export function ExportData() {
     try {
       const data = await exportAllData();
 
-      // Filter by date range if provided
       let expenses = data.expenses;
       if (fromDate && toDate) {
-        const fromDateStr = format(fromDate, "yyyy-MM-dd");
-        const toDateStr = format(toDate, "yyyy-MM-dd");
         expenses = expenses.filter(
-          (e) => e.date >= fromDateStr && e.date <= toDateStr
+          (e) => e.date >= fromDate && e.date <= toDate
         );
       }
 
@@ -77,8 +68,8 @@ export function ExportData() {
   }
 
   const clearDates = () => {
-    setFromDate(undefined);
-    setToDate(undefined);
+    setFromDate("");
+    setToDate("");
   };
 
   return (
@@ -122,52 +113,18 @@ export function ExportData() {
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "justify-start text-left font-normal",
-                        !fromDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {fromDate ? format(fromDate, "MMM dd") : "From"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={fromDate}
-                      onSelect={setFromDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "justify-start text-left font-normal",
-                        !toDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {toDate ? format(toDate, "MMM dd") : "To"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={toDate}
-                      onSelect={setToDate}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  placeholder="From"
+                />
+                <Input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  placeholder="To"
+                />
               </div>
             </div>
 
