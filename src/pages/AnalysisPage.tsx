@@ -80,142 +80,15 @@ import {
 } from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
-
-type TrendGranularity = "day" | "week" | "month";
-
-// Custom tooltip for pie chart
-const CustomPieTooltip = ({ active, payload }: any) => {
-  const { currency } = useCurrency();
-
-  if (!active || !payload || !payload?.length) return null;
-
-  const data = payload[0];
-  const percentage = ((data.value / data.payload.total) * 100).toFixed(1);
-  return (
-    <div
-      className="px-3 py-2 rounded-lg shadow-lg border border-white"
-      style={{
-        backgroundColor: data.payload.color,
-      }}
-    >
-      <p className="font-medium text-white">{data.name}</p>
-      <p className="text-white/90">
-        {currency.symbol}
-        {data.value.toLocaleString(currency.locale)}
-      </p>
-      <p className="text-white/80 text-sm">{percentage}%</p>
-    </div>
-  );
-};
-
-// --- Helper functions ---
-
-function formatPeriodDisplay(
-  periodTab: TimePeriod,
-  selectedDate: Date,
-  dateRange: DateRange,
-): string {
-  switch (periodTab) {
-    case "week": {
-      const start = dateRange.start;
-      const end = dateRange.end;
-      if (isSameMonth(start, end)) {
-        return `${format(start, "MMM d")} - ${format(end, "d")}`;
-      }
-      return `${format(start, "MMM d")} - ${format(end, "MMM d")}`;
-    }
-    case "month":
-      return format(selectedDate, "MMM yyyy");
-    case "year":
-      return format(selectedDate, "yyyy");
-    case "custom":
-      return `${format(dateRange.start, "MMM d")} - ${format(dateRange.end, "MMM d, yyyy")}`;
-  }
-}
-
-function getGranularityOptions(
-  periodTab: TimePeriod,
-  customRange?: DateRange,
-): TrendGranularity[] {
-  switch (periodTab) {
-    case "week":
-      return ["day"];
-    case "month":
-      return ["day", "week"];
-    case "year":
-      return ["day", "week", "month"];
-    case "custom": {
-      if (!customRange) return ["day"];
-      const days = differenceInDays(customRange.end, customRange.start);
-      if (days <= 14) return ["day"];
-      if (days <= 90) return ["day", "week"];
-      return ["day", "week", "month"];
-    }
-  }
-}
-
-function aggregateTrendData(
-  dailyData: DailySummary[],
-  granularity: TrendGranularity,
-): Array<{ label: string; amount: number }> {
-  if (granularity === "day") {
-    return dailyData.map((d) => ({
-      label: format(parseISO(d.date), "MMM d"),
-      amount: d.total,
-    }));
-  }
-
-  if (granularity === "week") {
-    const weekMap = new Map<string, number>();
-    for (const d of dailyData) {
-      const date = parseISO(d.date);
-      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-      const key = format(weekStart, "yyyy-MM-dd");
-      const label = isSameMonth(weekStart, weekEnd)
-        ? `${format(weekStart, "MMM d")}-${format(weekEnd, "d")}`
-        : `${format(weekStart, "MMM d")}-${format(weekEnd, "MMM d")}`;
-      weekMap.set(key, (weekMap.get(key) || 0) + d.total);
-      // Store label as well
-      if (!weekMap.has(`label_${key}`)) {
-        weekMap.set(`label_${key}`, 0);
-      }
-    }
-
-    // Rebuild properly
-    const weeks = new Map<string, { label: string; amount: number }>();
-    for (const d of dailyData) {
-      const date = parseISO(d.date);
-      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-      const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-      const key = format(weekStart, "yyyy-MM-dd");
-      if (!weeks.has(key)) {
-        const label = isSameMonth(weekStart, weekEnd)
-          ? `${format(weekStart, "MMM d")}-${format(weekEnd, "d")}`
-          : `${format(weekStart, "MMM d")}-${format(weekEnd, "MMM d")}`;
-        weeks.set(key, { label, amount: 0 });
-      }
-      weeks.get(key)!.amount += d.total;
-    }
-    return Array.from(weeks.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, v]) => v);
-  }
-
-  // month
-  const months = new Map<string, { label: string; amount: number }>();
-  for (const d of dailyData) {
-    const date = parseISO(d.date);
-    const key = format(date, "yyyy-MM");
-    if (!months.has(key)) {
-      months.set(key, { label: format(date, "MMM"), amount: 0 });
-    }
-    months.get(key)!.amount += d.total;
-  }
-  return Array.from(months.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, v]) => v);
-}
+import CategoryBreakdown from "@/components/analysis/CategoryBreakdown";
+import TrendSection from "@/components/analysis/TrendSection";
+import ExportDialog from "@/components/analysis/ExportDialog";
+import {
+  formatPeriodDisplay,
+  getGranularityOptions,
+  aggregateTrendData,
+  TrendGranularity,
+} from "@/components/analysis/analysisUtils";
 
 // --- Component ---
 
@@ -537,65 +410,6 @@ export default function AnalysisPage() {
       {/* Category Breakdown */}
       {summary.totalTransactions > 0 ? (
         <>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-4 bg-card rounded-xl border border-border/50"
-          >
-            <h3 className="text-sm font-medium mb-4">Category Breakdown</h3>
-            <div className="h-64 **:outline-none">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                    label={({ payload }) => `${payload.percentage}%`}
-                    labelLine={false}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomPieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Legend - ALL non-zero categories */}
-            <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0">
-              {nonZeroCategories.map((cat) => (
-                <div
-                  key={cat.categoryId}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <CategoryIcon
-                      icon={cat.categoryIcon}
-                      color={cat.categoryColor}
-                      size="sm"
-                    />
-                    <span className="truncate">{cat.categoryName}</span>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-2">
-                    <span className="font-medium">
-                      {currency.symbol}
-                      {formatValue(cat.total)}
-                    </span>
-                    <span className="text-muted-foreground w-12 text-right">
-                      {cat.percentage.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
           {/* Summary Stats */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -655,6 +469,20 @@ export default function AnalysisPage() {
             </div>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="p-4 bg-card rounded-xl border border-border/50"
+          >
+            <CategoryBreakdown
+              pieData={pieData}
+              nonZeroCategories={nonZeroCategories}
+              currency={currency}
+              formatValue={formatValue}
+            />
+          </motion.div>
+
           {/* Spending Trend */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -662,70 +490,14 @@ export default function AnalysisPage() {
             transition={{ delay: 0.2 }}
             className="p-4 bg-card rounded-xl border border-border/50"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium">Spending Trend</h3>
-              {granularityOptions.length > 1 && (
-                <Select
-                  value={trendGranularity}
-                  onValueChange={(v) =>
-                    setTrendGranularity(v as TrendGranularity)
-                  }
-                >
-                  <SelectTrigger className="w-24 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {granularityOptions.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
-            <div className="h-64 **:outline-none">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData}>
-                  <XAxis
-                    dataKey="label"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{
-                      fontSize: 10,
-                      fill: "hsl(var(--muted-foreground))",
-                    }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{
-                      fontSize: 10,
-                      fill: "hsl(var(--muted-foreground))",
-                    }}
-                    tickFormatter={(value) =>
-                      `${currency.symbol}${value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}`
-                    }
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      `${currency.symbol}${formatValue(value)}`,
-                      "Amount",
-                    ]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.5rem",
-                    }}
-                  />
-                  <Bar
-                    dataKey="amount"
-                    fill="hsl(var(--primary))"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <TrendSection
+              barData={barData}
+              currency={currency}
+              formatValue={formatValue}
+              trendGranularity={trendGranularity as TrendGranularity}
+              setTrendGranularity={(g) => setTrendGranularity(g)}
+              granularityOptions={granularityOptions as TrendGranularity[]}
+            />
           </motion.div>
         </>
       ) : (
@@ -756,39 +528,12 @@ export default function AnalysisPage() {
       </motion.div>
 
       {/* Export Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export Data</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <Button
-              variant="outline"
-              className="w-full justify-start h-auto py-4"
-              onClick={handleExportCSV}
-            >
-              <div className="text-left">
-                <p className="font-medium">Export as CSV</p>
-                <p className="text-xs text-muted-foreground">
-                  Compatible with Excel, Google Sheets
-                </p>
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start h-auto py-4"
-              onClick={handleExportJSON}
-            >
-              <div className="text-left">
-                <p className="font-medium">Export as JSON</p>
-                <p className="text-xs text-muted-foreground">
-                  Full data backup with all fields
-                </p>
-              </div>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        onExportCSV={handleExportCSV}
+        onExportJSON={handleExportJSON}
+      />
     </div>
   );
 }
