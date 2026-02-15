@@ -1,9 +1,15 @@
 import React from "react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
+type PiePayload = {
+  name: string;
+  value: number;
+  payload: { total: number; color: string } & Record<string, unknown>;
+};
+
 type Props = {
   active?: boolean;
-  payload?: any;
+  payload?: PiePayload[];
 };
 
 export default function CustomPieTooltip({ active, payload }: Props) {

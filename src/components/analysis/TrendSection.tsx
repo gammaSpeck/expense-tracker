@@ -15,12 +15,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { TrendGranularity } from "./analysisUtils";
+import type { Currency } from "@/lib/currency";
 
 type DataPoint = { label: string; amount: number };
 
 type Props = {
   barData: DataPoint[];
-  currency: any;
+  currency: Currency;
   formatValue: (v: number) => string;
   trendGranularity: TrendGranularity;
   setTrendGranularity: (g: TrendGranularity) => void;

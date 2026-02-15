@@ -3,6 +3,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import CustomPieTooltip from "./CustomPieTooltip";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import type { CategorySummary } from "@/types/expense";
+import type { Currency } from "@/lib/currency";
 
 type PieDatum = {
   name: string;
@@ -15,7 +16,7 @@ type PieDatum = {
 type Props = {
   pieData: PieDatum[];
   nonZeroCategories: CategorySummary[];
-  currency: any;
+  currency: Currency;
   formatValue: (v: number) => string;
 };
 
