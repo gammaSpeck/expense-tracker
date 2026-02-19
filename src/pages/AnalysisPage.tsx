@@ -349,7 +349,6 @@ export default function AnalysisPage() {
                             end: prev?.end || date,
                           }));
                       }}
-                      autoFocus
                       className="pointer-events-auto"
                     />
                   </PopoverContent>
