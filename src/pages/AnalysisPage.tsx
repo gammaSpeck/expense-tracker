@@ -19,17 +19,7 @@ import {
   isSameMonth,
   getWeek,
 } from "date-fns";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+
 import {
   Download,
   TrendingUp,
