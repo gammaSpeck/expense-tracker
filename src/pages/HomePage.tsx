@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { format } from "date-fns";
 import { getCurrentTime24 } from "@/lib/time";
 import { Plus, ArrowRight } from "lucide-react";
@@ -85,89 +85,91 @@ export default function HomePage() {
   };
 
   return (
-    <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
-      {/* Monthly Summary Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="summary-card"
-      >
-        <p className="text-sm opacity-80">This Month's Expenses</p>
-        <p className="text-3xl font-bold mt-1">
-          {currency.symbol}
-          {formatValue(total)}
-        </p>
-        {totalExcludingAdhoc !== total && (
-          <p className="text-sm opacity-70 mt-1">
-            Excluding Adhoc: {currency.symbol}
-            {formatValue(totalExcludingAdhoc)}
+    <LazyMotion features={domAnimation}>
+      <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
+        {/* Monthly Summary Card */}
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="summary-card"
+        >
+          <p className="text-sm opacity-80">This Month's Expenses</p>
+          <p className="text-3xl font-bold mt-1">
+            {currency.symbol}
+            {formatValue(total)}
           </p>
-        )}
-        <p className="text-xs opacity-60 mt-2">
-          {format(monthStart, "d MMM")} - {format(monthEnd, "d MMM yyyy")}
-        </p>
-      </motion.div>
-
-      {/* Recent Transactions */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Recent Transactions</h2>
-          {displayExpenses.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/transactions")}
-              className="text-primary"
-            >
-              See All
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
+          {totalExcludingAdhoc !== total && (
+            <p className="text-sm opacity-70 mt-1">
+              Excluding Adhoc: {currency.symbol}
+              {formatValue(totalExcludingAdhoc)}
+            </p>
           )}
-        </div>
+          <p className="text-xs opacity-60 mt-2">
+            {format(monthStart, "d MMM")} - {format(monthEnd, "d MMM yyyy")}
+          </p>
+        </m.div>
 
-        <ExpenseList
-          expenses={displayExpenses}
-          categories={categories}
-          onExpenseClick={handleExpenseClick}
-          onDuplicate={handleDuplicate}
-          onEdit={handleEdit}
-          onDelete={(expense) => setExpenseToDelete(expense)}
-          emptyMessage={"No expenses yet. Add your first one!"}
-        />
-      </motion.div>
+        {/* Recent Transactions */}
+        <m.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Recent Transactions</h2>
+            {displayExpenses.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/transactions")}
+                className="text-primary"
+              >
+                See All
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
+          </div>
 
-      {/* FAB */}
-      {isMobile && <FloatingActionButton />}
+          <ExpenseList
+            expenses={displayExpenses}
+            categories={categories}
+            onExpenseClick={handleExpenseClick}
+            onDuplicate={handleDuplicate}
+            onEdit={handleEdit}
+            onDelete={(expense) => setExpenseToDelete(expense)}
+            emptyMessage={"No expenses yet. Add your first one!"}
+          />
+        </m.div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={!!expenseToDelete}
-        onOpenChange={() => setExpenseToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this expense? This action cannot
-              be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+        {/* FAB */}
+        {isMobile && <FloatingActionButton />}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={!!expenseToDelete}
+          onOpenChange={() => setExpenseToDelete(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this expense? This action cannot
+                be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </LazyMotion>
   );
 }

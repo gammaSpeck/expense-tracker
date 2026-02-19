@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import {
   format,
   parseISO,
@@ -261,279 +261,277 @@ export default function AnalysisPage() {
   };
 
   return (
-    <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-xl font-semibold">Analysis</h1>
-      </motion.div>
+    <LazyMotion features={domAnimation}>
+      <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-xl font-semibold">Analysis</h1>
+        </m.div>
 
-      {/* Period Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="space-y-3 p-4 bg-card rounded-xl border border-border/50"
-      >
-        {/* Tabs */}
-        <Tabs value={periodTab} onValueChange={handlePeriodChange}>
-          <TabsList className="w-full">
-            <TabsTrigger value="week" className="flex-1">
-              Week
-            </TabsTrigger>
-            <TabsTrigger value="month" className="flex-1">
-              Month
-            </TabsTrigger>
-            <TabsTrigger value="year" className="flex-1">
-              Year
-            </TabsTrigger>
-            <TabsTrigger value="custom" className="flex-1">
-              Custom
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Period Selector */}
+        <m.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="space-y-3 p-4 bg-card rounded-xl border border-border/50"
+        >
+          {/* Tabs */}
+          <Tabs value={periodTab} onValueChange={handlePeriodChange}>
+            <TabsList className="w-full">
+              <TabsTrigger value="week" className="flex-1">
+                Week
+              </TabsTrigger>
+              <TabsTrigger value="month" className="flex-1">
+                Month
+              </TabsTrigger>
+              <TabsTrigger value="year" className="flex-1">
+                Year
+              </TabsTrigger>
+              <TabsTrigger value="custom" className="flex-1">
+                Custom
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-        {/* Period Navigation */}
-        {periodTab !== "custom" && (
+          {/* Period Navigation */}
+          {periodTab !== "custom" && (
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goToPreviousPeriod}
+                aria-label="Previous period"
+                className="h-9 w-9"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <span className="text-sm font-semibold">{periodDisplay}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goToNextPeriod}
+                aria-label="Next period"
+                className="h-9 w-9"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+
+          {/* Custom date pickers */}
+          {periodTab === "custom" && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal text-sm",
+                        !customRange?.start && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="h-4 w-4" />
+                      {customRange?.start
+                        ? format(customRange.start, "PP")
+                        : "Pick start"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customRange?.start}
+                      onSelect={(date) => {
+                        if (date)
+                          setCustomRange((prev) => ({
+                            start: date,
+                            end: prev?.end || date,
+                          }));
+                      }}
+                      autoFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal text-sm",
+                        !customRange?.end && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="h-4 w-4" />
+                      {customRange?.end
+                        ? format(customRange.end, "PP")
+                        : "Pick end"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={customRange?.end}
+                      onSelect={(date) => {
+                        if (date)
+                          setCustomRange((prev) => ({
+                            start: prev?.start || date,
+                            end: date,
+                          }));
+                      }}
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
+
+          {/* Exclude Adhoc toggle */}
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={goToPreviousPeriod}
-              aria-label="Previous period"
-              className="h-9 w-9"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <span className="text-sm font-semibold">{periodDisplay}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={goToNextPeriod}
-              aria-label="Next period"
-              className="h-9 w-9"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
+            <Label htmlFor="exclude-adhoc" className="cursor-pointer text-sm">
+              Exclude Adhoc Expenses
+            </Label>
+            <Switch
+              id="exclude-adhoc"
+              checked={excludeAdhoc}
+              onCheckedChange={setExcludeAdhoc}
+            />
           </div>
-        )}
+        </m.div>
 
-        {/* Custom date pickers */}
-        {periodTab === "custom" && (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-xs">Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal text-sm",
-                      !customRange?.start && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                    {customRange?.start
-                      ? format(customRange.start, "PP")
-                      : "Pick start"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={customRange?.start}
-                    onSelect={(date) => {
-                      if (date)
-                        setCustomRange((prev) => ({
-                          start: date,
-                          end: prev?.end || date,
-                        }));
-                    }}
-                    autoFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal text-sm",
-                      !customRange?.end && "text-muted-foreground",
-                    )}
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                    {customRange?.end
-                      ? format(customRange.end, "PP")
-                      : "Pick end"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={customRange?.end}
-                    onSelect={(date) => {
-                      if (date)
-                        setCustomRange((prev) => ({
-                          start: prev?.start || date,
-                          end: date,
-                        }));
-                    }}
-                    autoFocus
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-        )}
-
-        {/* Exclude Adhoc toggle */}
-        <div className="flex items-center justify-between">
-          <Label htmlFor="exclude-adhoc" className="cursor-pointer text-sm">
-            Exclude Adhoc Expenses
-          </Label>
-          <Switch
-            id="exclude-adhoc"
-            checked={excludeAdhoc}
-            onCheckedChange={setExcludeAdhoc}
-          />
-        </div>
-      </motion.div>
-
-      {/* Category Breakdown */}
-      {summary.totalTransactions > 0 ? (
-        <>
-          {/* Summary Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-          >
-            <div className="p-4 bg-card rounded-xl border border-border/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Wallet className="h-4 w-4" />
-                <span className="text-xs">Total</span>
-              </div>
-              <p className="text-xl font-bold">
-                {currency.symbol}
-                {formatValue(summary.totalExpenses)}
-              </p>
-            </div>
-
-            <div className="p-4 bg-card rounded-xl border border-border/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Receipt className="h-4 w-4" />
-                <span className="text-xs">Transactions</span>
-              </div>
-              <p className="text-xl font-bold">{summary.totalTransactions}</p>
-            </div>
-
-            <div className="p-4 bg-card rounded-xl border border-border/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <TrendingUp className="h-4 w-4" />
-                <span className="text-xs">Average</span>
-              </div>
-              <p className="text-xl font-bold">
-                {currency.symbol}
-                {formatValue(Math.round(summary.averageExpense))}
-              </p>
-            </div>
-
-            <div className="p-4 bg-card rounded-xl border border-border/50">
-              <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                <Award className="h-4 w-4" />
-                <span className="text-xs">Top Category</span>
-              </div>
-              {summary.topCategory ? (
-                <div className="flex items-center gap-2">
-                  <CategoryIcon
-                    icon={summary.topCategory.categoryIcon}
-                    color={summary.topCategory.categoryColor}
-                    size="sm"
-                  />
-                  <span className="font-medium text-sm truncate">
-                    {summary.topCategory.categoryName}
-                  </span>
+        {/* Category Breakdown */}
+        {summary.totalTransactions > 0 ? (
+          <>
+            {/* Summary Stats */}
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+            >
+              <div className="p-4 bg-card rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Wallet className="h-4 w-4" />
+                  <span className="text-xs">Total</span>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No data</p>
-              )}
-            </div>
-          </motion.div>
+                <p className="text-xl font-bold">
+                  {currency.symbol}
+                  {formatValue(summary.totalExpenses)}
+                </p>
+              </div>
 
-          <motion.div
+              <div className="p-4 bg-card rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Receipt className="h-4 w-4" />
+                  <span className="text-xs">Transactions</span>
+                </div>
+                <p className="text-xl font-bold">{summary.totalTransactions}</p>
+              </div>
+
+              <div className="p-4 bg-card rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="text-xs">Average</span>
+                </div>
+                <p className="text-xl font-bold">
+                  {currency.symbol}
+                  {formatValue(Math.round(summary.averageExpense))}
+                </p>
+              </div>
+
+              <div className="p-4 bg-card rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Award className="h-4 w-4" />
+                  <span className="text-xs">Top Category</span>
+                </div>
+                {summary.topCategory ? (
+                  <div className="flex items-center gap-2">
+                    <CategoryIcon
+                      icon={summary.topCategory.categoryIcon}
+                      color={summary.topCategory.categoryColor}
+                      size="sm"
+                    />
+                    <span className="font-medium text-sm truncate">
+                      {summary.topCategory.categoryName}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No data</p>
+                )}
+              </div>
+            </m.div>
+
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="p-4 bg-card rounded-xl border border-border/50"
+            >
+              <CategoryBreakdown
+                pieData={pieData}
+                nonZeroCategories={nonZeroCategories}
+                currency={currency}
+                formatValue={formatValue}
+              />
+            </m.div>
+
+            {/* Spending Trend */}
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="p-4 bg-card rounded-xl border border-border/50"
+            >
+              <TrendSection
+                barData={barData}
+                currency={currency}
+                formatValue={formatValue}
+                trendGranularity={trendGranularity as TrendGranularity}
+                setTrendGranularity={(g) => setTrendGranularity(g)}
+                granularityOptions={granularityOptions as TrendGranularity[]}
+              />
+            </m.div>
+          </>
+        ) : (
+          <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="p-4 bg-card rounded-xl border border-border/50"
+            className="flex flex-col items-center justify-center py-12 text-muted-foreground"
           >
-            <CategoryBreakdown
-              pieData={pieData}
-              nonZeroCategories={nonZeroCategories}
-              currency={currency}
-              formatValue={formatValue}
-            />
-          </motion.div>
+            <p>No expense data for this period</p>
+          </m.div>
+        )}
 
-          {/* Spending Trend */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-4 bg-card rounded-xl border border-border/50"
-          >
-            <TrendSection
-              barData={barData}
-              currency={currency}
-              formatValue={formatValue}
-              trendGranularity={trendGranularity as TrendGranularity}
-              setTrendGranularity={(g) => setTrendGranularity(g)}
-              granularityOptions={granularityOptions as TrendGranularity[]}
-            />
-          </motion.div>
-        </>
-      ) : (
-        <motion.div
+        {/* Export Button */}
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex flex-col items-center justify-center py-12 text-muted-foreground"
+          transition={{ delay: 0.25 }}
         >
-          <p>No expense data for this period</p>
-        </motion.div>
-      )}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setShowExportDialog(true)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </m.div>
 
-      {/* Export Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
-      >
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setShowExportDialog(true)}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export
-        </Button>
-      </motion.div>
-
-      {/* Export Dialog */}
-      <ExportDialog
-        open={showExportDialog}
-        onOpenChange={setShowExportDialog}
-        onExportCSV={handleExportCSV}
-        onExportJSON={handleExportJSON}
-      />
-    </div>
+        {/* Export Dialog */}
+        <ExportDialog
+          open={showExportDialog}
+          onOpenChange={setShowExportDialog}
+          onExportCSV={handleExportCSV}
+          onExportJSON={handleExportJSON}
+        />
+      </div>
+    </LazyMotion>
   );
 }

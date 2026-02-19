@@ -24,9 +24,11 @@ export function FactoryReset() {
     setIsResetting(true);
     try {
       // Clear all data
-      await db.expenses.clear();
-      await db.categories.clear();
-      await db.tagMetadata.clear();
+      await Promise.all([
+        db.expenses.clear(),
+        db.categories.clear(),
+        db.tagMetadata.clear(),
+      ]);
 
       // Clear localStorage
       localStorage.clear();

@@ -11,7 +11,7 @@ import {
   Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 
 const navItems = [
   { path: "/", icon: Home, label: "Home" },
@@ -32,7 +32,7 @@ export function BottomNav() {
   const location = useLocation();
 
   return (
-    <>
+    <LazyMotion features={domAnimation}>
       <nav className="bottom-nav">
         {navItems.map((item) => {
           const isActive =
@@ -47,7 +47,7 @@ export function BottomNav() {
               className={cn("bottom-nav-item relative", isActive && "active")}
             >
               {isActive && (
-                <motion.div
+                <m.div
                   layoutId="nav-indicator"
                   className="absolute inset-0 bg-accent rounded-xl"
                   initial={false}
@@ -57,13 +57,13 @@ export function BottomNav() {
               <Icon
                 className={cn(
                   "h-5 w-5 relative z-10",
-                  isActive && "text-primary"
+                  isActive && "text-primary",
                 )}
               />
               <span
                 className={cn(
                   "text-[10px] mt-1 font-medium relative z-10",
-                  isActive && "text-primary"
+                  isActive && "text-primary",
                 )}
               >
                 {item.label}
@@ -72,7 +72,7 @@ export function BottomNav() {
           );
         })}
       </nav>
-    </>
+    </LazyMotion>
   );
 }
 
@@ -114,7 +114,7 @@ export function SidebarNav() {
                 "transition-all duration-200",
                 isActive
                   ? "bg-accent text-accent-foreground font-medium"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
               )}
             >
               <Icon className="h-5 w-5" />

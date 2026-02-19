@@ -43,8 +43,8 @@ export default function CategoryBreakdown({
               label={({ payload }) => `${payload.percentage}%`}
               labelLine={false}
             >
-              {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {pieData.map((entry) => (
+                <Cell key={`${entry.name}-${entry.color}`} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip content={<CustomPieTooltip />} />
