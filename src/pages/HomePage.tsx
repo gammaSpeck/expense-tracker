@@ -11,7 +11,6 @@ import {
   useMonthSummary,
   useRecentExpenses,
   useCategories,
-  useFilteredExpenses,
 } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/lib/db";
 import { toast } from "sonner";

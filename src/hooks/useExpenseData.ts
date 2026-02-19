@@ -2,8 +2,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, getAllExpenses, getAllCategories, getAllTags } from "@/lib/db";
 import {
   Expense,
-  Category,
-  TagMetadata,
   ExpenseFilters,
   AnalysisSummary,
   CategorySummary,
@@ -19,7 +17,6 @@ import {
   endOfYear,
   parseISO,
   isWithinInterval,
-  format,
 } from "date-fns";
 
 export function useExpenses() {

@@ -2,22 +2,12 @@ import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import {
   format,
-  parseISO,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
   subWeeks,
   subMonths,
   subYears,
   addWeeks,
   addMonths,
   addYears,
-  differenceInDays,
-  isSameMonth,
-  getWeek,
 } from "date-fns";
 
 import {
@@ -40,19 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { cn } from "@/lib/utils";
 import {
@@ -61,12 +39,7 @@ import {
   getDateRangeForPeriod,
 } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/lib/db";
-import {
-  TimePeriod,
-  ExpenseFilters,
-  DateRange,
-  DailySummary,
-} from "@/types/expense";
+import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import ExportDialog from "@/components/analysis/ExportDialog";

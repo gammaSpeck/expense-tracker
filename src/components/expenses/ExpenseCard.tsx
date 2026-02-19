@@ -8,7 +8,7 @@ import {
   isYesterday,
 } from "date-fns";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
-import { Expense, Category, ContextMenuAction } from "@/types/expense";
+import { Expense, Category } from "@/types/expense";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { Paperclip, Copy, Edit, Trash2 } from "lucide-react";
@@ -39,7 +39,7 @@ export function ExpenseCard({
   showDate = true,
 }: ExpenseCardProps) {
   const [isLongPressing, setIsLongPressing] = useState(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const formatRelativeDate = (dateStr: string) => {
     const date = parseISO(dateStr);

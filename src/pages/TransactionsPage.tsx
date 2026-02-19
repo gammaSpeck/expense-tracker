@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import { Search, ArrowLeft, Filter, X } from "lucide-react";
+import { Search, ArrowLeft, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";

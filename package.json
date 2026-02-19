@@ -81,6 +81,7 @@
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^16.5.0",
     "lovable-tagger": "^1.1.13",
     "postcss": "^8.5.6",

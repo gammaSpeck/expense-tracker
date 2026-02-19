@@ -29,12 +29,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
-import { Category, ExpenseFormData, Expense } from "@/types/expense";
-import { useCategories, useTags } from "@/hooks/useExpenseData";
+import { ExpenseFormData, Expense } from "@/types/expense";
+import { useCategories } from "@/hooks/useExpenseData";
 import {
   addExpense,
   updateExpense,
-  addCategory,
   getTagSuggestions,
 } from "@/lib/db";
 import { CalendarIcon, Clock, Plus, X, ImagePlus, Trash2 } from "lucide-react";

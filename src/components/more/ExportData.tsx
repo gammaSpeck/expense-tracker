@@ -13,7 +13,6 @@ import {
 import { exportAllData } from "@/lib/db";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
 
 export function ExportData() {
   const [open, setOpen] = useState(false);
