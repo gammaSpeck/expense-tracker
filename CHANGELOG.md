@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.3.0...v1.3.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* **analysis:** modularized analysis page and changed analysis section order ([#22](https://github.com/gammaSpeck/expense-tracker/issues/22)) ([3d74fd4](https://github.com/gammaSpeck/expense-tracker/commit/3d74fd4a7e295549967bc2ecb493d4d9d171d45a))
+* **perf:** react-doctor fixes ([#24](https://github.com/gammaSpeck/expense-tracker/issues/24)) ([e1f07fc](https://github.com/gammaSpeck/expense-tracker/commit/e1f07fc342dd8b5133a57c657c8b8896ac347479))
+
 ## [1.3.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.2.2...v1.3.0) (2026-02-09)
 
 
