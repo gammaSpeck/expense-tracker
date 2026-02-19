@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import {
   format,
@@ -33,7 +33,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -70,8 +69,6 @@ import {
 } from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import CategoryBreakdown from "@/components/analysis/CategoryBreakdown";
-import TrendSection from "@/components/analysis/TrendSection";
 import ExportDialog from "@/components/analysis/ExportDialog";
 import {
   formatPeriodDisplay,
@@ -79,6 +76,11 @@ import {
   aggregateTrendData,
   TrendGranularity,
 } from "@/components/analysis/analysisUtils";
+
+const CategoryBreakdown = lazy(
+  () => import("@/components/analysis/CategoryBreakdown"),
+);
+const TrendSection = lazy(() => import("@/components/analysis/TrendSection"));
 
 // --- Component ---
 
@@ -461,12 +463,21 @@ export default function AnalysisPage() {
               transition={{ delay: 0.1 }}
               className="p-4 bg-card rounded-xl border border-border/50"
             >
-              <CategoryBreakdown
-                pieData={pieData}
-                nonZeroCategories={nonZeroCategories}
-                currency={currency}
-                formatValue={formatValue}
-              />
+              <Suspense
+                fallback={
+                  <div
+                    className="h-64 rounded-lg bg-muted/40 animate-pulse"
+                    aria-hidden="true"
+                  />
+                }
+              >
+                <CategoryBreakdown
+                  pieData={pieData}
+                  nonZeroCategories={nonZeroCategories}
+                  currency={currency}
+                  formatValue={formatValue}
+                />
+              </Suspense>
             </m.div>
 
             {/* Spending Trend */}
@@ -476,14 +487,23 @@ export default function AnalysisPage() {
               transition={{ delay: 0.2 }}
               className="p-4 bg-card rounded-xl border border-border/50"
             >
-              <TrendSection
-                barData={barData}
-                currency={currency}
-                formatValue={formatValue}
-                trendGranularity={trendGranularity as TrendGranularity}
-                setTrendGranularity={(g) => setTrendGranularity(g)}
-                granularityOptions={granularityOptions as TrendGranularity[]}
-              />
+              <Suspense
+                fallback={
+                  <div
+                    className="h-64 rounded-lg bg-muted/40 animate-pulse"
+                    aria-hidden="true"
+                  />
+                }
+              >
+                <TrendSection
+                  barData={barData}
+                  currency={currency}
+                  formatValue={formatValue}
+                  trendGranularity={trendGranularity as TrendGranularity}
+                  setTrendGranularity={(g) => setTrendGranularity(g)}
+                  granularityOptions={granularityOptions as TrendGranularity[]}
+                />
+              </Suspense>
             </m.div>
           </>
         ) : (
