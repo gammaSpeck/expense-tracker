@@ -19,7 +19,7 @@ interface ImportPreview {
 
 export function ImportData() {
   const [preview, setPreview] = useState<ImportPreview | null>(null);
-  const [mode, setMode] = useState<"merge" | "override">("merge");
+  const [mode, setMode] = useState<"merge" | "override">("override");
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,7 +38,7 @@ export function ImportData() {
 
       // Sort expenses by date to get range
       const sortedExpenses = [...data.expenses].sort((a: Expense, b: Expense) =>
-        a.date.localeCompare(b.date)
+        a.date.localeCompare(b.date),
       );
 
       setPreview({
@@ -93,7 +93,6 @@ export function ImportData() {
   if (!preview) {
     return (
       <div className="space-y-2">
-        <Label className="text-sm text-muted-foreground">Import Backup</Label>
         <label className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
           <input
             ref={fileInputRef}
@@ -123,7 +122,10 @@ export function ImportData() {
 
       <div className="space-y-3">
         <Label className="text-sm text-muted-foreground">Import Mode</Label>
-        <RadioGroup value={mode} onValueChange={(v) => setMode(v as "merge" | "override")}>
+        <RadioGroup
+          value={mode}
+          onValueChange={(v) => setMode(v as "merge" | "override")}
+        >
           <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
             <RadioGroupItem value="merge" id="merge" className="mt-1" />
             <div>
@@ -138,7 +140,10 @@ export function ImportData() {
           <div className="flex items-start gap-3 p-3 rounded-lg border border-destructive/30">
             <RadioGroupItem value="override" id="override" className="mt-1" />
             <div>
-              <Label htmlFor="override" className="cursor-pointer font-medium text-destructive">
+              <Label
+                htmlFor="override"
+                className="cursor-pointer font-medium text-destructive"
+              >
                 Override (Destructive)
               </Label>
               <p className="text-xs text-muted-foreground">
@@ -153,7 +158,11 @@ export function ImportData() {
         <Button variant="outline" onClick={handleCancel} className="flex-1">
           Cancel
         </Button>
-        <Button onClick={handleImport} disabled={isImporting} className="flex-1">
+        <Button
+          onClick={handleImport}
+          disabled={isImporting}
+          className="flex-1"
+        >
           {isImporting ? "Importing..." : "Confirm Import"}
         </Button>
       </div>
@@ -202,6 +211,6 @@ async function mergeImportData(data: {
           }
         }
       }
-    }
+    },
   );
 }

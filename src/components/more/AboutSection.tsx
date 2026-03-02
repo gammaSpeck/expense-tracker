@@ -2,7 +2,7 @@ import { Github, Lock, Folder, PiggyBank } from "lucide-react";
 
 export function AboutSection() {
   return (
-    <div className="text-center space-y-3">
+    <div className="text-center space-y-5">
       <div className="text-2xl">
         <PiggyBank className="h-8 w-8 mx-auto mb-1" />
       </div>
@@ -28,7 +28,7 @@ export function AboutSection() {
         Open on GitHub
       </a>
 
-      <div className="text-left pt-3 border-t border-border space-y-2 overflow-hidden">
+      <div className="text-left pt-4 border-t border-border space-y-3 overflow-hidden">
         <p className="text-xs text-muted-foreground">
           This expense manager was created to be open-source and free, because
           all other apps want to monetize themselves.

@@ -3,13 +3,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router";
-import {
-  Home,
-  FolderOpen,
-  BarChart3,
-  MoreHorizontal,
-  Plus,
-} from "lucide-react";
+import { Home, FolderOpen, BarChart3, Settings, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 
@@ -17,7 +11,7 @@ const navItems = [
   { path: "/", icon: Home, label: "Home" },
   { path: "/categories", icon: FolderOpen, label: "Categories" },
   { path: "/analysis", icon: BarChart3, label: "Analysis" },
-  { path: "/more", icon: MoreHorizontal, label: "More" },
+  { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
 const sidebarNavItems = [
@@ -25,7 +19,7 @@ const sidebarNavItems = [
   { path: "/categories", icon: FolderOpen, label: "Categories" },
   { path: "/analysis", icon: BarChart3, label: "Analysis" },
   { path: "/transactions", icon: FolderOpen, label: "All Transactions" },
-  { path: "/more", icon: MoreHorizontal, label: "More" },
+  { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export function BottomNav() {

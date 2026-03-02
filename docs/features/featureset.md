@@ -76,34 +76,29 @@ Powerful search capabilities across all expenses:
 
 ### 6. Data Management
 
+Accessible via **Settings → Data Management** (dedicated sub-screen).
+
 #### Export
 
-- **Format options**: CSV or JSON
-- **Date range filtering**: Export specific periods
-- **CSV export** with columns:
-  - Date, Time, Amount, Category, Description, Tags, Type (Regular/Adhoc)
-- **JSON export** includes:
-  - Full expense data
-  - Category definitions
-  - Export metadata (version, date)
-- **Attachment handling** (optional inclusion)
+- **Format options**: JSON (default) or CSV
+- **Always exports all data** — no date range filtering
+- **JSON export** includes full expense data, category definitions, and export metadata
+- **CSV export** with columns: Date, Time, Amount, Category, Description, Tags, Type
 
 #### Import
 
-- **JSON import** from previous exports
-- **Two merge modes**:
-  - **Merge**: Add to existing data
-  - **Override**: Replace all data
+- **JSON import** from previous exports only
+- **Two merge modes** (Override is default):
+  - **Override**: Replace all existing data
+  - **Merge**: Add to existing data, skip duplicates
 - **Import preview**: Shows expense count, category count, date range
 - **Validation**: Checks file structure before import
-- **Error handling** with user feedback
 
-#### Factory Reset
+#### Clear All Data
 
 - **Complete data wipe**: Expenses, categories, tags, settings
 - **Re-seeding**: Restores default categories
 - **Confirmation dialog** with clear warnings
-- **Backup reminder** before reset
 - **localStorage cleanup** for fresh start
 
 ### 7. Multi-Currency Support
@@ -127,13 +122,10 @@ International currency handling with locale formatting:
 
 Flexible appearance customization:
 
-- **Three theme modes**:
-  - Light theme
-  - Dark theme (default)
-  - System (follows OS preferences)
+- **Three theme modes**: Light, Dark (default), System
+- **Icon-only toggle** in Settings — Sun / Moon / Monitor, all on one row
 - **Persistent storage** of user preference
 - **Dynamic system theme** switching
-- **Smooth transitions** between themes
 - **Tailwind CSS v4** powered styling
 
 ### 9. Progressive Web App (PWA)
@@ -199,8 +191,9 @@ Precise tracking of when expenses occurred:
 #### Layout
 
 - **Responsive design**: Mobile-first with desktop optimization
-- **Bottom navigation** (mobile): Home, Categories, Analysis, More
+- **Bottom navigation** (mobile): Home, Categories, Analysis, Settings (cog icon)
 - **Sidebar navigation** (desktop): Extended menu with Add button
+- **Settings page** : Navigation hub for Theme, Currency, Data Management, and About App sub-screens
 - **Floating Action Button** (mobile): Quick expense add
 - **Max-width containers** (672px) for optimal readability
 

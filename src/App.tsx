@@ -14,7 +14,9 @@ import CategoriesPage from "./pages/CategoriesPage";
 import AnalysisPage from "./pages/AnalysisPage";
 import TransactionsPage from "./pages/TransactionsPage";
 import EditExpensePage from "./pages/EditExpensePage";
-import MorePage from "./pages/MorePage";
+import SettingsPage from "./pages/SettingsPage";
+import DataManagementPage from "./pages/DataManagementPage";
+import AboutPage from "./pages/AboutPage";
 import NotFound from "./pages/NotFound";
 
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
@@ -36,7 +38,9 @@ function AppContent() {
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/expense/:id" element={<EditExpensePage />} />
         <Route path="/expense/:id/edit" element={<EditExpensePage />} />
-        <Route path="/more" element={<MorePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/data" element={<DataManagementPage />} />
+        <Route path="/settings/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
