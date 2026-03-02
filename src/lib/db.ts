@@ -256,6 +256,35 @@ export async function getTagSuggestions(
   return tags.map((t) => t.tag);
 }
 
+// Get unique descriptions from past expenses
+export async function getDescriptionSuggestions(
+  searchQuery?: string,
+  limit: number = 10
+): Promise<string[]> {
+  const expenses = await db.expenses
+    .orderBy("[date+time]")
+    .reverse()
+    .toArray();
+
+  // Filter expenses with non-empty descriptions
+  const descriptions = expenses
+    .filter((e) => e.description && e.description.trim() !== "")
+    .map((e) => e.description!.trim());
+
+  // Get unique descriptions
+  const uniqueDescriptions = Array.from(new Set(descriptions));
+
+  // Filter by search query if provided (case-insensitive, contains match)
+  const filtered = searchQuery
+    ? uniqueDescriptions.filter((desc) =>
+        desc.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : uniqueDescriptions;
+
+  // Return limited results
+  return filtered.slice(0, limit);
+}
+
 export async function deleteTag(tag: string): Promise<void> {
   // Remove tag from all expenses
   const expenses = await db.expenses.where("tags").equals(tag).toArray();

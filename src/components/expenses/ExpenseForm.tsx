@@ -31,7 +31,12 @@ import {
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { ExpenseFormData, Expense } from "@/types/expense";
 import { useCategories } from "@/hooks/useExpenseData";
-import { addExpense, updateExpense, getTagSuggestions } from "@/lib/db";
+import {
+  addExpense,
+  updateExpense,
+  getTagSuggestions,
+  getDescriptionSuggestions,
+} from "@/lib/db";
 import { CalendarIcon, Clock, Plus, X, ImagePlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryForm } from "@/components/categories/CategoryForm";
@@ -95,6 +100,10 @@ export function ExpenseForm({
   const categories = useCategories();
   const [tagInput, setTagInput] = useState("");
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [descriptionSuggestions, setDescriptionSuggestions] = useState<
+    string[]
+  >([]);
+  const [showDescriptionDropdown, setShowDescriptionDropdown] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | undefined>(
     expense?.attachment,
@@ -122,6 +131,20 @@ export function ExpenseForm({
   useEffect(() => {
     getTagSuggestions().then(setTagSuggestions);
   }, []);
+
+  // Load description suggestions when user types (after 2 characters)
+  useEffect(() => {
+    const descriptionValue = description || "";
+    if (descriptionValue.length >= 2) {
+      getDescriptionSuggestions(descriptionValue, 10).then((suggestions) => {
+        setDescriptionSuggestions(suggestions);
+        setShowDescriptionDropdown(suggestions.length > 0);
+      });
+    } else {
+      setDescriptionSuggestions([]);
+      setShowDescriptionDropdown(false);
+    }
+  }, [description]);
 
   // Filter suggestions based on description and input
   const filteredSuggestions = tagSuggestions.filter(
@@ -296,7 +319,7 @@ export function ExpenseForm({
         </div>
 
         {/* Description */}
-        <div className="space-y-2">
+        <div className="space-y-2 relative">
           <Label htmlFor="description">Description (optional)</Label>
           <Textarea
             id="description"
@@ -304,7 +327,37 @@ export function ExpenseForm({
             className="resize-none text-sm"
             rows={2}
             {...register("description")}
+            onFocus={() => {
+              if (
+                description &&
+                description.length >= 2 &&
+                descriptionSuggestions.length > 0
+              ) {
+                setShowDescriptionDropdown(true);
+              }
+            }}
+            onBlur={() => {
+              // Delay to allow click on suggestion
+              setTimeout(() => setShowDescriptionDropdown(false), 200);
+            }}
           />
+          {showDescriptionDropdown && descriptionSuggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {descriptionSuggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => {
+                    setValue("description", suggestion);
+                    setShowDescriptionDropdown(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors first:rounded-t-lg last:rounded-b-lg"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Tags */}
