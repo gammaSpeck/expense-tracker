@@ -29,6 +29,8 @@
 - **Factory Reset**: Nuke all data (if you dare!)
 - **Fun UI**: Modern, animated, accessible, and energetic
 
+📖 **[View Complete Feature Documentation](docs/features/featureset.md)**
+
 ---
 
 ## 🖼️ Screenshots
@@ -115,6 +117,7 @@ If you love this project, give it a ⭐️! Share your feedback, ideas, and scre
 
 ## 🗺️ Community & Links
 
+- [Changelog](CHANGELOG.md)
 - [Issues](https://github.com/gammaSpeck/expense-tracker/issues)
 - [Discussions](https://github.com/gammaSpeck/expense-tracker/discussions)
 - [Releases](https://github.com/gammaSpeck/expense-tracker/releases)
