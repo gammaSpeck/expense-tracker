@@ -5,6 +5,7 @@ import {
   getCurrencyByCode,
   SUPPORTED_CURRENCIES,
 } from "@/lib/currency";
+import { userPreferences } from "@/lib/userPreferences";
 
 interface CurrencyContextType {
   currency: Currency;
@@ -14,23 +15,16 @@ interface CurrencyContextType {
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(
-  undefined
+  undefined,
 );
-
-const STORAGE_KEY = "expense-tracker-currency";
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currencyCode, setCurrencyCodeState] = useState<string>(() => {
-    if (typeof window === "undefined") return DEFAULT_CURRENCY_CODE;
-    return localStorage.getItem(STORAGE_KEY) || DEFAULT_CURRENCY_CODE;
+    return userPreferences.getCurrencyCode(DEFAULT_CURRENCY_CODE);
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, currencyCode);
-    } catch (e) {
-      // ignore
-    }
+    userPreferences.setCurrencyCode(currencyCode);
   }, [currencyCode]);
 
   const currency = getCurrencyByCode(currencyCode);

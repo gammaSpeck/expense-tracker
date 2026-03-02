@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { Theme } from "@/types/expense";
+import { userPreferences } from "@/lib/userPreferences";
 
 interface ThemeContextType {
   theme: Theme;
@@ -26,13 +27,7 @@ function getSystemTheme(): "light" | "dark" {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(
-        "expense-tracker-theme"
-      ) as Theme | null;
-      return stored || "dark";
-    }
-    return "dark";
+    return userPreferences.getTheme("dark");
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
@@ -44,7 +39,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem("expense-tracker-theme", newTheme);
+    userPreferences.setTheme(newTheme);
   };
 
   useEffect(() => {

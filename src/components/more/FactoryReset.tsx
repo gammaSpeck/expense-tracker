@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { db, initializeDatabase } from "@/lib/db";
+import { userPreferences } from "@/lib/userPreferences";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 
@@ -30,8 +31,7 @@ export function FactoryReset() {
         db.tagMetadata.clear(),
       ]);
 
-      // Clear localStorage
-      localStorage.clear();
+      userPreferences.clearAll();
 
       // Re-seed default categories
       await initializeDatabase();
