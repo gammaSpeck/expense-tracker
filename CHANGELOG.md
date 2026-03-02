@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.3.1...v1.4.0) (2026-03-02)
+
+
+### Features
+
+* **add-expense-ux:** add description suggestions feature to ExpenseForm ([#25](https://github.com/gammaSpeck/expense-tracker/issues/25)) ([08447af](https://github.com/gammaSpeck/expense-tracker/commit/08447af3d4c5b6e08412331511a79825703feda9))
+* **docs:** add complete feature documentation and changelog links to README ([#27](https://github.com/gammaSpeck/expense-tracker/issues/27)) ([fd1f614](https://github.com/gammaSpeck/expense-tracker/commit/fd1f6149374d6ee6c0ef80f1732045f16c61ac5c))
+* **settings:** restructure settings and data management pages, add new routes and components ([#28](https://github.com/gammaSpeck/expense-tracker/issues/28)) ([a8922c2](https://github.com/gammaSpeck/expense-tracker/commit/a8922c2eed18c82ad78c88809abb50573fd60ce3))
+
 ## [1.3.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.3.0...v1.3.1) (2026-02-19)
 
 
