@@ -91,7 +91,7 @@ export default function HomePage() {
           onBackupNow={() =>
             navigate("/settings/data", { state: { openExport: true } })
           }
-          onOpenSettings={() => navigate("/settings")}
+          onOpenSettings={() => navigate("/settings/data")}
         />
 
         {/* Monthly Summary Card */}
