@@ -85,6 +85,14 @@ Accessible via **Settings → Data Management** (dedicated sub-screen).
 - **JSON export** includes full expense data, category definitions, and export metadata
 - **CSV export** with columns: Date, Time, Amount, Category, Description, Tags, Type
 
+#### Backup Reminders & Export UX
+
+- **Backup reminders**: user-configurable reminders (Never / Daily / Weekly / Monthly) to encourage regular exports. Shown once per qualifying day; reminders record last-shown and last-backup timestamps.
+- **Startup prompt**: app shows a non-intrusive backup prompt on startup when a reminder is due; "Backup Now" opens the Export dialog.
+- **Export defaults**: JSON is the recommended default (importable). CSV remains available for device export.
+- **Filename convention**: exports use `extrack-backup-YYYY-MM-DD.json` (or `.csv`).
+- **Settings**: reminder frequency is configurable from Settings → Data Management.
+
 #### Import
 
 - **JSON import** from previous exports only
