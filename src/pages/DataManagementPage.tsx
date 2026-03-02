@@ -1,6 +1,6 @@
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ChevronLeft, Database } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
@@ -8,6 +8,10 @@ import { FactoryReset } from "@/components/more/FactoryReset";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const autoOpenExport = Boolean(
+    (location.state as { openExport?: boolean } | null)?.openExport,
+  );
 
   return (
     <LazyMotion features={domAnimation}>
@@ -43,7 +47,7 @@ export default function DataManagementPage() {
             <p className="text-xs text-muted-foreground">
               Download all your expenses and categories as a backup file.
             </p>
-            <ExportData />
+            <ExportData openOnMount={autoOpenExport} />
           </div>
 
           {/* Import */}

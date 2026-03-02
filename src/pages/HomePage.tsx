@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Expense } from "@/types/expense";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BackupReminderBanner } from "@/components/more/BackupReminderBanner";
 
 export function FloatingActionButton() {
   const navigate = useNavigate();
@@ -86,6 +87,13 @@ export default function HomePage() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
+        <BackupReminderBanner
+          onBackupNow={() =>
+            navigate("/settings/data", { state: { openExport: true } })
+          }
+          onOpenSettings={() => navigate("/settings")}
+        />
+
         {/* Monthly Summary Card */}
         <m.div
           initial={{ opacity: 0, y: 20 }}

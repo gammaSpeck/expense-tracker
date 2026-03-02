@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,10 +13,23 @@ import { exportAllData } from "@/lib/db";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
 
-export function ExportData() {
+interface ExportDataProps {
+  openOnMount?: boolean;
+}
+
+export function ExportData({ openOnMount = false }: ExportDataProps) {
   const [open, setOpen] = useState(false);
   const [formatType, setFormatType] = useState<"csv" | "json">("json");
   const [isExporting, setIsExporting] = useState(false);
+  const hasAutoOpenedRef = useRef(false);
+
+  useEffect(() => {
+    if (!openOnMount || hasAutoOpenedRef.current) return;
+
+    setFormatType("json");
+    setOpen(true);
+    hasAutoOpenedRef.current = true;
+  }, [openOnMount]);
 
   const resetForm = () => {
     setFormatType("json");
