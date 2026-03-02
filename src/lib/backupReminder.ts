@@ -42,6 +42,20 @@ export function shouldShowBackupReminderBanner(
   const todayKey = toDateKey(now);
   if (preferences.bannerLastShownDate === todayKey) return false;
 
+  const daysSinceLastBackup = getDaysSinceLastBackup(
+    preferences.lastBackupDate,
+    now,
+  );
+
+  if (daysSinceLastBackup === null) return true;
+
+  const isOverdue =
+    (preferences.reminderSchedule === "daily" && daysSinceLastBackup >= 1) ||
+    (preferences.reminderSchedule === "weekly" && daysSinceLastBackup >= 7) ||
+    (preferences.reminderSchedule === "monthly" && daysSinceLastBackup >= 30);
+
+  if (!isOverdue) return false;
+
   switch (preferences.reminderSchedule) {
     case "daily":
       return true;

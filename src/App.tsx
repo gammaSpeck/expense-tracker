@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
+import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
 import { useEffect } from "react";
 import { initializeDatabase } from "@/lib/db";
 
@@ -43,6 +44,7 @@ function AppContent() {
         <Route path="/settings/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <BackupReminderPrompt />
     </AppLayout>
   );
 }
