@@ -73,8 +73,30 @@ export interface UploadResult {
 }
 
 /**
- * Uploads a JSON blob to the given Drive folder using multipart upload.
- * Returns the file ID and a direct link to view it in Drive.
+ * Searches for an existing file by name inside a specific folder.
+ * Returns the file ID if found, null otherwise.
+ */
+async function findExistingFile(
+  filename: string,
+  folderID: string,
+  accessToken: string,
+): Promise<string | null> {
+  const query = encodeURIComponent(
+    `name = '${filename}' and '${folderID}' in parents and mimeType = 'application/json' and trashed = false`,
+  );
+  const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id)`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  const files = data.files as { id: string }[];
+  return files.length > 0 ? files[0].id : null;
+}
+
+/**
+ * Uploads a JSON blob to the given Drive folder.
+ * If a file with the same name already exists in the folder, it is replaced
+ * (PATCH) rather than creating a duplicate. Returns the file ID and webViewLink.
  */
 export async function uploadFileToDrive(
   blob: Blob,
@@ -82,27 +104,60 @@ export async function uploadFileToDrive(
   folderID: string,
   accessToken: string,
 ): Promise<UploadResult> {
-  const metadata = {
-    name: filename,
-    mimeType: "application/json",
-    parents: [folderID],
-  };
+  const existingFileId = await findExistingFile(
+    filename,
+    folderID,
+    accessToken,
+  );
 
   const body = new FormData();
   body.append(
     "metadata",
-    new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+    new Blob(
+      [JSON.stringify({ name: filename, mimeType: "application/json" })],
+      {
+        type: "application/json",
+      },
+    ),
   );
   body.append("file", blob);
 
-  const res = await fetch(
-    `${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`,
-    {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body,
-    },
-  );
+  let res: Response;
+
+  if (existingFileId) {
+    // Update existing file — no `parents` in metadata for PATCH
+    res = await fetch(
+      `${DRIVE_UPLOAD_API}/files/${existingFileId}?uploadType=multipart&fields=id,webViewLink`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      },
+    );
+  } else {
+    // Create new file
+    body.set(
+      "metadata",
+      new Blob(
+        [
+          JSON.stringify({
+            name: filename,
+            mimeType: "application/json",
+            parents: [folderID],
+          }),
+        ],
+        { type: "application/json" },
+      ),
+    );
+    res = await fetch(
+      `${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      },
+    );
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
