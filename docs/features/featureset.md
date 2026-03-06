@@ -84,6 +84,23 @@ Accessible via **Settings → Data Management** (dedicated sub-screen).
 - **Always exports all data** — no date range filtering
 - **JSON export** includes full expense data, category definitions, and export metadata
 - **CSV export** with columns: Date, Time, Amount, Category, Description, Tags, Type
+- **Save to device** or **Google Drive** (when connected)
+- **Drive exports are JSON-only** — CSV available for device export only
+- **Filename convention**: `extrack-backup-YYYY-MM-DD.json` (or `.csv`)
+- **Duplicate handling**: exporting to Drive on the same day replaces the existing file (no duplicates)
+
+#### Google Drive Backup
+
+- **Optional cloud backup** via Google Drive — no backend, fully client-side
+- **PKCE OAuth 2.0** authentication with real refresh tokens (no repeated logins)
+- **Auto-creates `ExTrack Backups` folder** in the user's Drive on first backup
+- **Token auto-refresh**: access token silently refreshed before each upload; no popup for logged-in users
+- **Account management** in Settings → Data Management:
+  - View connected account email and folder name
+  - Disconnect account (revokes token, clears credentials locally; Drive files are not deleted)
+- **Scope**: `drive.file` — app can only access files it created, not any other Drive content
+- **No API key required** — all Drive calls use the user's OAuth access token only
+- **"View in Drive ↗"** action in success toast after each cloud backup
 
 #### Backup Reminders & Export UX
 
@@ -227,11 +244,12 @@ Precise tracking of when expenses occurred:
 
 Complete local data management:
 
-- **No backend server**: All data stays on device
+- **No backend server**: All data stays on device (or user's own Google Drive)
 - **IndexedDB storage**: Persistent local database
 - **No analytics**: Zero tracking or telemetry
 - **No user accounts**: No registration required
-- **CORS isolation**: Data never transmitted
+- **CORS isolation**: Data never transmitted to any third party
+- **Google Drive integration**: OAuth tokens stored in localStorage, scoped to `drive.file` only; tokens never logged or sent anywhere except `googleapis.com`
 - **Open source**: Transparent codebase (MIT license)
 
 ### 15. Performance Optimizations
@@ -285,7 +303,7 @@ Well-structured codebase:
 - [ ] More theme customization options
 - [ ] Split expenses between multiple categories
 - [ ] Receipt OCR for automatic data entry
-- [ ] Cloud backup/sync (optional, privacy-first)
+- [x] Cloud backup/sync via Google Drive (optional, privacy-first, PKCE OAuth, no backend)
 - [ ] Dashboard widgets/cards customization
 - [ ] More chart types (donut, stacked bar, area)
 - [ ] Expense comparison (month-over-month, year-over-year)
