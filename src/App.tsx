@@ -19,6 +19,7 @@ import SettingsPage from "./pages/SettingsPage";
 import DataManagementPage from "./pages/DataManagementPage";
 import AboutPage from "./pages/AboutPage";
 import NotFound from "./pages/NotFound";
+import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
 
@@ -49,6 +50,15 @@ function AppContent() {
   );
 }
 
+function RootRoutes() {
+  return (
+    <Routes>
+      <Route path="/oauth/callback" element={<GoogleCallbackPage />} />
+      <Route path="/*" element={<AppContent />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CurrencyProvider>
@@ -56,7 +66,7 @@ const App = () => (
         <TooltipProvider>
           <Sonner position="top-right" duration={3000} />
           <BrowserRouter>
-            <AppContent />
+            <RootRoutes />
           </BrowserRouter>
           <ReloadPrompt />
         </TooltipProvider>

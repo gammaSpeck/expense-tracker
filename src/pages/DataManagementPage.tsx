@@ -6,6 +6,7 @@ import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { FactoryReset } from "@/components/more/FactoryReset";
 import { BackupReminderSettings } from "@/components/more/BackupReminderSettings";
+import { GoogleDriveSettings } from "@/components/more/GoogleDriveSettings";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
@@ -44,6 +45,11 @@ export default function DataManagementPage() {
         >
           <div className="p-4 rounded-xl bg-card border border-border/50">
             <BackupReminderSettings />
+          </div>
+
+          {/* Google Drive */}
+          <div className="p-4 rounded-xl bg-card border border-border/50">
+            <GoogleDriveSettings />
           </div>
 
           {/* Export */}
