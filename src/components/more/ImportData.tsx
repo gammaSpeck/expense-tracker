@@ -3,7 +3,7 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { importData, db } from "@/lib/db";
+import { importData, db } from "@/db/expenseTrackerDb";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
 

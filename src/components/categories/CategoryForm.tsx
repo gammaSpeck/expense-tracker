@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryFormData } from "@/types/expense";
-import { addCategory, updateCategory, getCategoryByName } from "@/lib/db";
+import {
+  addCategory,
+  updateCategory,
+  getCategoryByName,
+} from "@/db/expenseTrackerDb";
 import { IconPicker } from "@/components/categories/CategoryIcon";
 import { ColorPicker } from "@/components/categories/ColorPicker";
-import { CATEGORY_COLORS } from "@/lib/db";
+import { CATEGORY_COLORS } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
 
 const categorySchema = z.object({

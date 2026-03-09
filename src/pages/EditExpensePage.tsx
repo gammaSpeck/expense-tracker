@@ -4,7 +4,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { useExpense } from "@/hooks/useExpenseData";
-import { deleteExpense } from "@/lib/db";
+import { deleteExpense } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
 import {
   AlertDialog,

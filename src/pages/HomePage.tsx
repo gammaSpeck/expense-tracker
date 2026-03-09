@@ -12,7 +12,7 @@ import {
   useRecentExpenses,
   useCategories,
 } from "@/hooks/useExpenseData";
-import { deleteExpense } from "@/lib/db";
+import { deleteExpense } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
 import {
   AlertDialog,

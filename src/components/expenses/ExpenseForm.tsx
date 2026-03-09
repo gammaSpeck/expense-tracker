@@ -36,7 +36,7 @@ import {
   updateExpense,
   getTagSuggestions,
   getDescriptionSuggestions,
-} from "@/lib/db";
+} from "@/db/expenseTrackerDb";
 import { CalendarIcon, Clock, Plus, X, ImagePlus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryForm } from "@/components/categories/CategoryForm";

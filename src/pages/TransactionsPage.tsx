@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";
 import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
-import { deleteExpense } from "@/lib/db";
+import { deleteExpense } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { getCurrentTime24 } from "@/lib/time";

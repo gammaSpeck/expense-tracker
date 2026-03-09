@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { exportAllData } from "@/lib/db";
+import { exportAllData } from "@/db/expenseTrackerDb";
 import { markBackupCompleted } from "@/lib/backupReminder";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";

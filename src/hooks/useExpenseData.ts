@@ -1,5 +1,10 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, getAllExpenses, getAllCategories, getAllTags } from "@/lib/db";
+import {
+  db,
+  getAllExpenses,
+  getAllCategories,
+  getAllTags,
+} from "@/db/expenseTrackerDb";
 import {
   Expense,
   ExpenseFilters,
@@ -38,7 +43,7 @@ export function useCategory(id: string | undefined) {
   const category = useLiveQuery(
     () => (id ? db.categories.get(id) : undefined),
     [id],
-    undefined
+    undefined,
   );
   return category;
 }
@@ -47,7 +52,7 @@ export function useExpense(id: string | undefined) {
   const expense = useLiveQuery(
     () => (id ? db.expenses.get(id) : undefined),
     [id],
-    undefined
+    undefined,
   );
   return expense;
 }
@@ -87,14 +92,14 @@ export function useFilteredExpenses(filters: ExpenseFilters = {}) {
     // Category filter
     if (filters.categories && filters.categories.length > 0) {
       filtered = filtered.filter((expense) =>
-        filters.categories!.includes(expense.category)
+        filters.categories!.includes(expense.category),
       );
     }
 
     // Tag filter
     if (filters.tags && filters.tags.length > 0) {
       filtered = filtered.filter((expense) =>
-        expense.tags.some((tag) => filters.tags!.includes(tag))
+        expense.tags.some((tag) => filters.tags!.includes(tag)),
       );
     }
 
@@ -125,7 +130,7 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
   return useMemo(() => {
     const totalExpenses = filteredExpenses.reduce(
       (sum, exp) => sum + exp.value,
-      0
+      0,
     );
     const totalTransactions = filteredExpenses.length;
     const averageExpense =
@@ -226,7 +231,7 @@ export function useRecentExpenses(limit: number = 10) {
 export function getDateRangeForPeriod(
   period: "week" | "month" | "year",
   anchorDate?: Date,
-  customRange?: { start: Date; end: Date }
+  customRange?: { start: Date; end: Date },
 ) {
   const date = anchorDate || new Date();
 
@@ -241,6 +246,8 @@ export function getDateRangeForPeriod(
     case "year":
       return { start: startOfYear(date), end: endOfYear(date) };
     default:
-      return customRange || { start: startOfMonth(date), end: endOfMonth(date) };
+      return (
+        customRange || { start: startOfMonth(date), end: endOfMonth(date) }
+      );
   }
 }

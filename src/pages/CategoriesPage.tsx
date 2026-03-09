@@ -36,7 +36,7 @@ import {
   useCategories,
   useCategoryExpenseCounts,
 } from "@/hooks/useExpenseData";
-import { deleteCategory } from "@/lib/db";
+import { deleteCategory } from "@/db/expenseTrackerDb";
 import { Category } from "@/types/expense";
 import { cn } from "@/lib/utils";
 

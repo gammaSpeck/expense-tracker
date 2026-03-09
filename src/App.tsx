@@ -7,7 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
 import { useEffect } from "react";
-import { initializeDatabase } from "@/lib/db";
+import { initializeDatabase } from "@/db/expenseTrackerDb";
 
 import HomePage from "./pages/HomePage";
 import AddExpensePage from "./pages/AddExpensePage";

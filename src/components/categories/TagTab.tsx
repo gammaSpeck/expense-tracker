@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTags } from "@/hooks/useExpenseData";
-import { deleteTag, renameTag } from "@/lib/db";
+import { deleteTag, renameTag } from "@/db/expenseTrackerDb";
 import { Trash2, Edit2, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";

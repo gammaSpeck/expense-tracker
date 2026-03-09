@@ -38,7 +38,7 @@ import {
   useCategories,
   getDateRangeForPeriod,
 } from "@/hooks/useExpenseData";
-import { exportAllData } from "@/lib/db";
+import { exportAllData } from "@/db/expenseTrackerDb";
 import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
 import { toast } from "sonner";
 import { useCurrency } from "@/contexts/CurrencyContext";
