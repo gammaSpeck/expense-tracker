@@ -14,10 +14,10 @@ import { exportAllData } from "@/db/expenseTrackerDb";
 import { markBackupCompleted } from "@/lib/backupReminder";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
-import { isDriveConnected } from "@/lib/driveCredentials";
+import { isDriveConnected } from "@/db/driveCredentials";
 import { getValidAccessToken, DriveSessionExpiredError } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
-import { getDriveCredentials } from "@/lib/driveCredentials";
+import { getDriveCredentials } from "@/db/driveCredentials";
 
 interface ExportDataProps {
   openOnMount?: boolean;
@@ -98,7 +98,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
         // Update folderID in case it was (re)created
         if (folderID !== creds.folderID) {
           const { saveDriveCredentials } =
-            await import("@/lib/driveCredentials");
+            await import("@/db/driveCredentials");
           await saveDriveCredentials({ ...creds, folderID });
         }
 

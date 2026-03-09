@@ -5,7 +5,7 @@ import {
   MONTHLY_REMINDER_DAY,
   WEEKLY_REMINDER_DAY,
   userPreferences,
-} from "@/lib/userPreferences";
+} from "@/db/userPreferences";
 
 function toDateKey(value: Date): string {
   return format(value, "yyyy-MM-dd");

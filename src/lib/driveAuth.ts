@@ -3,7 +3,7 @@ import {
   saveDriveCredentials,
   clearDriveCredentials,
   isTokenExpired,
-} from "./driveCredentials";
+} from "../db/driveCredentials";
 
 /**
  * Thrown by getValidAccessToken when the refresh token is invalid/revoked.

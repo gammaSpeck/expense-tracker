@@ -17,7 +17,7 @@ import {
   getDriveCredentials,
   clearDriveCredentials,
   type DriveCredentials,
-} from "@/lib/driveCredentials";
+} from "@/db/driveCredentials";
 import { toast } from "sonner";
 
 export function GoogleDriveSettings() {

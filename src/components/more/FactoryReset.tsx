@@ -12,7 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { db, initializeDatabase } from "@/db/expenseTrackerDb";
-import { userPreferences } from "@/lib/userPreferences";
+import { userPreferences } from "@/db/userPreferences";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 

@@ -5,7 +5,7 @@ import {
   getCurrencyByCode,
   SUPPORTED_CURRENCIES,
 } from "@/lib/currency";
-import { userPreferences } from "@/lib/userPreferences";
+import { userPreferences } from "@/db/userPreferences";
 
 interface CurrencyContextType {
   currency: Currency;

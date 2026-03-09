@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { exchangeCodeForTokens } from "@/lib/driveAuth";
 import { getUserEmail, findOrCreateBackupFolder } from "@/lib/driveApi";
-import { saveDriveCredentials } from "@/lib/driveCredentials";
+import { saveDriveCredentials } from "@/db/driveCredentials";
 
 type Status = "loading" | "error";
 

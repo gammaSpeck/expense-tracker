@@ -8,7 +8,7 @@ import {
   markBackupReminderBannerShown,
   shouldShowBackupReminderBanner,
 } from "@/lib/backupReminder";
-import { type BackupReminderSchedule } from "@/lib/userPreferences";
+import { type BackupReminderSchedule } from "@/db/userPreferences";
 
 type PromptState = {
   visible: boolean;

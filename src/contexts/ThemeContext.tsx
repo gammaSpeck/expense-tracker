@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { Theme } from "@/types/expense";
-import { userPreferences } from "@/lib/userPreferences";
+import { userPreferences } from "@/db/userPreferences";
 
 interface ThemeContextType {
   theme: Theme;
