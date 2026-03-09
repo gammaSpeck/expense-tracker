@@ -1,8 +1,21 @@
 import {
   getDriveCredentials,
   saveDriveCredentials,
+  clearDriveCredentials,
   isTokenExpired,
 } from "./driveCredentials";
+
+/**
+ * Thrown by getValidAccessToken when the refresh token is invalid/revoked.
+ * Callers should catch this, show a reconnect prompt, and never retry silently.
+ * Local credentials are already cleared when this is thrown.
+ */
+export class DriveSessionExpiredError extends Error {
+  constructor() {
+    super("Google Drive session expired. Please reconnect.");
+    this.name = "DriveSessionExpiredError";
+  }
+}
 
 const CLIENT_ID = import.meta.env
   .VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_ID as string;
@@ -137,20 +150,27 @@ async function refreshAccessToken(
 
 /**
  * Returns a valid access token, refreshing silently if the current one is
- * expired. Throws if credentials are missing or the refresh token is revoked
- * (caller should prompt re-authentication).
+ * expired. Throws DriveSessionExpiredError (and clears local credentials) if
+ * the refresh token is invalid or revoked — caller should prompt reconnect.
  */
 export async function getValidAccessToken(): Promise<string> {
   const creds = getDriveCredentials();
-  if (!creds) throw new Error("Google Drive is not connected.");
+  if (!creds) throw new DriveSessionExpiredError();
 
   if (!isTokenExpired(creds)) return creds.accessToken;
 
-  const { accessToken, expiresAt } = await refreshAccessToken(
-    creds.refreshToken,
-  );
-  saveDriveCredentials({ ...creds, accessToken, expiresAt });
-  return accessToken;
+  try {
+    const { accessToken, expiresAt } = await refreshAccessToken(
+      creds.refreshToken,
+    );
+    saveDriveCredentials({ ...creds, accessToken, expiresAt });
+    return accessToken;
+  } catch {
+    // Refresh token is invalid/revoked — wipe credentials so the app reflects
+    // the disconnected state immediately, then signal callers to reconnect.
+    clearDriveCredentials();
+    throw new DriveSessionExpiredError();
+  }
 }
 
 // ---------------------------------------------------------------------------

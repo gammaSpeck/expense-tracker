@@ -15,7 +15,7 @@ import { markBackupCompleted } from "@/lib/backupReminder";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
 import { isDriveConnected } from "@/lib/driveCredentials";
-import { getValidAccessToken } from "@/lib/driveAuth";
+import { getValidAccessToken, DriveSessionExpiredError } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
 import { getDriveCredentials } from "@/lib/driveCredentials";
 
@@ -62,10 +62,14 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
         let accessToken: string;
         try {
           accessToken = await getValidAccessToken();
-        } catch {
-          toast.error("Google Drive session expired. Please reconnect.", {
+        } catch (err) {
+          const message =
+            err instanceof DriveSessionExpiredError
+              ? "Google Drive session expired. Please reconnect."
+              : "Could not connect to Google Drive. Please reconnect.";
+          toast.error(message, {
             action: {
-              label: "Reconnect",
+              label: "Go to Settings",
               onClick: () => (window.location.href = "/settings/data"),
             },
           });
