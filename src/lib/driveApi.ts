@@ -2,6 +2,14 @@ const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
 const BACKUP_FOLDER_NAME = "ExTrack Backups";
 
+/**
+ * Escapes a value for use inside a single-quoted Drive Files.list query string.
+ * Google's query language requires backslash-escaping both `\` and `'`.
+ */
+function escapeDriveQuery(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
 // ---------------------------------------------------------------------------
 // User info
 // ---------------------------------------------------------------------------
@@ -21,7 +29,7 @@ export async function getUserEmail(accessToken: string): Promise<string> {
 
 async function findBackupFolder(accessToken: string): Promise<string | null> {
   const query = encodeURIComponent(
-    `name = '${BACKUP_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+    `name = '${escapeDriveQuery(BACKUP_FOLDER_NAME)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
   );
   const res = await fetch(
     `${DRIVE_API}/files?q=${query}&fields=files(id,name)`,
@@ -82,7 +90,7 @@ async function findExistingFile(
   accessToken: string,
 ): Promise<string | null> {
   const query = encodeURIComponent(
-    `name = '${filename}' and '${folderID}' in parents and mimeType = 'application/json' and trashed = false`,
+    `name = '${escapeDriveQuery(filename)}' and '${escapeDriveQuery(folderID)}' in parents and mimeType = 'application/json' and trashed = false`,
   );
   const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id)`, {
     headers: { Authorization: `Bearer ${accessToken}` },
