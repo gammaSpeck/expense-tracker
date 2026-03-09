@@ -95,7 +95,12 @@ async function findExistingFile(
   const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id)`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      err?.error?.message ?? `Drive file search failed (${res.status})`,
+    );
+  }
   const data = await res.json();
   const files = data.files as { id: string }[];
   return files.length > 0 ? files[0].id : null;
