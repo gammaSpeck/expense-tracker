@@ -1,4 +1,6 @@
-const STORAGE_KEY = "expense-tracker-drive-credentials";
+import { get, set, del, createStore } from "idb-keyval";
+
+const store = createStore("expense-tracker-drive", "credentials");
 
 export interface DriveCredentials {
   accessToken: string;
@@ -9,22 +11,18 @@ export interface DriveCredentials {
   accountEmail: string;
 }
 
-export function getDriveCredentials(): DriveCredentials | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as DriveCredentials;
-  } catch {
-    return null;
-  }
+export async function getDriveCredentials(): Promise<DriveCredentials | null> {
+  return (await get<DriveCredentials>("creds", store)) ?? null;
 }
 
-export function saveDriveCredentials(creds: DriveCredentials): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(creds));
+export async function saveDriveCredentials(
+  creds: DriveCredentials,
+): Promise<void> {
+  await set("creds", creds, store);
 }
 
-export function clearDriveCredentials(): void {
-  localStorage.removeItem(STORAGE_KEY);
+export async function clearDriveCredentials(): Promise<void> {
+  await del("creds", store);
 }
 
 /**
@@ -34,6 +32,6 @@ export function isTokenExpired(creds: DriveCredentials): boolean {
   return Date.now() >= creds.expiresAt - 60_000;
 }
 
-export function isDriveConnected(): boolean {
-  return getDriveCredentials() !== null;
+export async function isDriveConnected(): Promise<boolean> {
+  return (await getDriveCredentials()) !== null;
 }

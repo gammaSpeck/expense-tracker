@@ -154,7 +154,7 @@ async function refreshAccessToken(
  * the refresh token is invalid or revoked — caller should prompt reconnect.
  */
 export async function getValidAccessToken(): Promise<string> {
-  const creds = getDriveCredentials();
+  const creds = await getDriveCredentials();
   if (!creds) throw new DriveSessionExpiredError();
 
   if (!isTokenExpired(creds)) return creds.accessToken;
@@ -163,12 +163,12 @@ export async function getValidAccessToken(): Promise<string> {
     const { accessToken, expiresAt } = await refreshAccessToken(
       creds.refreshToken,
     );
-    saveDriveCredentials({ ...creds, accessToken, expiresAt });
+    await saveDriveCredentials({ ...creds, accessToken, expiresAt });
     return accessToken;
   } catch {
     // Refresh token is invalid/revoked — wipe credentials so the app reflects
     // the disconnected state immediately, then signal callers to reconnect.
-    clearDriveCredentials();
+    await clearDriveCredentials();
     throw new DriveSessionExpiredError();
   }
 }

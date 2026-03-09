@@ -48,7 +48,7 @@ export default function GoogleCallbackPage() {
           findOrCreateBackupFolder(accessToken),
         ]);
 
-        saveDriveCredentials({
+        await saveDriveCredentials({
           accessToken,
           refreshToken: tokens.refresh_token,
           expiresAt,

@@ -29,7 +29,11 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
   const [saveTo, setSaveTo] = useState<"device" | "drive">("device");
   const [isExporting, setIsExporting] = useState(false);
   const hasAutoOpenedRef = useRef(false);
-  const driveConnected = isDriveConnected();
+  const [driveConnected, setDriveConnected] = useState(false);
+
+  useEffect(() => {
+    isDriveConnected().then(setDriveConnected);
+  }, []);
 
   useEffect(() => {
     if (!openOnMount || hasAutoOpenedRef.current) return;
@@ -87,14 +91,15 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
           2,
         );
         const blob = new Blob([json], { type: "application/json" });
-        const creds = getDriveCredentials()!;
+        const creds = await getDriveCredentials();
+        if (!creds) return;
         const folderID = await findOrCreateBackupFolder(accessToken);
 
         // Update folderID in case it was (re)created
         if (folderID !== creds.folderID) {
           const { saveDriveCredentials } =
             await import("@/lib/driveCredentials");
-          saveDriveCredentials({ ...creds, folderID });
+          await saveDriveCredentials({ ...creds, folderID });
         }
 
         const { webViewLink } = await uploadFileToDrive(

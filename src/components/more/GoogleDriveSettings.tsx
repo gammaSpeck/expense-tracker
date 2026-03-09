@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CloudUpload, Link2, Link2Off, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +16,17 @@ import { initiateGoogleAuth, revokeToken } from "@/lib/driveAuth";
 import {
   getDriveCredentials,
   clearDriveCredentials,
+  type DriveCredentials,
 } from "@/lib/driveCredentials";
 import { toast } from "sonner";
 
 export function GoogleDriveSettings() {
-  const [creds, setCreds] = useState(() => getDriveCredentials());
+  const [creds, setCreds] = useState<DriveCredentials | null>(null);
   const [isUnlinking, setIsUnlinking] = useState(false);
+
+  useEffect(() => {
+    getDriveCredentials().then(setCreds);
+  }, []);
 
   const isConnected = creds !== null;
 
@@ -35,7 +40,7 @@ export function GoogleDriveSettings() {
     // Clear local credentials immediately — revocation is best-effort and
     // must not delay the UI or leave credentials in place if it fails.
     const snapshot = creds;
-    clearDriveCredentials();
+    await clearDriveCredentials();
     setCreds(null);
     try {
       if (snapshot) {
