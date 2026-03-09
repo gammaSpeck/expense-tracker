@@ -124,7 +124,7 @@ Accessible via **Settings → Data Management** (dedicated sub-screen).
 - **Complete data wipe**: Expenses, categories, tags, settings
 - **Re-seeding**: Restores default categories
 - **Confirmation dialog** with clear warnings
-- **localStorage cleanup** for fresh start
+- **Full storage cleanup**: clears IndexedDB (Dexie) and localStorage for a fresh start
 
 ### 7. Multi-Currency Support
 
@@ -249,7 +249,7 @@ Complete local data management:
 - **No analytics**: Zero tracking or telemetry
 - **No user accounts**: No registration required
 - **CORS isolation**: Data never transmitted to any third party
-- **Google Drive integration**: OAuth tokens stored in localStorage, scoped to `drive.file` only; tokens never logged or sent anywhere except `googleapis.com`
+- **Google Drive integration**: OAuth tokens stored in IndexedDB, scoped to `drive.file` only; tokens never logged or sent anywhere except `googleapis.com`
 - **Open source**: Transparent codebase (MIT license)
 
 ### 15. Performance Optimizations
@@ -261,6 +261,7 @@ Fast and efficient user experience:
 - **SWC compiler**: Faster than Babel
 - **Code splitting**: Lazy-loaded components
 - **Dexie.js**: Optimized IndexedDB access
+- **idb-keyval**: Lightweight key-value IndexedDB store for credentials and preferences
 - **React Query**: Efficient data caching
 - **Image compression**: Browser-based compression for attachments
 - **Virtual scrolling**: (Planned for large lists)
