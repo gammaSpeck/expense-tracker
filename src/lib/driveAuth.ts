@@ -157,12 +157,15 @@ export async function getValidAccessToken(): Promise<string> {
 // Revoke token — called on unlink
 // ---------------------------------------------------------------------------
 
+/**
+ * Best-effort token revocation via POST body (tokens must not appear in URLs).
+ * Silently ignores network/revoke failures — the token may already be expired
+ * or revoked. Always clear local credentials regardless of this call's outcome.
+ */
 export async function revokeToken(token: string): Promise<void> {
-  // Best-effort — don't block UI if this fails (e.g. already revoked)
-  await fetch(
-    `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token)}`,
-    {
-      method: "POST",
-    },
-  ).catch(() => {});
+  await fetch("https://oauth2.googleapis.com/revoke", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ token }),
+  }).catch(() => {});
 }

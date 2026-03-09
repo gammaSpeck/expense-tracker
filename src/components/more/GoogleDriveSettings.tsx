@@ -32,14 +32,18 @@ export function GoogleDriveSettings() {
 
   async function handleUnlink() {
     setIsUnlinking(true);
+    // Clear local credentials immediately — revocation is best-effort and
+    // must not delay the UI or leave credentials in place if it fails.
+    const snapshot = creds;
+    clearDriveCredentials();
+    setCreds(null);
     try {
-      if (creds) {
-        // Best-effort revocation — using access token (or refresh token as fallback)
-        await revokeToken(creds.accessToken);
+      if (snapshot) {
+        // Revoking the refresh token automatically invalidates all associated
+        // access tokens on Google's side — no need for a second call.
+        await revokeToken(snapshot.refreshToken);
       }
     } finally {
-      clearDriveCredentials();
-      setCreds(null);
       setIsUnlinking(false);
       toast.success("Google Drive disconnected.");
     }
