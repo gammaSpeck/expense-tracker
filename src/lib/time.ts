@@ -23,7 +23,7 @@ export function formatTime12(time24: string): string {
   try {
     const date = parse(time24, "HH:mm", new Date());
     return format(date, "h:mm a");
-  } catch (error) {
+  } catch {
     console.error("Error formatting time:", error);
     return time24; // Fallback to original value
   }
@@ -38,7 +38,7 @@ export function formatTime24(time12: string): string {
   try {
     const date = parse(time12, "h:mm a", new Date());
     return format(date, "HH:mm");
-  } catch (error) {
+  } catch {
     console.error("Error formatting time:", error);
     return time12; // Fallback to original value
   }

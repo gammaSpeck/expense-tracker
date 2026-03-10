@@ -39,7 +39,7 @@ export function FactoryReset() {
       toast.success("All data cleared. App reset to default state.");
       setOpen(false);
       navigate("/");
-    } catch (error) {
+    } catch {
       toast.error("Factory reset failed");
     } finally {
       setIsResetting(false);

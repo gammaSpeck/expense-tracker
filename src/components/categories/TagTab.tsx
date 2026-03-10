@@ -33,7 +33,7 @@ export function TagTab() {
       await deleteTag(deleteData.tag);
       toast.success(`Tag "${deleteData.tag}" deleted`);
       setDeleteData(null);
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete tag");
     }
   }
@@ -50,7 +50,7 @@ export function TagTab() {
       toast.success(`Tag renamed to "${newName}"`);
       setEditingTag(null);
       setNewName("");
-    } catch (error) {
+    } catch {
       toast.error("Failed to rename tag");
     }
   }

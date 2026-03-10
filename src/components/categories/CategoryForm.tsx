@@ -80,7 +80,7 @@ export function CategoryForm({
         toast.success("Category created");
       }
       onSuccess?.(id);
-    } catch (error) {
+    } catch {
       toast.error("Failed to save category");
     }
   };

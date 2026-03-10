@@ -187,7 +187,7 @@ export function ExpenseForm({
         setImagePreview(base64);
       };
       reader.readAsDataURL(compressed);
-    } catch (error) {
+    } catch {
       toast.error("Failed to compress image");
     }
   };
@@ -207,7 +207,7 @@ export function ExpenseForm({
         toast.success("Expense added");
       }
       onSuccess?.();
-    } catch (error) {
+    } catch {
       toast.error("Failed to save expense");
     }
   };

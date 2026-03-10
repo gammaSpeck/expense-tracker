@@ -36,7 +36,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const formatValue = (value: number) => {
     try {
       return value.toLocaleString(currency.locale);
-    } catch (e) {
+    } catch {
       return value.toString();
     }
   };

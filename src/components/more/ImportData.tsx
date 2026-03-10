@@ -50,7 +50,7 @@ export function ImportData() {
         },
         data,
       });
-    } catch (error) {
+    } catch {
       toast.error("Invalid backup file");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -76,7 +76,7 @@ export function ImportData() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error) {
+    } catch {
       toast.error("Import failed");
     } finally {
       setIsImporting(false);

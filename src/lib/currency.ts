@@ -30,7 +30,7 @@ export function getCurrencyByCode(code: string): Currency {
 export function formatNumber(value: number, locale = "en-IN") {
   try {
     return value.toLocaleString(locale);
-  } catch (e) {
+  } catch {
     return value.toString();
   }
 }

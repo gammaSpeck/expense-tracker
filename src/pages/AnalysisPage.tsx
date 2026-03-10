@@ -200,7 +200,7 @@ export default function AnalysisPage() {
       URL.revokeObjectURL(url);
       toast.success("Exported successfully");
       setShowExportDialog(false);
-    } catch (error) {
+    } catch {
       toast.error("Export failed");
     }
   };
@@ -220,7 +220,7 @@ export default function AnalysisPage() {
       URL.revokeObjectURL(url);
       toast.success("Exported successfully");
       setShowExportDialog(false);
-    } catch (error) {
+    } catch {
       toast.error("Export failed");
     }
   };

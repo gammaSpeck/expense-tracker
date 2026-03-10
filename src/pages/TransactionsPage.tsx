@@ -58,7 +58,7 @@ export default function TransactionsPage() {
     try {
       await deleteExpense(expenseToDelete.id);
       toast.success("Expense deleted");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete");
     }
     setExpenseToDelete(null);

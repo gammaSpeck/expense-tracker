@@ -30,7 +30,7 @@ export default function EditExpensePage() {
       await deleteExpense(id);
       toast.success("Expense deleted");
       navigate("/");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete expense");
     }
   };
