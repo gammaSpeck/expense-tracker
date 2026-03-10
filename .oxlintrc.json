@@ -2,12 +2,12 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [],
   "categories": {
-    "correctness": "off"
+    "correctness": "warn"
   },
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["dist"],
+  "ignorePatterns": ["dist", "src/components/ui/**"],
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
@@ -104,7 +104,7 @@
           }
         ],
         "react/only-export-components": [
-          "off",
+          "warn",
           {
             "allowConstantExport": true
           }
