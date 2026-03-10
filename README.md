@@ -57,7 +57,7 @@ $ bun install # or npm install / pnpm install
 # 3. Start the dev server
 $ bun run dev # or npm run dev / pnpm dev
 
-# 4. Open http://localhost:5173 in your browser
+# 4. Open http://localhost:4173 in your browser
 ```
 
 ---

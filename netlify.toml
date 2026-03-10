@@ -1,0 +1,31 @@
+# SPA routing is handled by public/_redirects.
+# This file only carries security response headers.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+
+    # Prevent MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+
+    # Reduce referrer leakage on cross-origin navigations
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Disable unused browser APIs
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+    # Content Security Policy
+    #
+    # Key directives:
+    #   connect-src — restricts fetch/XHR targets; prevents XSS token exfiltration
+    #     to any domain not in this list (the attacker's server gets blocked).
+    #   script-src 'self' — no external or inline scripts.
+    #   style-src 'unsafe-inline' — required for Radix UI / shadcn dynamic inline styles.
+    #   frame-ancestors 'none' — prevents clickjacking.
+    #   form-action 'self' — prevents form hijacking.
+    #
+    # Google OAuth redirect (window.location.href) is a browser navigation —
+    # it is NOT restricted by connect-src or form-action. Only fetch/XHR is.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://oauth2.googleapis.com https://www.googleapis.com https://accounts.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"

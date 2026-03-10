@@ -130,6 +130,73 @@ Enhance the existing export/import system with:
    - Unlinking does NOT delete existing backups from Drive (user owns those files)
    - Prompt for re-authentication if refresh token is invalid
 
+### **Public Client & `client_secret` Tradeoff**
+
+> **Why is `client_secret` in the frontend bundle — and is that okay?**
+
+This app has no backend. All code is deployed to Netlify and runs in the browser. `VITE_*` variables are baked into the JS bundle at build time, meaning `client_secret` is effectively public to anyone who inspects the bundle.
+
+**Google's OAuth client types and what they actually mean:**
+
+| Client Type     | Secret confidentiality                 | Allowed redirect URIs          |
+| --------------- | -------------------------------------- | ------------------------------ |
+| Desktop App     | Non-secret (Google says so explicitly) | `localhost` / `127.0.0.1` only |
+| Web Application | Intended for server-side               | Any HTTPS URI you register     |
+
+Both types require `client_secret` to be sent in token exchange requests. Neither type provides actual secret confidentiality in a purely client-side app — the Desktop type just makes it official that the secret isn't secret. **PKCE is the actual security mechanism**, not the secret.
+
+**What can an attacker do with the exposed `client_secret`?**
+
+- Token exchange requires a valid `code` — only issued to registered redirect URIs. An attacker cannot generate one.
+- Even with an intercepted `code` (e.g., via network attack), they also need the `code_verifier` stored in `sessionStorage`, which requires XSS or physical device access.
+- With XSS access, they already have the issued tokens from IndexedDB — the `client_secret` is irrelevant at that point.
+
+**Conclusion:** For a no-backend SPA, embedding `client_secret` in the bundle is an accepted and documented tradeoff (see [RFC 8252](https://www.rfc-editor.org/rfc/rfc8252), [RFC 9700](https://www.rfc-editor.org/rfc/rfc9700)). Use a **Web application client** (not Desktop) so staging/production redirect URIs can be registered. Rotate the secret via Netlify env vars if ever needed.
+
+**Client configuration:**
+
+| Environment   | OAuth Client                    | Registered Redirect URIs                                                                                                                            |
+| ------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dev + Staging | `Extrack Dev/Staging` (Web app) | `http://localhost:3000/oauth/callback`, `http://localhost:4173/oauth/callback`, `https://staging--gamma-expense-tracker.netlify.app/oauth/callback` |
+| Production    | `Extrack Production` (Web app)  | `https://extrack.madhukm.com/oauth/callback`                                                                                                        |
+
+### **XSS Hardening via Content Security Policy**
+
+The primary practical risk in a no-backend SPA is XSS — an injected script that reads IndexedDB tokens and exfiltrates them to an attacker's server.
+
+**How CSP mitigates this:**
+
+- **`connect-src`** is the critical directive. It restricts where `fetch()` / `XHR` / `WebSocket` calls can go. If an XSS payload tries to POST stolen tokens to `https://attacker.com`, the browser blocks it — the domain isn't in the allowlist.
+- **`script-src 'self'`** prevents external scripts from being injected via DOM manipulation.
+- **`frame-ancestors 'none'`** prevents clickjacking (embedding the app in an attacker's iframe).
+
+CSP does **not** prevent XSS from occurring (that's React's job via proper rendering), but it severely limits what an attacker can do if it does occur. A `connect-src`-locked app means an attacker can only exfiltrate data to `googleapis.com`, which doesn't help them.
+
+**CSP is implemented via `netlify.toml` headers** — see the `netlify.toml` in the project root.
+
+`style-src 'unsafe-inline'` is required for Radix UI / shadcn components which inject inline styles for dynamic positioning (dialogs, tooltips, etc.). CSS injection is a much lower-severity risk than script injection and cannot directly steal tokens.
+
+### **Mobile Browser Extension Threat Model**
+
+**Summary: PWA standalone mode eliminates the extension attack surface.**
+
+When users install the app to their home screen (PWA), it opens in a standalone container — not a browser tab. Extensions are a browser feature. They do not run in standalone PWA mode on any major platform:
+
+| Platform                   | Browser extension support | Standalone PWA mode                  | Extensions in PWA? |
+| -------------------------- | ------------------------- | ------------------------------------ | ------------------ |
+| iOS (Safari)               | Yes (since iOS 15)        | WKWebView standalone                 | ❌ No              |
+| Android (Chrome)           | No extension support      | Standalone Chrome context            | ❌ No              |
+| Android (Firefox)          | Yes (full add-on support) | Firefox does not support PWA install | N/A                |
+| Android (Samsung Internet) | Limited (ad blockers)     | Standalone mode                      | ❌ No              |
+
+**Conclusion for this app's users (mobile PWA installs):** Once installed to home screen, the browser extension attack surface is fully eliminated. This is a genuine security benefit of the PWA delivery model, additional to the typical UX arguments.
+
+**Can you actively block extensions from running on a web page?** No — there is no web standard for this. Only the OS/browser sandbox controls it. For users accessing the app via a normal browser tab, extensions can run. The mitigation is:
+
+1. The PWA install flow (already implemented) moves users out of the browser tab context
+2. CSP's `connect-src` limits exfiltration even if a malicious extension runs
+3. There is no known practical attack using extensions against a CSP-locked, PKCE-protected OAuth flow for a `drive.file`-scoped app
+
 ---
 
 ## 🎨 User Flows
@@ -263,7 +330,7 @@ Success: "Account unlinked"
 3. Create OAuth 2.0 Client ID (Web application)
 4. Configure authorized JavaScript origins:
    - `https://yourdomain.com`
-   - `http://localhost:5173` (for dev)
+   - `http://localhost:4173` (for dev)
 5. No billing/payment required
 
 ### **Libraries Used**
@@ -467,18 +534,22 @@ Before implementation, confirm:
 
 ## ✅ Decisions Log
 
-| #   | Question          | Decision                                                                   |
-| --- | ----------------- | -------------------------------------------------------------------------- |
-| 1   | Backup filename   | `extrack-backup-YYYY-MM-DD.json`                                           |
-| 2   | Reminder behavior | Once per qualifying day (daily/weekly/monthly/never), configurable by user |
-| 3   | Drive folder      | **User-selected folder** via Google Picker (not `appDataFolder`)           |
-| 4   | Token storage     | IndexedDB plaintext for now                                                |
-| 5   | Token lifetime    | Access token: ~1hr; Refresh token: long-lived (until revoked)              |
-| 6   | File encryption   | Future scope (Phase 4) — AES-GCM via Web Crypto API, user passphrase       |
-| 7   | Multiple backups  | User-managed in their chosen folder; no auto-cleanup by app                |
-| 8   | CSV for Drive     | Not supported — Drive is JSON only; CSV available for device export        |
-| 9   | Import source     | Device (JSON only), Drive import is future scope (Phase 5)                 |
-| 10  | Active phases     | Phase 1 (reminders) + Phase 2 (export UX) first                            |
+| #   | Question                  | Decision                                                                                                                           |
+| --- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Backup filename           | `extrack-backup-YYYY-MM-DD.json`                                                                                                   |
+| 2   | Reminder behavior         | Once per qualifying day (daily/weekly/monthly/never), configurable by user                                                         |
+| 3   | Drive folder              | **User-selected folder** via Google Picker (not `appDataFolder`)                                                                   |
+| 4   | Token storage             | IndexedDB plaintext for now                                                                                                        |
+| 5   | Token lifetime            | Access token: ~1hr; Refresh token: long-lived (until revoked)                                                                      |
+| 6   | File encryption           | Future scope (Phase 4) — AES-GCM via Web Crypto API, user passphrase                                                               |
+| 7   | Multiple backups          | User-managed in their chosen folder; no auto-cleanup by app                                                                        |
+| 8   | CSV for Drive             | Not supported — Drive is JSON only; CSV available for device export                                                                |
+| 9   | Import source             | Device (JSON only), Drive import is future scope (Phase 5)                                                                         |
+| 10  | Active phases             | Phase 1 (reminders) + Phase 2 (export UX) first                                                                                    |
+| 11  | OAuth client type         | **Web application** client (not Desktop) — PKCE works identically; Web client allows staging/prod HTTPS redirect URIs              |
+| 12  | `client_secret` in bundle | Accepted tradeoff for no-backend SPA (RFC 8252/9700). PKCE is the real security. Rotate via Netlify env vars if needed.            |
+| 13  | XSS hardening             | CSP via `netlify.toml` — `connect-src` limits exfiltration; `script-src 'self'` blocks injected scripts                            |
+| 14  | Mobile extensions         | PWA standalone mode eliminates extension attack surface on iOS and Android Chrome. CSP is residual defence for browser-tab access. |
 
 ---
 

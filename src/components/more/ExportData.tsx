@@ -14,11 +14,7 @@ import { exportAllData } from "@/db/expenseTrackerDb";
 import { markBackupCompleted } from "@/lib/backupReminder";
 import { Expense, Category } from "@/types/expense";
 import { toast } from "sonner";
-import {
-  isDriveConnected,
-  getDriveCredentials,
-  saveDriveCredentials,
-} from "@/db/driveCredentials";
+import { isDriveConnected, getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
 import { getValidAccessToken, DriveSessionExpiredError } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
 
@@ -103,12 +99,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
           await saveDriveCredentials({ ...creds, folderID });
         }
 
-        const { webViewLink } = await uploadFileToDrive(
-          blob,
-          filename,
-          folderID,
-          accessToken,
-        );
+        const { webViewLink } = await uploadFileToDrive(blob, filename, folderID, accessToken);
 
         markBackupCompleted();
         toast.success("Backup saved to Google Drive", {
@@ -150,11 +141,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        variant="outline"
-        className="w-full justify-start"
-      >
+      <Button onClick={() => setOpen(true)} variant="outline" className="w-full justify-start">
         <Download className="h-4 w-4 mr-2" />
         Export Backup
       </Button>
@@ -196,9 +183,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
                 </button>
               </div>
               {saveTo === "drive" && (
-                <p className="text-xs text-muted-foreground">
-                  Drive backups are always JSON.
-                </p>
+                <p className="text-xs text-muted-foreground">Drive backups are always JSON.</p>
               )}
             </div>
 
@@ -220,11 +205,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
                 <button
                   onClick={() => driveConnected && handleSaveToChange("drive")}
                   disabled={!driveConnected}
-                  title={
-                    !driveConnected
-                      ? "Connect Google Drive in Settings"
-                      : undefined
-                  }
+                  title={!driveConnected ? "Connect Google Drive in Settings" : undefined}
                   className={`flex items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
                     saveTo === "drive"
                       ? "bg-primary text-primary-foreground"
@@ -238,10 +219,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
               {!driveConnected && (
                 <p className="text-xs text-muted-foreground">
                   Connect Google Drive in{" "}
-                  <a
-                    href="/settings/data"
-                    className="underline underline-offset-2"
-                  >
+                  <a href="/settings/data" className="underline underline-offset-2">
                     Settings
                   </a>{" "}
                   to enable cloud backup.
@@ -250,11 +228,7 @@ export function ExportData({ openOnMount = false }: ExportDataProps) {
             </div>
 
             {/* Export Button */}
-            <Button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="w-full"
-            >
+            <Button onClick={handleExport} disabled={isExporting} className="w-full">
               <Download className="h-4 w-4 mr-2" />
               {isExporting ? "Exporting..." : "Export"}
             </Button>
