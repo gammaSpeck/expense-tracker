@@ -6,15 +6,12 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
-import { useEffect } from "react";
+import { lazy, useEffect } from "react";
 import { initializeDatabase } from "@/db/expenseTrackerDb";
 
 import HomePage from "./pages/HomePage";
-import AddExpensePage from "./pages/AddExpensePage";
-import CategoriesPage from "./pages/CategoriesPage";
-import AnalysisPage from "./pages/AnalysisPage";
+
 import TransactionsPage from "./pages/TransactionsPage";
-import EditExpensePage from "./pages/EditExpensePage";
 import SettingsPage from "./pages/SettingsPage";
 import DataManagementPage from "./pages/DataManagementPage";
 import AboutPage from "./pages/AboutPage";
@@ -22,6 +19,11 @@ import NotFound from "./pages/NotFound";
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
 import { CurrencyProvider } from "@/contexts/CurrencyContext";
+
+const AddExpensePage = lazy(() => import("@/pages/AddExpensePage"));
+const CategoriesPage = lazy(() => import("@/pages/CategoriesPage"));
+const AnalysisPage = lazy(() => import("@/pages/AnalysisPage"));
+const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
 
 const queryClient = new QueryClient();
 
