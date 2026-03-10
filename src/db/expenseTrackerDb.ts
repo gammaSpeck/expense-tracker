@@ -75,8 +75,7 @@ class ExpenseDatabase extends Dexie {
 
     // Version 2: add compound index [date+time] to expenses
     this.version(2).stores({
-      expenses:
-        "id, category, date, time, [date+time], isAdhoc, *tags, createdAt",
+      expenses: "id, category, date, time, [date+time], isAdhoc, *tags, createdAt",
       categories: "id, &name",
       tagMetadata: "tag, count, lastUsed",
     });
@@ -104,7 +103,7 @@ export async function initializeDatabase(): Promise<void> {
 
 // Expense CRUD operations
 export async function addExpense(
-  expense: Omit<Expense, "id" | "createdAt" | "updatedAt">
+  expense: Omit<Expense, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
   const now = new Date().toISOString();
   const id = uuidv4();
@@ -128,7 +127,7 @@ export async function addExpense(
 
 export async function updateExpense(
   id: string,
-  updates: Partial<Omit<Expense, "id" | "createdAt">>
+  updates: Partial<Omit<Expense, "id" | "createdAt">>,
 ): Promise<void> {
   const now = new Date().toISOString();
   await db.expenses.update(id, { ...updates, updatedAt: now });
@@ -155,16 +154,12 @@ export async function getAllExpenses(): Promise<Expense[]> {
   return db.expenses.orderBy("[date+time]").reverse().toArray();
 }
 
-export async function getExpensesByCategory(
-  categoryId: string
-): Promise<Expense[]> {
+export async function getExpensesByCategory(categoryId: string): Promise<Expense[]> {
   return db.expenses.where("category").equals(categoryId).toArray();
 }
 
 // Category CRUD operations
-export async function addCategory(
-  category: Omit<Category, "id" | "createdAt">
-): Promise<string> {
+export async function addCategory(category: Omit<Category, "id" | "createdAt">): Promise<string> {
   const id = uuidv4();
   const now = new Date().toISOString();
 
@@ -179,15 +174,12 @@ export async function addCategory(
 
 export async function updateCategory(
   id: string,
-  updates: Partial<Omit<Category, "id" | "createdAt">>
+  updates: Partial<Omit<Category, "id" | "createdAt">>,
 ): Promise<void> {
   await db.categories.update(id, updates);
 }
 
-export async function deleteCategory(
-  id: string,
-  moveToCategory?: string
-): Promise<void> {
+export async function deleteCategory(id: string, moveToCategory?: string): Promise<void> {
   const category = await db.categories.get(id);
 
   if (category?.isDefault && category.name === "Others") {
@@ -216,9 +208,7 @@ export async function getAllCategories(): Promise<Category[]> {
   return db.categories.toArray();
 }
 
-export async function getCategoryByName(
-  name: string
-): Promise<Category | undefined> {
+export async function getCategoryByName(name: string): Promise<Category | undefined> {
   return db.categories.where("name").equals(name).first();
 }
 
@@ -245,26 +235,17 @@ export async function getAllTags(): Promise<TagMetadata[]> {
   return db.tagMetadata.orderBy("count").reverse().toArray();
 }
 
-export async function getTagSuggestions(
-  limit: number = 100
-): Promise<string[]> {
-  const tags = await db.tagMetadata
-    .orderBy("count")
-    .reverse()
-    .limit(limit)
-    .toArray();
+export async function getTagSuggestions(limit: number = 100): Promise<string[]> {
+  const tags = await db.tagMetadata.orderBy("count").reverse().limit(limit).toArray();
   return tags.map((t) => t.tag);
 }
 
 // Get unique descriptions from past expenses
 export async function getDescriptionSuggestions(
   searchQuery?: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<string[]> {
-  const expenses = await db.expenses
-    .orderBy("[date+time]")
-    .reverse()
-    .toArray();
+  const expenses = await db.expenses.orderBy("[date+time]").reverse().toArray();
 
   // Filter expenses with non-empty descriptions
   const descriptions = expenses
@@ -276,9 +257,7 @@ export async function getDescriptionSuggestions(
 
   // Filter by search query if provided (case-insensitive, contains match)
   const filtered = searchQuery
-    ? uniqueDescriptions.filter((desc) =>
-        desc.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? uniqueDescriptions.filter((desc) => desc.toLowerCase().includes(searchQuery.toLowerCase()))
     : uniqueDescriptions;
 
   // Return limited results
@@ -312,9 +291,7 @@ export async function renameTag(oldTag: string, newTag: string): Promise<void> {
 }
 
 // Get expenses count per category
-export async function getCategoryExpenseCounts(): Promise<
-  Record<string, number>
-> {
+export async function getCategoryExpenseCounts(): Promise<Record<string, number>> {
   const expenses = await db.expenses.toArray();
   const counts: Record<string, number> = {};
 
@@ -340,39 +317,33 @@ export async function importData(data: {
   expenses: Expense[];
   categories: Category[];
 }): Promise<void> {
-  await db.transaction(
-    "rw",
-    [db.expenses, db.categories, db.tagMetadata],
-    async () => {
-      // Clear existing data
-      await db.expenses.clear();
-      await db.categories.clear();
-      await db.tagMetadata.clear();
+  await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    // Clear existing data
+    await db.expenses.clear();
+    await db.categories.clear();
+    await db.tagMetadata.clear();
 
-      // Import categories
-      await db.categories.bulkAdd(data.categories);
+    // Import categories
+    await db.categories.bulkAdd(data.categories);
 
-      // Import expenses and rebuild tag metadata
-      await db.expenses.bulkAdd(data.expenses);
+    // Import expenses and rebuild tag metadata
+    await db.expenses.bulkAdd(data.expenses);
 
-      // Rebuild tag metadata
-      const tagCounts: Record<string, number> = {};
-      for (const expense of data.expenses) {
-        for (const tag of expense.tags) {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        }
+    // Rebuild tag metadata
+    const tagCounts: Record<string, number> = {};
+    for (const expense of data.expenses) {
+      for (const tag of expense.tags) {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
       }
-
-      const now = new Date().toISOString();
-      const tagMetadata: TagMetadata[] = Object.entries(tagCounts).map(
-        ([tag, count]) => ({
-          tag,
-          count,
-          lastUsed: now,
-        })
-      );
-
-      await db.tagMetadata.bulkAdd(tagMetadata);
     }
-  );
+
+    const now = new Date().toISOString();
+    const tagMetadata: TagMetadata[] = Object.entries(tagCounts).map(([tag, count]) => ({
+      tag,
+      count,
+      lastUsed: now,
+    }));
+
+    await db.tagMetadata.bulkAdd(tagMetadata);
+  });
 }

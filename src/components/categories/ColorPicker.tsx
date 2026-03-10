@@ -19,8 +19,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             onClick={() => onChange(color)}
             className={cn(
               "w-7 h-7 rounded-full transition-all duration-200",
-              isSelected &&
-                "ring-2 ring-offset-2 ring-offset-background ring-primary scale-110",
+              isSelected && "ring-2 ring-offset-2 ring-offset-background ring-primary scale-110",
             )}
             style={{ backgroundColor: color }}
           />

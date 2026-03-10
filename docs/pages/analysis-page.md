@@ -151,9 +151,7 @@ Redesign the Analysis page with a mobile-first approach, focusing on simplified 
 
 ```typescript
 // Period navigation
-const [periodTab, setPeriodTab] = useState<
-  "week" | "month" | "year" | "custom"
->("month");
+const [periodTab, setPeriodTab] = useState<"week" | "month" | "year" | "custom">("month");
 const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Anchor date for navigation
 const [customRange, setCustomRange] = useState<DateRange | undefined>();
 
@@ -161,9 +159,7 @@ const [customRange, setCustomRange] = useState<DateRange | undefined>();
 const [excludeAdhoc, setExcludeAdhoc] = useState(true);
 
 // Spending trend granularity
-const [trendGranularity, setTrendGranularity] = useState<
-  "day" | "week" | "month"
->("day");
+const [trendGranularity, setTrendGranularity] = useState<"day" | "week" | "month">("day");
 ```
 
 ### Computed Values:
@@ -306,9 +302,7 @@ function aggregateTrendData(
 
 ```typescript
 // Only include categories with total > 0
-const nonZeroCategories = summary.categoryBreakdown.filter(
-  (cat) => cat.total > 0,
-);
+const nonZeroCategories = summary.categoryBreakdown.filter((cat) => cat.total > 0);
 ```
 
 ---
@@ -417,9 +411,7 @@ const nonZeroCategories = summary.categoryBreakdown.filter(
   {/* Bar Chart */}
   <div className="h-64">
     <ResponsiveContainer>
-      <BarChart data={aggregatedTrendData}>
-        {/* ... existing chart config ... */}
-      </BarChart>
+      <BarChart data={aggregatedTrendData}>{/* ... existing chart config ... */}</BarChart>
     </ResponsiveContainer>
   </div>
 </div>

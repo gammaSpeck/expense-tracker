@@ -23,10 +23,7 @@ function scheduleLabel(schedule: "daily" | "weekly" | "monthly"): string {
   }
 }
 
-export function BackupReminderBanner({
-  onBackupNow,
-  onOpenSettings,
-}: BackupReminderBannerProps) {
+export function BackupReminderBanner({ onBackupNow, onOpenSettings }: BackupReminderBannerProps) {
   const [dismissed, setDismissed] = useState(false);
 
   const [bannerState] = useState(() => {

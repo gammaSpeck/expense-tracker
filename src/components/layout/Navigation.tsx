@@ -1,8 +1,4 @@
-import {
-  NavLink as RouterNavLink,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { NavLink as RouterNavLink, useLocation, useNavigate } from "react-router";
 import { Home, FolderOpen, BarChart3, Settings, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LazyMotion, domAnimation, m } from "framer-motion";
@@ -48,12 +44,7 @@ export function BottomNav() {
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 />
               )}
-              <Icon
-                className={cn(
-                  "h-5 w-5 relative z-10",
-                  isActive && "text-primary",
-                )}
-              />
+              <Icon className={cn("h-5 w-5 relative z-10", isActive && "text-primary")} />
               <span
                 className={cn(
                   "text-[10px] mt-1 font-medium relative z-10",
@@ -78,9 +69,7 @@ export function SidebarNav() {
     <aside className="hidden lg:flex flex-col w-64 border-r border-border bg-card/50 p-4">
       <div className="mb-8">
         <h1 className="text-xl font-bold gradient-text">Expense Tracker</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Track your spending
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">Track your spending</p>
       </div>
 
       {/* Add Expense Button */}

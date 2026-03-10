@@ -73,12 +73,7 @@ export default function TransactionsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3"
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="h-9 w-9"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">All Transactions</h1>
@@ -117,11 +112,7 @@ export default function TransactionsPage() {
         </m.div>
 
         {/* Transaction List */}
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
+        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <ExpenseList
             expenses={expenses}
             categories={categories}
@@ -130,23 +121,17 @@ export default function TransactionsPage() {
             onEdit={handleEdit}
             onDelete={(expense) => setExpenseToDelete(expense)}
             grouped
-            emptyMessage={
-              search ? "No matching transactions" : "No transactions yet"
-            }
+            emptyMessage={search ? "No matching transactions" : "No transactions yet"}
           />
         </m.div>
 
         {/* Delete Confirmation Dialog */}
-        <AlertDialog
-          open={!!expenseToDelete}
-          onOpenChange={() => setExpenseToDelete(null)}
-        >
+        <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this expense? This action cannot
-                be undone.
+                Are you sure you want to delete this expense? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

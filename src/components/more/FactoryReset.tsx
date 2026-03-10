@@ -25,11 +25,7 @@ export function FactoryReset() {
     setIsResetting(true);
     try {
       // Clear all data
-      await Promise.all([
-        db.expenses.clear(),
-        db.categories.clear(),
-        db.tagMetadata.clear(),
-      ]);
+      await Promise.all([db.expenses.clear(), db.categories.clear(), db.tagMetadata.clear()]);
 
       userPreferences.clearAll();
 
@@ -53,11 +49,7 @@ export function FactoryReset() {
         <p className="text-xs text-muted-foreground">
           Permanently delete all expenses, categories, and settings
         </p>
-        <Button
-          variant="destructive"
-          onClick={() => setOpen(true)}
-          className="w-full"
-        >
+        <Button variant="destructive" onClick={() => setOpen(true)} className="w-full">
           <Trash2 className="h-4 w-4 mr-2" />
           Factory Reset
         </Button>
@@ -70,9 +62,7 @@ export function FactoryReset() {
             <AlertDialogDescription asChild>
               <div className="space-y-3 pt-2">
                 <div className="text-sm space-y-2">
-                  <div className="font-medium text-foreground">
-                    This will permanently delete:
-                  </div>
+                  <div className="font-medium text-foreground">This will permanently delete:</div>
                   <ul className="list-disc list-inside text-muted-foreground space-y-1 text-xs">
                     <li>All expenses</li>
                     <li>All categories</li>
@@ -89,13 +79,12 @@ export function FactoryReset() {
 
                 <div className="text-xs text-muted-foreground space-y-1.5">
                   <div>
-                    <span className="font-medium">💡 Backup Reminder:</span>{" "}
-                    Before proceeding, we recommend backing up your data using
-                    the Export feature.
+                    <span className="font-medium">💡 Backup Reminder:</span> Before proceeding, we
+                    recommend backing up your data using the Export feature.
                   </div>
                   <div>
-                    No copy of your data exists on any server or cloud storage.
-                    Once deleted, it's gone forever.
+                    No copy of your data exists on any server or cloud storage. Once deleted, it's
+                    gone forever.
                   </div>
                 </div>
               </div>

@@ -22,9 +22,7 @@ export const SUPPORTED_CURRENCIES: Currency[] = [
 export const DEFAULT_CURRENCY_CODE = "INR";
 
 export function getCurrencyByCode(code: string): Currency {
-  return (
-    SUPPORTED_CURRENCIES.find((c) => c.code === code) || SUPPORTED_CURRENCIES[0]
-  );
+  return SUPPORTED_CURRENCIES.find((c) => c.code === code) || SUPPORTED_CURRENCIES[0];
 }
 
 export function formatNumber(value: number, locale = "en-IN") {

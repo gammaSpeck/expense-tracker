@@ -98,10 +98,7 @@ export function TagTab() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleTagClick(tagData.tag)}
-                  className="flex-1 text-left"
-                >
+                <button onClick={() => handleTagClick(tagData.tag)} className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <Tag className="h-4 w-4 text-primary" />
                     <span className="font-medium">{tagData.tag}</span>
@@ -124,9 +121,7 @@ export function TagTab() {
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() =>
-                      setDeleteData({ tag: tagData.tag, count: tagData.count })
-                    }
+                    onClick={() => setDeleteData({ tag: tagData.tag, count: tagData.count })}
                     className="p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-colors"
                     aria-label="Delete tag"
                   >
@@ -145,8 +140,8 @@ export function TagTab() {
             <AlertDialogTitle>Delete "{deleteData?.tag}"?</AlertDialogTitle>
             <AlertDialogDescription>
               This tag is used in {deleteData?.count} expense
-              {deleteData?.count !== 1 ? "s" : ""}. The tag will be removed from
-              all expenses, but the expenses themselves will NOT be deleted.
+              {deleteData?.count !== 1 ? "s" : ""}. The tag will be removed from all expenses, but
+              the expenses themselves will NOT be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

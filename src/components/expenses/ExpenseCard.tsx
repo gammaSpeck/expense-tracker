@@ -1,12 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import {
-  format,
-  formatDistanceToNow,
-  parseISO,
-  isToday,
-  isYesterday,
-} from "date-fns";
+import { format, formatDistanceToNow, parseISO, isToday, isYesterday } from "date-fns";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { Expense, Category } from "@/types/expense";
 import { cn } from "@/lib/utils";
@@ -103,10 +97,7 @@ export function ExpenseCard({
           {expense.tags.length > 0 && (
             <div className="flex items-center gap-1 overflow-hidden">
               {expense.tags.slice(0, 2).map((tag) => (
-                <span
-                  key={tag}
-                  className="tag-badge text-[10px] truncate max-w-20"
-                >
+                <span key={tag} className="tag-badge text-[10px] truncate max-w-20">
                   {tag}
                 </span>
               ))}
@@ -125,12 +116,8 @@ export function ExpenseCard({
           <ExpenseValue value={expense.value} />
         </span>
         <div className="flex items-center gap-1">
-          {expense.isAdhoc && (
-            <span className="adhoc-badge text-[10px]">Adhoc</span>
-          )}
-          {expense.attachment && (
-            <Paperclip className="h-3 w-3 text-muted-foreground" />
-          )}
+          {expense.isAdhoc && <span className="adhoc-badge text-[10px]">Adhoc</span>}
+          {expense.attachment && <Paperclip className="h-3 w-3 text-muted-foreground" />}
         </div>
       </div>
     </button>
@@ -148,10 +135,7 @@ export function ExpenseCard({
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </ContextMenuItem>
-        <ContextMenuItem
-          onClick={onDelete}
-          className="text-destructive focus:text-destructive"
-        >
+        <ContextMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </ContextMenuItem>
@@ -243,9 +227,7 @@ export function ExpenseList({
     {} as Record<string, Expense[]>,
   );
 
-  const sortedDates = Object.keys(grouped_expenses).sort((a, b) =>
-    b.localeCompare(a),
-  );
+  const sortedDates = Object.keys(grouped_expenses).sort((a, b) => b.localeCompare(a));
 
   const getDateLabel = (dateStr: string) => {
     const date = parseISO(dateStr);
@@ -258,9 +240,7 @@ export function ExpenseList({
     <div className="space-y-6">
       {sortedDates.map((date) => (
         <div key={date}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">
-            {getDateLabel(date)}
-          </h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">{getDateLabel(date)}</h3>
           <div className="space-y-2">
             {grouped_expenses[date].map((expense) => (
               <ExpenseCard

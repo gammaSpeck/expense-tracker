@@ -126,7 +126,6 @@ Example colors (generate 36 total):
 
 - **Route:** `/add` or modal overlay
 - **Form Fields:**
-
   1. **Value** (required)
      - Number input, prefixed with `₹` symbol
      - Validation: Must be positive, max 1 Crore (10,000,000)
@@ -261,19 +260,16 @@ Example colors (generate 36 total):
 **Layout:**
 
 1. **Header Section:**
-
    - App title/logo
    - Theme toggle button (sun/moon icon)
    - Settings/menu icon (future use)
 
 2. **Monthly Summary Card:**
-
    - Large display: "This Month's Expenses: ₹XX,XXX"
    - Subtitle: "Excluding Adhoc: ₹XX,XXX" (smaller text)
    - Date range: "1 Dec - 17 Dec 2025"
 
 3. **Search Bar:**
-
    - Placed prominently at the top of the transactions section
    - Filters expenses in real-time by:
      - Description (partial match)
@@ -283,7 +279,6 @@ Example colors (generate 36 total):
    - Placeholder: "Search by description, category, or tag..."
 
 4. **Recent Transactions Section:**
-
    - Title: "Recent Transactions"
    - List of last 10 expenses, each showing:
      - Category icon (circular, colored)
@@ -310,7 +305,6 @@ Example colors (generate 36 total):
 **Features:**
 
 1. **Search Bar:**
-
    - Fixed at top of screen (sticky)
    - Same functionality as home screen search
    - Filters the entire transaction list in real-time
@@ -360,7 +354,6 @@ Example colors (generate 36 total):
 **Layout:**
 
 1. **Filter Section (top):**
-
    - **Time Period Selector:**
      - Tabs/Buttons: "Week" | "Month" | "Year" | "Custom"
      - Default: "Month" (current month)
@@ -372,14 +365,12 @@ Example colors (generate 36 total):
      - e.g., "December 2025 | Excluding Adhoc"
 
 2. **Summary Stats Cards:**
-
    - Total Expenses (₹XXX)
    - Number of Transactions
    - Average Expense (₹XXX)
    - Top Category (name + % of total)
 
 3. **Pie Chart - Category Breakdown:**
-
    - **Chart:** Pie/Donut chart showing percentage breakdown by category
    - Use category colors for segments
    - Legend on right/bottom showing:
@@ -390,7 +381,6 @@ Example colors (generate 36 total):
    - Responsive: donut on desktop, pie on mobile
 
 4. **Bar Chart - Spending Trends:**
-
    - **Chart:** Bar chart showing spending over time
    - X-axis: Time period (days for week view, weeks for month, months for year)
    - Y-axis: Total expenses (₹)
@@ -627,7 +617,6 @@ Use React Router with these routes:
 Generate a complete, production-ready Vite + React + TypeScript application with:
 
 1. **File Structure:**
-
    - `/src/components` - Reusable shadcn/ui components
    - `/src/pages` - Page components for each route
    - `/src/lib` - Utilities (db. ts, utils.ts)
@@ -636,7 +625,6 @@ Generate a complete, production-ready Vite + React + TypeScript application with
    - `/public` - Static assets, PWA icons
 
 2. **Key Files to Generate:**
-
    - `vite.config.ts` - With PWA plugin configuration
    - `src/lib/db.ts` - Dexie.js database setup
    - `src/App.tsx` - Main app with routing

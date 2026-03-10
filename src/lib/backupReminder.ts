@@ -12,12 +12,7 @@ function toDateKey(value: Date): string {
 }
 
 function isReminderSchedule(value: unknown): value is BackupReminderSchedule {
-  return (
-    value === "never" ||
-    value === "daily" ||
-    value === "weekly" ||
-    value === "monthly"
-  );
+  return value === "never" || value === "daily" || value === "weekly" || value === "monthly";
 }
 
 export function getBackupReminderPreferences(): BackupReminderPreferences {
@@ -42,10 +37,7 @@ export function shouldShowBackupReminderBanner(
   const todayKey = toDateKey(now);
   if (preferences.bannerLastShownDate === todayKey) return false;
 
-  const daysSinceLastBackup = getDaysSinceLastBackup(
-    preferences.lastBackupDate,
-    now,
-  );
+  const daysSinceLastBackup = getDaysSinceLastBackup(preferences.lastBackupDate, now);
 
   if (daysSinceLastBackup === null) return true;
 
@@ -98,17 +90,13 @@ export function getDaysSinceLastBackup(
   return Math.max(0, differenceInCalendarDays(now, parsed));
 }
 
-export function markBackupReminderBannerShown(
-  now: Date = new Date(),
-): BackupReminderPreferences {
+export function markBackupReminderBannerShown(now: Date = new Date()): BackupReminderPreferences {
   return userPreferences.updateBackupReminderPreferences({
     bannerLastShownDate: toDateKey(now),
   });
 }
 
-export function markBackupCompleted(
-  now: Date = new Date(),
-): BackupReminderPreferences {
+export function markBackupCompleted(now: Date = new Date()): BackupReminderPreferences {
   return userPreferences.updateBackupReminderPreferences({
     lastBackupDate: toDateKey(now),
   });

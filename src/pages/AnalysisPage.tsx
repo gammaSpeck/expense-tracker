@@ -1,14 +1,6 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { LazyMotion, domAnimation, m } from "framer-motion";
-import {
-  format,
-  subWeeks,
-  subMonths,
-  subYears,
-  addWeeks,
-  addMonths,
-  addYears,
-} from "date-fns";
+import { format, subWeeks, subMonths, subYears, addWeeks, addMonths, addYears } from "date-fns";
 
 import {
   Download,
@@ -24,20 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { cn } from "@/lib/utils";
-import {
-  useAnalysisSummary,
-  useCategories,
-  getDateRangeForPeriod,
-} from "@/hooks/useExpenseData";
+import { useAnalysisSummary, useCategories, getDateRangeForPeriod } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
 import { toast } from "sonner";
@@ -50,9 +34,7 @@ import {
   TrendGranularity,
 } from "@/components/analysis/analysisUtils";
 
-const CategoryBreakdown = lazy(
-  () => import("@/components/analysis/CategoryBreakdown"),
-);
+const CategoryBreakdown = lazy(() => import("@/components/analysis/CategoryBreakdown"));
 const TrendSection = lazy(() => import("@/components/analysis/TrendSection"));
 
 // --- Component ---
@@ -62,8 +44,7 @@ export default function AnalysisPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [customRange, setCustomRange] = useState<DateRange | undefined>();
   const [excludeAdhoc, setExcludeAdhoc] = useState(true);
-  const [trendGranularity, setTrendGranularity] =
-    useState<TrendGranularity>("day");
+  const [trendGranularity, setTrendGranularity] = useState<TrendGranularity>("day");
   const [showExportDialog, setShowExportDialog] = useState(false);
   const categories = useCategories();
 
@@ -75,10 +56,7 @@ export default function AnalysisPage() {
     if (periodTab === "custom") {
       return getDateRangeForPeriod("month", selectedDate);
     }
-    return getDateRangeForPeriod(
-      periodTab as "week" | "month" | "year",
-      selectedDate,
-    );
+    return getDateRangeForPeriod(periodTab as "week" | "month" | "year", selectedDate);
   }, [periodTab, selectedDate, customRange]);
 
   const filters: ExpenseFilters = {
@@ -140,22 +118,16 @@ export default function AnalysisPage() {
   }, [periodTab]);
 
   // Pie chart data
-  const nonZeroCategories = summary.categoryBreakdown.filter(
-    (cat) => cat.total > 0,
-  );
+  const nonZeroCategories = summary.categoryBreakdown.filter((cat) => cat.total > 0);
 
-  const totalForPie = nonZeroCategories.reduce(
-    (sum, cat) => sum + cat.total,
-    0,
-  );
+  const totalForPie = nonZeroCategories.reduce((sum, cat) => sum + cat.total, 0);
 
   const pieData = nonZeroCategories.map((cat) => ({
     name: cat.categoryName,
     value: cat.total,
     color: cat.categoryColor,
     total: totalForPie,
-    percentage:
-      totalForPie > 0 ? ((cat.total / totalForPie) * 100).toFixed(1) : "0",
+    percentage: totalForPie > 0 ? ((cat.total / totalForPie) * 100).toFixed(1) : "0",
   }));
 
   // Bar chart data with granularity
@@ -169,15 +141,7 @@ export default function AnalysisPage() {
     try {
       const data = await exportAllData();
       const csvRows = [
-        [
-          "Date",
-          "Time",
-          "Category",
-          "Description",
-          "Value",
-          "Tags",
-          "IsAdhoc",
-        ].join(","),
+        ["Date", "Time", "Category", "Description", "Value", "Tags", "IsAdhoc"].join(","),
         ...data.expenses.map((e) => {
           const category = categories.find((c) => c.id === e.category);
           return [
@@ -298,9 +262,7 @@ export default function AnalysisPage() {
                       )}
                     >
                       <CalendarIcon className="h-4 w-4" />
-                      {customRange?.start
-                        ? format(customRange.start, "PP")
-                        : "Pick start"}
+                      {customRange?.start ? format(customRange.start, "PP") : "Pick start"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -331,9 +293,7 @@ export default function AnalysisPage() {
                       )}
                     >
                       <CalendarIcon className="h-4 w-4" />
-                      {customRange?.end
-                        ? format(customRange.end, "PP")
-                        : "Pick end"}
+                      {customRange?.end ? format(customRange.end, "PP") : "Pick end"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -360,11 +320,7 @@ export default function AnalysisPage() {
             <Label htmlFor="exclude-adhoc" className="cursor-pointer text-sm">
               Exclude Adhoc Expenses
             </Label>
-            <Switch
-              id="exclude-adhoc"
-              checked={excludeAdhoc}
-              onCheckedChange={setExcludeAdhoc}
-            />
+            <Switch id="exclude-adhoc" checked={excludeAdhoc} onCheckedChange={setExcludeAdhoc} />
           </div>
         </m.div>
 
@@ -438,10 +394,7 @@ export default function AnalysisPage() {
             >
               <Suspense
                 fallback={
-                  <div
-                    className="h-64 rounded-lg bg-muted/40 animate-pulse"
-                    aria-hidden="true"
-                  />
+                  <div className="h-64 rounded-lg bg-muted/40 animate-pulse" aria-hidden="true" />
                 }
               >
                 <CategoryBreakdown
@@ -462,10 +415,7 @@ export default function AnalysisPage() {
             >
               <Suspense
                 fallback={
-                  <div
-                    className="h-64 rounded-lg bg-muted/40 animate-pulse"
-                    aria-hidden="true"
-                  />
+                  <div className="h-64 rounded-lg bg-muted/40 animate-pulse" aria-hidden="true" />
                 }
               >
                 <TrendSection
@@ -496,11 +446,7 @@ export default function AnalysisPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setShowExportDialog(true)}
-          >
+          <Button variant="outline" className="w-full" onClick={() => setShowExportDialog(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>

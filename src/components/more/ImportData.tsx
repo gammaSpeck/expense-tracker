@@ -122,10 +122,7 @@ export function ImportData() {
 
       <div className="space-y-3">
         <Label className="text-sm text-muted-foreground">Import Mode</Label>
-        <RadioGroup
-          value={mode}
-          onValueChange={(v) => setMode(v as "merge" | "override")}
-        >
+        <RadioGroup value={mode} onValueChange={(v) => setMode(v as "merge" | "override")}>
           <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
             <RadioGroupItem value="merge" id="merge" className="mt-1" />
             <div>
@@ -140,15 +137,10 @@ export function ImportData() {
           <div className="flex items-start gap-3 p-3 rounded-lg border border-destructive/30">
             <RadioGroupItem value="override" id="override" className="mt-1" />
             <div>
-              <Label
-                htmlFor="override"
-                className="cursor-pointer font-medium text-destructive"
-              >
+              <Label htmlFor="override" className="cursor-pointer font-medium text-destructive">
                 Override (Destructive)
               </Label>
-              <p className="text-xs text-muted-foreground">
-                Delete all existing data and replace
-              </p>
+              <p className="text-xs text-muted-foreground">Delete all existing data and replace</p>
             </div>
           </div>
         </RadioGroup>
@@ -158,11 +150,7 @@ export function ImportData() {
         <Button variant="outline" onClick={handleCancel} className="flex-1">
           Cancel
         </Button>
-        <Button
-          onClick={handleImport}
-          disabled={isImporting}
-          className="flex-1"
-        >
+        <Button onClick={handleImport} disabled={isImporting} className="flex-1">
           {isImporting ? "Importing..." : "Confirm Import"}
         </Button>
       </div>
@@ -175,42 +163,38 @@ async function mergeImportData(data: {
   expenses: Expense[];
   categories: Category[];
 }): Promise<void> {
-  await db.transaction(
-    "rw",
-    [db.expenses, db.categories, db.tagMetadata],
-    async () => {
-      // Import categories (skip if already exists by id)
-      for (const category of data.categories) {
-        const exists = await db.categories.get(category.id);
-        if (!exists) {
-          await db.categories.add(category);
-        }
+  await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    // Import categories (skip if already exists by id)
+    for (const category of data.categories) {
+      const exists = await db.categories.get(category.id);
+      if (!exists) {
+        await db.categories.add(category);
       }
+    }
 
-      // Import expenses (skip if already exists by id)
-      for (const expense of data.expenses) {
-        const exists = await db.expenses.get(expense.id);
-        if (!exists) {
-          await db.expenses.add(expense);
+    // Import expenses (skip if already exists by id)
+    for (const expense of data.expenses) {
+      const exists = await db.expenses.get(expense.id);
+      if (!exists) {
+        await db.expenses.add(expense);
 
-          // Update tag metadata
-          for (const tag of expense.tags) {
-            const tagMeta = await db.tagMetadata.get(tag);
-            if (tagMeta) {
-              await db.tagMetadata.update(tag, {
-                count: tagMeta.count + 1,
-                lastUsed: new Date().toISOString(),
-              });
-            } else {
-              await db.tagMetadata.add({
-                tag,
-                count: 1,
-                lastUsed: new Date().toISOString(),
-              });
-            }
+        // Update tag metadata
+        for (const tag of expense.tags) {
+          const tagMeta = await db.tagMetadata.get(tag);
+          if (tagMeta) {
+            await db.tagMetadata.update(tag, {
+              count: tagMeta.count + 1,
+              lastUsed: new Date().toISOString(),
+            });
+          } else {
+            await db.tagMetadata.add({
+              tag,
+              count: 1,
+              lastUsed: new Date().toISOString(),
+            });
           }
         }
       }
-    },
-  );
+    }
+  });
 }

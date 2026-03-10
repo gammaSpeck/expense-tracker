@@ -11,9 +11,7 @@ import { GoogleDriveSettings } from "@/components/more/GoogleDriveSettings";
 export default function DataManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const autoOpenExport = Boolean(
-    (location.state as { openExport?: boolean } | null)?.openExport,
-  );
+  const autoOpenExport = Boolean((location.state as { openExport?: boolean } | null)?.openExport);
 
   return (
     <LazyMotion features={domAnimation}>

@@ -1,6 +1,7 @@
 # Detailed Examples by Dimension
 
 ## Table of Contents
+
 - [1. Naming Issues](#1-naming-issues)
 - [2. Function Issues](#2-function-issues)
 - [3. Duplication Issues](#3-duplication-issues)
@@ -14,12 +15,12 @@
 ### Meaningless Names
 
 ```typescript
-// ❌ 
-const list = getUsers();           // list of what?
-const flag = checkPermission();    // what flag?
-const handler = () => {};          // handles what?
+// ❌
+const list = getUsers(); // list of what?
+const flag = checkPermission(); // what flag?
+const handler = () => {}; // handles what?
 
-// ✅ 
+// ✅
 const activeUsers = getUsers();
 const hasEditPermission = checkPermission();
 const onFormSubmit = () => {};
@@ -42,7 +43,7 @@ getUserSettings();
 ### Boolean Naming
 
 ```typescript
-// ❌ 
+// ❌
 const open = true;
 const disabled = false;
 
@@ -82,7 +83,7 @@ async function processOrder(order) {
 ### Too Many Parameters
 
 ```typescript
-// ❌ 
+// ❌
 function createUser(name, email, age, address, phone, role, department, manager) {}
 
 // ✅ Use configuration object
@@ -101,8 +102,8 @@ function createUser(params: CreateUserParams) {}
 // ❌ Function name implies read-only, but has side effects
 function getUser(id) {
   const user = db.find(id);
-  user.lastAccess = new Date();  // Side effect!
-  db.save(user);                  // Side effect!
+  user.lastAccess = new Date(); // Side effect!
+  db.save(user); // Side effect!
   return user;
 }
 
@@ -127,15 +128,15 @@ function recordUserAccess(id) {
 ```typescript
 // ❌ Repeated validation pattern
 function validateUser(user) {
-  if (!user.name) throw new Error('Name required');
-  if (!user.email) throw new Error('Email required');
-  if (!user.age) throw new Error('Age required');
+  if (!user.name) throw new Error("Name required");
+  if (!user.email) throw new Error("Email required");
+  if (!user.age) throw new Error("Age required");
 }
 
 function validateProduct(product) {
-  if (!product.name) throw new Error('Name required');
-  if (!product.price) throw new Error('Price required');
-  if (!product.sku) throw new Error('SKU required');
+  if (!product.name) throw new Error("Name required");
+  if (!product.price) throw new Error("Price required");
+  if (!product.sku) throw new Error("SKU required");
 }
 
 // ✅ Extract generic validator
@@ -145,8 +146,8 @@ function validateRequired(obj, fields) {
   }
 }
 
-validateRequired(user, ['name', 'email', 'age']);
-validateRequired(product, ['name', 'price', 'sku']);
+validateRequired(user, ["name", "email", "age"]);
+validateRequired(product, ["name", "price", "sku"]);
 ```
 
 ### Similar Error Handling
@@ -155,19 +156,19 @@ validateRequired(product, ['name', 'price', 'sku']);
 // ❌ Repeated try-catch pattern
 async function fetchUsers() {
   try {
-    return await api.get('/users');
+    return await api.get("/users");
   } catch (e) {
-    logger.error('Failed to fetch users', e);
-    throw new ApiError('Failed to fetch users');
+    logger.error("Failed to fetch users", e);
+    throw new ApiError("Failed to fetch users");
   }
 }
 
 async function fetchProducts() {
   try {
-    return await api.get('/products');
+    return await api.get("/products");
   } catch (e) {
-    logger.error('Failed to fetch products', e);
-    throw new ApiError('Failed to fetch products');
+    logger.error("Failed to fetch products", e);
+    throw new ApiError("Failed to fetch products");
   }
 }
 
@@ -181,8 +182,8 @@ async function apiCall(endpoint, errorMessage) {
   }
 }
 
-const users = await apiCall('/users', 'Failed to fetch users');
-const products = await apiCall('/products', 'Failed to fetch products');
+const users = await apiCall("/users", "Failed to fetch users");
+const products = await apiCall("/products", "Failed to fetch products");
 ```
 
 ---
@@ -198,12 +199,16 @@ interface IUserRepository {
 }
 
 class UserRepository implements IUserRepository {
-  findById(id: string): User { /* ... */ }
+  findById(id: string): User {
+    /* ... */
+  }
 }
 
 // ✅ Use class directly, abstract when needed
 class UserRepository {
-  findById(id: string): User { /* ... */ }
+  findById(id: string): User {
+    /* ... */
+  }
 }
 ```
 
@@ -212,12 +217,12 @@ class UserRepository {
 ```typescript
 // ❌ Overly defensive code
 function add(a, b) {
-  if (typeof a !== 'number') throw new Error('a must be number');
-  if (typeof b !== 'number') throw new Error('b must be number');
-  if (isNaN(a)) throw new Error('a is NaN');
-  if (isNaN(b)) throw new Error('b is NaN');
-  if (!isFinite(a)) throw new Error('a is not finite');
-  if (!isFinite(b)) throw new Error('b is not finite');
+  if (typeof a !== "number") throw new Error("a must be number");
+  if (typeof b !== "number") throw new Error("b must be number");
+  if (isNaN(a)) throw new Error("a is NaN");
+  if (isNaN(b)) throw new Error("b is NaN");
+  if (!isFinite(a)) throw new Error("a is not finite");
+  if (!isFinite(b)) throw new Error("b is not finite");
   return a + b;
 }
 
@@ -230,11 +235,12 @@ function add(a: number, b: number): number {
 ### Never-Used Configuration
 
 ```typescript
-// ❌ 
-if (config.enableNewFeature) {  // Always true
+// ❌
+if (config.enableNewFeature) {
+  // Always true
   newFeature();
 } else {
-  oldFeature();  // Dead code
+  oldFeature(); // Dead code
 }
 
 // ✅ Remove dead code
@@ -248,29 +254,35 @@ newFeature();
 ### Numbers in Business Logic
 
 ```typescript
-// ❌ 
-if (user.age >= 18) {}
-if (order.total > 100) {}
-if (retryCount < 3) {}
+// ❌
+if (user.age >= 18) {
+}
+if (order.total > 100) {
+}
+if (retryCount < 3) {
+}
 
-// ✅ 
+// ✅
 const LEGAL_AGE = 18;
 const FREE_SHIPPING_THRESHOLD = 100;
 const MAX_RETRY_ATTEMPTS = 3;
 
-if (user.age >= LEGAL_AGE) {}
-if (order.total > FREE_SHIPPING_THRESHOLD) {}
-if (retryCount < MAX_RETRY_ATTEMPTS) {}
+if (user.age >= LEGAL_AGE) {
+}
+if (order.total > FREE_SHIPPING_THRESHOLD) {
+}
+if (retryCount < MAX_RETRY_ATTEMPTS) {
+}
 ```
 
 ### Time Constants
 
 ```typescript
-// ❌ 
-setTimeout(fn, 86400000);  // How long is this?
+// ❌
+setTimeout(fn, 86400000); // How long is this?
 setInterval(poll, 300000); // How long is this?
 
-// ✅ 
+// ✅
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
@@ -281,11 +293,13 @@ setInterval(poll, FIVE_MINUTES_MS);
 ### HTTP Status Codes
 
 ```typescript
-// ❌ 
-if (response.status === 200) {}
-if (response.status === 404) {}
+// ❌
+if (response.status === 200) {
+}
+if (response.status === 404) {
+}
 
-// ✅ 
+// ✅
 const HTTP_OK = 200;
 const HTTP_NOT_FOUND = 404;
 // Or use constant library: import { StatusCodes } from 'http-status-codes';

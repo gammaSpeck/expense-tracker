@@ -86,9 +86,7 @@ export function BackupReminderSettings() {
         <div className="text-sm font-medium">Frequency</div>
         <Select
           value={schedule}
-          onValueChange={(value) =>
-            handleScheduleChange(value as BackupReminderSchedule)
-          }
+          onValueChange={(value) => handleScheduleChange(value as BackupReminderSchedule)}
         >
           <SelectTrigger className="h-8 w-32 text-xs">
             <SelectValue placeholder="Select" />

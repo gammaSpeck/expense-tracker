@@ -14,9 +14,7 @@ interface CurrencyContextType {
   formatValue: (value: number) => string;
 }
 
-const CurrencyContext = createContext<CurrencyContextType | undefined>(
-  undefined,
-);
+const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currencyCode, setCurrencyCodeState] = useState<string>(() => {

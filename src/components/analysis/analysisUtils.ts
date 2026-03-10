@@ -1,11 +1,4 @@
-import {
-  format,
-  parseISO,
-  startOfWeek,
-  endOfWeek,
-  differenceInDays,
-  isSameMonth,
-} from "date-fns";
+import { format, parseISO, startOfWeek, endOfWeek, differenceInDays, isSameMonth } from "date-fns";
 import type { TimePeriod, DateRange, DailySummary } from "@/types/expense";
 
 export type TrendGranularity = "day" | "week" | "month";

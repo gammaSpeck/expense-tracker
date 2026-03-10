@@ -91,23 +91,16 @@ class UserPreferences {
 
       return {
         reminderSchedule: schedule,
-        lastBackupDate:
-          typeof parsed.lastBackupDate === "string"
-            ? parsed.lastBackupDate
-            : null,
+        lastBackupDate: typeof parsed.lastBackupDate === "string" ? parsed.lastBackupDate : null,
         bannerLastShownDate:
-          typeof parsed.bannerLastShownDate === "string"
-            ? parsed.bannerLastShownDate
-            : null,
+          typeof parsed.bannerLastShownDate === "string" ? parsed.bannerLastShownDate : null,
       };
     } catch {
       return DEFAULT_BACKUP_REMINDER_PREFERENCES;
     }
   }
 
-  setBackupReminderPreferences(
-    preferences: BackupReminderPreferences,
-  ): BackupReminderPreferences {
+  setBackupReminderPreferences(preferences: BackupReminderPreferences): BackupReminderPreferences {
     this.setItem(STORAGE_KEYS.backupReminder, JSON.stringify(preferences));
     return preferences;
   }

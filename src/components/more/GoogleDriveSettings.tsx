@@ -62,10 +62,8 @@ export function GoogleDriveSettings() {
           Google Drive Backup
         </h2>
         <p className="text-xs text-muted-foreground">
-          Connect your Google account to back up directly to Drive. Backups are
-          saved to the{" "}
-          <span className="font-medium text-foreground">ExTrack Backups</span>{" "}
-          folder.
+          Connect your Google account to back up directly to Drive. Backups are saved to the{" "}
+          <span className="font-medium text-foreground">ExTrack Backups</span> folder.
         </p>
       </div>
 
@@ -79,14 +77,9 @@ export function GoogleDriveSettings() {
                 Connected
               </span>
             </div>
+            <p className="text-xs text-muted-foreground pl-5">{creds!.accountEmail}</p>
             <p className="text-xs text-muted-foreground pl-5">
-              {creds!.accountEmail}
-            </p>
-            <p className="text-xs text-muted-foreground pl-5">
-              Folder:{" "}
-              <span className="font-medium text-foreground">
-                ExTrack Backups
-              </span>
+              Folder: <span className="font-medium text-foreground">ExTrack Backups</span>
             </p>
           </div>
 
@@ -111,9 +104,8 @@ export function GoogleDriveSettings() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Disconnect Google Drive?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will remove your Google account from ExTrack. Existing
-                  backups in your Drive will not be deleted — you can reconnect
-                  anytime.
+                  This will remove your Google account from ExTrack. Existing backups in your Drive
+                  will not be deleted — you can reconnect anytime.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

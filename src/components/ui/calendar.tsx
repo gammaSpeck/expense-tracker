@@ -6,12 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export type CalendarProps = DayPickerProps;
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}: CalendarProps) {
+function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -26,8 +21,7 @@ function Calendar({
           "inline-flex items-center justify-center rounded-md h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
         month_grid: "w-full border-collapse mt-4",
         weekdays: "flex",
-        weekday:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        weekday: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
         week: "flex w-full mt-2",
         day: "h-9 w-9 text-center text-sm relative",
         day_button:

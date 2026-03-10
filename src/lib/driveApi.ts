@@ -31,12 +31,9 @@ async function findBackupFolder(accessToken: string): Promise<string | null> {
   const query = encodeURIComponent(
     `name = '${escapeDriveQuery(BACKUP_FOLDER_NAME)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
   );
-  const res = await fetch(
-    `${DRIVE_API}/files?q=${query}&fields=files(id,name)`,
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    },
-  );
+  const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id,name)`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
   if (!res.ok) throw new Error("Failed to search for backup folder in Drive.");
   const data = await res.json();
   const files = data.files as { id: string; name: string }[];
@@ -63,9 +60,7 @@ async function createBackupFolder(accessToken: string): Promise<string> {
 /**
  * Returns the folder ID for `ExTrack Backups`, creating it if it doesn't exist.
  */
-export async function findOrCreateBackupFolder(
-  accessToken: string,
-): Promise<string> {
+export async function findOrCreateBackupFolder(accessToken: string): Promise<string> {
   const existing = await findBackupFolder(accessToken);
   if (existing) return existing;
   return createBackupFolder(accessToken);
@@ -97,9 +92,7 @@ async function findExistingFile(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(
-      err?.error?.message ?? `Drive file search failed (${res.status})`,
-    );
+    throw new Error(err?.error?.message ?? `Drive file search failed (${res.status})`);
   }
   const data = await res.json();
   const files = data.files as { id: string }[];
@@ -117,21 +110,14 @@ export async function uploadFileToDrive(
   folderID: string,
   accessToken: string,
 ): Promise<UploadResult> {
-  const existingFileId = await findExistingFile(
-    filename,
-    folderID,
-    accessToken,
-  );
+  const existingFileId = await findExistingFile(filename, folderID, accessToken);
 
   const body = new FormData();
   body.append(
     "metadata",
-    new Blob(
-      [JSON.stringify({ name: filename, mimeType: "application/json" })],
-      {
-        type: "application/json",
-      },
-    ),
+    new Blob([JSON.stringify({ name: filename, mimeType: "application/json" })], {
+      type: "application/json",
+    }),
   );
   body.append("file", blob);
 
@@ -162,14 +148,11 @@ export async function uploadFileToDrive(
         { type: "application/json" },
       ),
     );
-    res = await fetch(
-      `${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body,
-      },
-    );
+    res = await fetch(`${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body,
+    });
   }
 
   if (!res.ok) {

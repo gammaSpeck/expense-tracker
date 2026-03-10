@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import {
   Select,
   SelectContent,
@@ -76,21 +69,14 @@ export default function TrendSection({
               }
             />
             <Tooltip
-              formatter={(value: number) => [
-                `${currency.symbol}${formatValue(value)}`,
-                "Amount",
-              ]}
+              formatter={(value: number) => [`${currency.symbol}${formatValue(value)}`, "Amount"]}
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
                 borderRadius: "0.5rem",
               }}
             />
-            <Bar
-              dataKey="amount"
-              fill="hsl(var(--primary))"
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

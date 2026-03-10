@@ -7,11 +7,7 @@ import { Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExpenseList } from "@/components/expenses/ExpenseCard";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import {
-  useMonthSummary,
-  useRecentExpenses,
-  useCategories,
-} from "@/hooks/useExpenseData";
+import { useMonthSummary, useRecentExpenses, useCategories } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
 import {
@@ -46,8 +42,7 @@ export default function HomePage() {
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const isMobile = useIsMobile();
 
-  const { total, totalExcludingAdhoc, monthStart, monthEnd } =
-    useMonthSummary();
+  const { total, totalExcludingAdhoc, monthStart, monthEnd } = useMonthSummary();
   const { currency, formatValue } = useCurrency();
   const categories = useCategories();
   const displayExpenses = useRecentExpenses(10);
@@ -145,16 +140,12 @@ export default function HomePage() {
         {isMobile && <FloatingActionButton />}
 
         {/* Delete Confirmation Dialog */}
-        <AlertDialog
-          open={!!expenseToDelete}
-          onOpenChange={() => setExpenseToDelete(null)}
-        >
+        <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this expense? This action cannot
-                be undone.
+                Are you sure you want to delete this expense? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

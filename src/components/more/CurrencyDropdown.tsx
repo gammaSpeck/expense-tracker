@@ -1,8 +1,4 @@
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   Command,
   CommandInput,
@@ -32,17 +28,15 @@ export default function CurrencyDropdown({ compact = false }: CurrencyDropdownPr
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
         ) : (
-        <button className="w-full text-left rounded-md border px-3 py-2 bg-transparent">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{currency.code}</span>
-              <span className="text-sm text-muted-foreground">
-                {currency.name}
-              </span>
+          <button className="w-full text-left rounded-md border px-3 py-2 bg-transparent">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{currency.code}</span>
+                <span className="text-sm text-muted-foreground">{currency.name}</span>
+              </div>
+              <div className="text-lg">{currency.symbol}</div>
             </div>
-            <div className="text-lg">{currency.symbol}</div>
-          </div>
-        </button>
+          </button>
         )}
       </PopoverTrigger>
       <PopoverContent className="w-[320px]">
@@ -63,9 +57,7 @@ export default function CurrencyDropdown({ compact = false }: CurrencyDropdownPr
                     <div className="font-medium">
                       {c.code} — {c.name}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {c.locale}
-                    </div>
+                    <div className="text-xs text-muted-foreground">{c.locale}</div>
                   </div>
                   <div className="ml-4">{c.symbol}</div>
                 </div>
@@ -77,4 +69,3 @@ export default function CurrencyDropdown({ compact = false }: CurrencyDropdownPr
     </Popover>
   );
 }
-

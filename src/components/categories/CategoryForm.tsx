@@ -5,11 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryFormData } from "@/types/expense";
-import {
-  addCategory,
-  updateCategory,
-  getCategoryByName,
-} from "@/db/expenseTrackerDb";
+import { addCategory, updateCategory, getCategoryByName } from "@/db/expenseTrackerDb";
 import { IconPicker } from "@/components/categories/CategoryIcon";
 import { ColorPicker } from "@/components/categories/ColorPicker";
 import { CATEGORY_COLORS } from "@/db/expenseTrackerDb";
@@ -27,11 +23,7 @@ interface CategoryFormProps {
   onCancel?: () => void;
 }
 
-export function CategoryForm({
-  category,
-  onSuccess,
-  onCancel,
-}: CategoryFormProps) {
+export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
   const defaultValues: CategoryFormData = category
     ? {
         name: category.name,
@@ -41,8 +33,7 @@ export function CategoryForm({
     : {
         name: "",
         icon: "Tag",
-        color:
-          CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)],
+        color: CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)],
       };
 
   const {
@@ -90,15 +81,8 @@ export function CategoryForm({
       {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          placeholder="Category name"
-          {...register("name")}
-          autoFocus
-        />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
+        <Input id="name" placeholder="Category name" {...register("name")} autoFocus />
+        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
       </div>
 
       {/* Icon Picker */}
@@ -114,21 +98,13 @@ export function CategoryForm({
       {/* Color Picker */}
       <div className="space-y-2">
         <Label>Color</Label>
-        <ColorPicker
-          value={selectedColor}
-          onChange={(color) => setValue("color", color)}
-        />
+        <ColorPicker value={selectedColor} onChange={(color) => setValue("color", color)} />
       </div>
 
       {/* Actions */}
       <div className="flex gap-3 pt-4">
         {onCancel && (
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={onCancel}
-          >
+          <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
             Cancel
           </Button>
         )}

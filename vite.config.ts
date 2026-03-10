@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => ({
         day: "2-digit",
         month: "long",
         year: "numeric",
-      })
+      }),
     ),
   },
 }));

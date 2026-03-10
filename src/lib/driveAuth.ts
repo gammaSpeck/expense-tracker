@@ -17,13 +17,11 @@ export class DriveSessionExpiredError extends Error {
   }
 }
 
-const CLIENT_ID = import.meta.env
-  .VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_ID as string;
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_ID as string;
 // For Desktop app OAuth clients, client_secret is required by Google's token
 // endpoint even with PKCE. This is not truly secret for Desktop app clients —
 // PKCE provides the actual security guarantee.
-const CLIENT_SECRET = import.meta.env
-  .VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_SECRET as string;
+const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_SECRET as string;
 const SCOPES = "https://www.googleapis.com/auth/drive.file email profile";
 const SESSION_VERIFIER_KEY = "expense-tracker-pkce-verifier";
 
@@ -85,14 +83,10 @@ export interface TokenResponse {
   expires_in: number; // seconds
 }
 
-export async function exchangeCodeForTokens(
-  code: string,
-): Promise<TokenResponse> {
+export async function exchangeCodeForTokens(code: string): Promise<TokenResponse> {
   const verifier = sessionStorage.getItem(SESSION_VERIFIER_KEY);
   if (!verifier)
-    throw new Error(
-      "PKCE verifier missing from session. Please try connecting again.",
-    );
+    throw new Error("PKCE verifier missing from session. Please try connecting again.");
 
   const redirectUri = `${window.location.origin}/oauth/callback`;
 
@@ -160,9 +154,7 @@ export async function getValidAccessToken(): Promise<string> {
   if (!isTokenExpired(creds)) return creds.accessToken;
 
   try {
-    const { accessToken, expiresAt } = await refreshAccessToken(
-      creds.refreshToken,
-    );
+    const { accessToken, expiresAt } = await refreshAccessToken(creds.refreshToken);
     await saveDriveCredentials({ ...creds, accessToken, expiresAt });
     return accessToken;
   } catch {

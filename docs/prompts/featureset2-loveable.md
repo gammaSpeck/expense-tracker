@@ -251,13 +251,11 @@ export function ExpenseForm({ mode, expenseId, onSuccess }: ExpenseFormProps) {
 **Actions:**
 
 1. **Save Button:**
-
    - Call `updateExpense(id, updates)` from `src/lib/db.ts`
    - Show toast: "Expense updated successfully"
    - Navigate back (see logic below)
 
 2. **Delete Button:**
-
    - Red/destructive styling
    - Confirmation dialog: "Are you sure you want to delete this expense? This action cannot be undone."
    - Call `deleteExpense(id)` from `src/lib/db.ts`
@@ -356,15 +354,15 @@ export function FloatingActionButton() {
     <button
       onClick={() => navigate("/add")}
       className="
-        fixed 
-        bottom-20 
-        left-1/2 
+        fixed
+        bottom-20
+        left-1/2
         -translate-x-1/2
-        w-14 h-14 
+        w-14 h-14
         rounded-full
-        bg-primary 
+        bg-primary
         text-primary-foreground
-        shadow-lg 
+        shadow-lg
         hover:shadow-xl
         flex items-center justify-center
         transition-all duration-200
@@ -513,7 +511,7 @@ export function ThemeSelector() {
           key={value}
           onClick={() => setTheme(value)}
           className={`
-            flex-1 flex items-center justify-center gap-2 
+            flex-1 flex items-center justify-center gap-2
             px-4 py-3 rounded-md transition-all
             ${
               theme === value
@@ -827,30 +825,26 @@ export async function mergeImportData(data: {
   expenses: Expense[];
   categories: Category[];
 }): Promise<void> {
-  await db.transaction(
-    "rw",
-    [db.expenses, db.categories, db.tagMetadata],
-    async () => {
-      // Import categories (skip if already exists)
-      for (const category of data.categories) {
-        const exists = await db.categories.get(category.id);
-        if (!exists) {
-          await db.categories.add(category);
-        }
+  await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    // Import categories (skip if already exists)
+    for (const category of data.categories) {
+      const exists = await db.categories.get(category.id);
+      if (!exists) {
+        await db.categories.add(category);
       }
-
-      // Import expenses (skip if already exists)
-      for (const expense of data.expenses) {
-        const exists = await db.expenses.get(expense.id);
-        if (!exists) {
-          await db.expenses.add(expense);
-        }
-      }
-
-      // Rebuild tag metadata
-      // ...  (similar to importData)
     }
-  );
+
+    // Import expenses (skip if already exists)
+    for (const expense of data.expenses) {
+      const exists = await db.expenses.get(expense.id);
+      if (!exists) {
+        await db.expenses.add(expense);
+      }
+    }
+
+    // Rebuild tag metadata
+    // ...  (similar to importData)
+  });
 }
 ```
 

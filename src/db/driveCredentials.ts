@@ -15,9 +15,7 @@ export async function getDriveCredentials(): Promise<DriveCredentials | null> {
   return (await get<DriveCredentials>("creds", store)) ?? null;
 }
 
-export async function saveDriveCredentials(
-  creds: DriveCredentials,
-): Promise<void> {
+export async function saveDriveCredentials(creds: DriveCredentials): Promise<void> {
   await set("creds", creds, store);
 }
 

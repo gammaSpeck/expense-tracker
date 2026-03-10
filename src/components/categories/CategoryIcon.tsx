@@ -20,15 +20,8 @@ const iconSizeClasses = {
   lg: "h-6 w-6",
 };
 
-export function CategoryIcon({
-  icon,
-  color,
-  size = "md",
-  className,
-}: CategoryIconProps) {
-  const IconComponent = icons[icon as keyof typeof icons] as
-    | LucideIcon
-    | undefined;
+export function CategoryIcon({ icon, color, size = "md", className }: CategoryIconProps) {
+  const IconComponent = icons[icon as keyof typeof icons] as LucideIcon | undefined;
   const Icon = IconComponent || MoreHorizontal;
 
   return (
@@ -119,9 +112,7 @@ export function IconPicker({ value, onChange, color }: IconPickerProps) {
   return (
     <div className="grid grid-cols-8 gap-1.5 max-h-48 overflow-y-auto p-2 bg-muted/30 rounded-lg">
       {AVAILABLE_ICONS.map((iconName) => {
-        const IconComponent = icons[iconName as keyof typeof icons] as
-          | LucideIcon
-          | undefined;
+        const IconComponent = icons[iconName as keyof typeof icons] as LucideIcon | undefined;
         if (!IconComponent) return null;
         const isSelected = value === iconName;
 
@@ -132,9 +123,7 @@ export function IconPicker({ value, onChange, color }: IconPickerProps) {
             onClick={() => onChange(iconName)}
             className={cn(
               "p-1.5 rounded-lg transition-all duration-200",
-              isSelected
-                ? "bg-primary/20 ring-2 ring-primary"
-                : "hover:bg-muted"
+              isSelected ? "bg-primary/20 ring-2 ring-primary" : "hover:bg-muted",
             )}
           >
             <IconComponent

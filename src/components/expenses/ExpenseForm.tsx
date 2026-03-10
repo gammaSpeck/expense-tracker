@@ -10,11 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -22,12 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { ExpenseFormData, Expense } from "@/types/expense";
 import { useCategories } from "@/hooks/useExpenseData";
@@ -91,23 +82,14 @@ function initDefaults(expense?: Expense, duplicate?: Expense): ExpenseFormData {
   };
 }
 
-export function ExpenseForm({
-  expense,
-  duplicate,
-  onSuccess,
-  onCancel,
-}: ExpenseFormProps) {
+export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: ExpenseFormProps) {
   const categories = useCategories();
   const [tagInput, setTagInput] = useState("");
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
-  const [descriptionSuggestions, setDescriptionSuggestions] = useState<
-    string[]
-  >([]);
+  const [descriptionSuggestions, setDescriptionSuggestions] = useState<string[]>([]);
   const [showDescriptionDropdown, setShowDescriptionDropdown] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | undefined>(
-    expense?.attachment,
-  );
+  const [imagePreview, setImagePreview] = useState<string | undefined>(expense?.attachment);
 
   const defaultValues: ExpenseFormData = initDefaults(expense, duplicate);
   const { currency } = useCurrency();
@@ -155,8 +137,7 @@ export function ExpenseForm({
   );
 
   const addTag = (tag: string) => {
-    if (tags.length < 4 && !tags.includes(tag))
-      setValue("tags", [...tags, tag]);
+    if (tags.length < 4 && !tags.includes(tag)) setValue("tags", [...tags, tag]);
 
     setTagInput("");
   };
@@ -249,9 +230,7 @@ export function ExpenseForm({
               {...register("value", { valueAsNumber: true })}
             />
           </div>
-          {errors.value && (
-            <p className="text-sm text-destructive">{errors.value.message}</p>
-          )}
+          {errors.value && <p className="text-sm text-destructive">{errors.value.message}</p>}
         </div>
 
         {/* Category Select */}
@@ -264,35 +243,23 @@ export function ExpenseForm({
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category">
-                    {field.value &&
-                      categories.find((c) => c.id === field.value) && (
-                        <div className="flex items-center gap-2">
-                          <CategoryIcon
-                            icon={
-                              categories.find((c) => c.id === field.value)!.icon
-                            }
-                            color={
-                              categories.find((c) => c.id === field.value)!
-                                .color
-                            }
-                            size="sm"
-                          />
-                          <span>
-                            {categories.find((c) => c.id === field.value)!.name}
-                          </span>
-                        </div>
-                      )}
+                    {field.value && categories.find((c) => c.id === field.value) && (
+                      <div className="flex items-center gap-2">
+                        <CategoryIcon
+                          icon={categories.find((c) => c.id === field.value)!.icon}
+                          color={categories.find((c) => c.id === field.value)!.color}
+                          size="sm"
+                        />
+                        <span>{categories.find((c) => c.id === field.value)!.name}</span>
+                      </div>
+                    )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       <div className="flex items-center gap-2">
-                        <CategoryIcon
-                          icon={category.icon}
-                          color={category.color}
-                          size="sm"
-                        />
+                        <CategoryIcon icon={category.icon} color={category.color} size="sm" />
                         <span>{category.name}</span>
                       </div>
                     </SelectItem>
@@ -311,11 +278,7 @@ export function ExpenseForm({
               </Select>
             )}
           />
-          {errors.category && (
-            <p className="text-sm text-destructive">
-              {errors.category.message}
-            </p>
-          )}
+          {errors.category && <p className="text-sm text-destructive">{errors.category.message}</p>}
         </div>
 
         {/* Description */}
@@ -328,11 +291,7 @@ export function ExpenseForm({
             rows={2}
             {...register("description")}
             onFocus={() => {
-              if (
-                description &&
-                description.length >= 2 &&
-                descriptionSuggestions.length > 0
-              ) {
+              if (description && description.length >= 2 && descriptionSuggestions.length > 0) {
                 setShowDescriptionDropdown(true);
               }
             }}
@@ -445,18 +404,14 @@ export function ExpenseForm({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value
-                        ? format(new Date(field.value), "PP")
-                        : "Pick a date"}
+                      {field.value ? format(new Date(field.value), "PP") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                      }
+                      onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
                       autoFocus
                       className="pointer-events-auto"
                     />
@@ -470,11 +425,7 @@ export function ExpenseForm({
             <Label>Time</Label>
             <div className="relative">
               <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="time"
-                className="pl-10 text-sm"
-                {...register("time")}
-              />
+              <Input type="time" className="pl-10 text-sm" {...register("time")} />
             </div>
           </div>
         </div>
@@ -493,11 +444,7 @@ export function ExpenseForm({
             control={control}
             name="isAdhoc"
             render={({ field }) => (
-              <Switch
-                id="isAdhoc"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Switch id="isAdhoc" checked={field.value} onCheckedChange={field.onChange} />
             )}
           />
         </div>
@@ -522,12 +469,7 @@ export function ExpenseForm({
             </div>
           ) : (
             <label className="flex items-center justify-center h-24 w-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               <ImagePlus className="h-6 w-6 text-muted-foreground" />
             </label>
           )}
@@ -536,12 +478,7 @@ export function ExpenseForm({
         {/* Actions */}
         <div className="flex gap-3 pt-4">
           {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={onCancel}
-            >
+            <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
               Cancel
             </Button>
           )}

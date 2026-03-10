@@ -65,20 +65,14 @@ export function ReloadPrompt() {
             {/* Icon */}
             <div className="shrink-0 mt-0.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
-                <RefreshCw
-                  className={`h-5 w-5 text-primary ${
-                    isUpdating ? "animate-spin" : ""
-                  }`}
-                />
+                <RefreshCw className={`h-5 w-5 text-primary ${isUpdating ? "animate-spin" : ""}`} />
               </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-foreground mb-1">
-                {needRefresh
-                  ? "New version available!"
-                  : "App ready to work offline"}
+                {needRefresh ? "New version available!" : "App ready to work offline"}
               </h3>
               <p className="text-xs text-muted-foreground mb-3">
                 {needRefresh

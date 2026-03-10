@@ -3,12 +3,7 @@ import { toast } from "sonner";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { Plus, Trash2, Edit, FolderOpen, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,10 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { CategoryForm } from "@/components/categories/CategoryForm";
 import { TagTab } from "@/components/categories/TagTab";
-import {
-  useCategories,
-  useCategoryExpenseCounts,
-} from "@/hooks/useExpenseData";
+import { useCategories, useCategoryExpenseCounts } from "@/hooks/useExpenseData";
 import { deleteCategory } from "@/db/expenseTrackerDb";
 import { Category } from "@/types/expense";
 import { cn } from "@/lib/utils";
@@ -64,9 +56,7 @@ export default function CategoriesPage() {
       }
       toast.success("Category deleted");
     } catch (error: unknown) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete category",
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to delete category");
     }
     setDeleteData(null);
   };
@@ -99,17 +89,10 @@ export default function CategoriesPage() {
           </Button>
         </m.div>
 
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
+        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           <Tabs defaultValue="categories" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger
-                value="categories"
-                className="flex items-center gap-2"
-              >
+              <TabsTrigger value="categories" className="flex items-center gap-2">
                 <FolderOpen className="h-4 w-4" />
                 Categories
               </TabsTrigger>
@@ -133,11 +116,7 @@ export default function CategoriesPage() {
                       "hover:border-primary/20 transition-colors",
                     )}
                   >
-                    <CategoryIcon
-                      icon={category.icon}
-                      color={category.color}
-                      size="lg"
-                    />
+                    <CategoryIcon icon={category.icon} color={category.color} size="lg" />
 
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{category.name}</p>
@@ -189,10 +168,7 @@ export default function CategoriesPage() {
         </Dialog>
 
         {/* Edit Dialog */}
-        <Dialog
-          open={!!editCategory}
-          onOpenChange={() => setEditCategory(null)}
-        >
+        <Dialog open={!!editCategory} onOpenChange={() => setEditCategory(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Edit Category</DialogTitle>
@@ -208,20 +184,14 @@ export default function CategoriesPage() {
         </Dialog>
 
         {/* Delete Dialog */}
-        <AlertDialog
-          open={!!deleteData}
-          onOpenChange={() => setDeleteData(null)}
-        >
+        <AlertDialog open={!!deleteData} onOpenChange={() => setDeleteData(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>
-                Delete "{deleteData?.category.name}"?
-              </AlertDialogTitle>
+              <AlertDialogTitle>Delete "{deleteData?.category.name}"?</AlertDialogTitle>
               <AlertDialogDescription>
                 {deleteData?.expenseCount ? (
                   <>
-                    This category has {deleteData.expenseCount} expenses. What
-                    would you like to do?
+                    This category has {deleteData.expenseCount} expenses. What would you like to do?
                   </>
                 ) : (
                   "This action cannot be undone."
@@ -233,21 +203,14 @@ export default function CategoriesPage() {
               <div className="space-y-4 py-4">
                 <RadioGroup
                   value={deleteAction}
-                  onValueChange={(v) =>
-                    setDeleteAction(v as "move" | "cascade")
-                  }
+                  onValueChange={(v) => setDeleteAction(v as "move" | "cascade")}
                 >
                   <div className="flex items-start space-x-3">
                     <RadioGroupItem value="move" id="move" />
                     <div className="space-y-1">
-                      <Label htmlFor="move">
-                        Move expenses to another category
-                      </Label>
+                      <Label htmlFor="move">Move expenses to another category</Label>
                       {deleteAction === "move" && (
-                        <Select
-                          value={moveToCategory}
-                          onValueChange={setMoveToCategory}
-                        >
+                        <Select value={moveToCategory} onValueChange={setMoveToCategory}>
                           <SelectTrigger className="w-full mt-2">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
@@ -257,11 +220,7 @@ export default function CategoriesPage() {
                               .map((c) => (
                                 <SelectItem key={c.id} value={c.id}>
                                   <div className="flex items-center gap-2">
-                                    <CategoryIcon
-                                      icon={c.icon}
-                                      color={c.color}
-                                      size="sm"
-                                    />
+                                    <CategoryIcon icon={c.icon} color={c.color} size="sm" />
                                     {c.name}
                                   </div>
                                 </SelectItem>
@@ -278,8 +237,7 @@ export default function CategoriesPage() {
                         Delete all {deleteData.expenseCount} expenses
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        This will permanently delete all expenses in this
-                        category
+                        This will permanently delete all expenses in this category
                       </p>
                     </div>
                   </div>

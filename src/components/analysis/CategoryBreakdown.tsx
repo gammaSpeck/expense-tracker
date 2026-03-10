@@ -55,16 +55,9 @@ export default function CategoryBreakdown({
       {/* Legend - ALL non-zero categories */}
       <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0">
         {nonZeroCategories.map((cat) => (
-          <div
-            key={cat.categoryId}
-            className="flex items-center justify-between text-sm"
-          >
+          <div key={cat.categoryId} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 min-w-0">
-              <CategoryIcon
-                icon={cat.categoryIcon}
-                color={cat.categoryColor}
-                size="sm"
-              />
+              <CategoryIcon icon={cat.categoryIcon} color={cat.categoryColor} size="sm" />
               <span className="truncate">{cat.categoryName}</span>
             </div>
             <div className="flex items-center gap-3 shrink-0 ml-2">

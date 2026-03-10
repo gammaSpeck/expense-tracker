@@ -90,7 +90,6 @@ bun run dev
    ```
 
 2. **Make Changes**:
-
    - Edit any source file
    - Update version in `package.json` (optional but recommended)
 
@@ -158,7 +157,6 @@ navigator.serviceWorker.getRegistration().then((reg) => {
    ```
 
 2. **Clear SW and Cache**:
-
    - DevTools > Application > Clear storage
    - Refresh the page
 
@@ -169,12 +167,10 @@ navigator.serviceWorker.getRegistration().then((reg) => {
 ### Update Not Working?
 
 1. **Check Network**:
-
    - Ensure app can reach the server
    - Verify new version is actually deployed
 
 2. **Force Update**:
-
    - DevTools > Application > Service Workers > "Update"
 
 3. **Inspect Console**:

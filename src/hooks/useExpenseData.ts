@@ -1,10 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import {
-  db,
-  getAllExpenses,
-  getAllCategories,
-  getAllTags,
-} from "@/db/expenseTrackerDb";
+import { db, getAllExpenses, getAllCategories, getAllTags } from "@/db/expenseTrackerDb";
 import {
   Expense,
   ExpenseFilters,
@@ -40,20 +35,12 @@ export function useTags() {
 }
 
 export function useCategory(id: string | undefined) {
-  const category = useLiveQuery(
-    () => (id ? db.categories.get(id) : undefined),
-    [id],
-    undefined,
-  );
+  const category = useLiveQuery(() => (id ? db.categories.get(id) : undefined), [id], undefined);
   return category;
 }
 
 export function useExpense(id: string | undefined) {
-  const expense = useLiveQuery(
-    () => (id ? db.expenses.get(id) : undefined),
-    [id],
-    undefined,
-  );
+  const expense = useLiveQuery(() => (id ? db.expenses.get(id) : undefined), [id], undefined);
   return expense;
 }
 
@@ -91,9 +78,7 @@ export function useFilteredExpenses(filters: ExpenseFilters = {}) {
 
     // Category filter
     if (filters.categories && filters.categories.length > 0) {
-      filtered = filtered.filter((expense) =>
-        filters.categories!.includes(expense.category),
-      );
+      filtered = filtered.filter((expense) => filters.categories!.includes(expense.category));
     }
 
     // Tag filter
@@ -128,13 +113,9 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
   const categories = useCategories();
 
   return useMemo(() => {
-    const totalExpenses = filteredExpenses.reduce(
-      (sum, exp) => sum + exp.value,
-      0,
-    );
+    const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.value, 0);
     const totalTransactions = filteredExpenses.length;
-    const averageExpense =
-      totalTransactions > 0 ? totalExpenses / totalTransactions : 0;
+    const averageExpense = totalTransactions > 0 ? totalExpenses / totalTransactions : 0;
 
     // Category breakdown
     const categoryTotals: Record<string, { total: number; count: number }> = {};
@@ -246,8 +227,6 @@ export function getDateRangeForPeriod(
     case "year":
       return { start: startOfYear(date), end: endOfYear(date) };
     default:
-      return (
-        customRange || { start: startOfMonth(date), end: endOfMonth(date) }
-      );
+      return customRange || { start: startOfMonth(date), end: endOfMonth(date) };
   }
 }

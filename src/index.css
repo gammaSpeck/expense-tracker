@@ -511,11 +511,7 @@ layer(base);
     /* Custom Expense Tracker Variables */
     --glass-bg: 0 0% 100% / 0.8;
     --glass-border: 0 0% 100% / 0.2;
-    --gradient-primary: linear-gradient(
-      135deg,
-      hsl(166 76% 40%),
-      hsl(172 66% 50%)
-    );
+    --gradient-primary: linear-gradient(135deg, hsl(166 76% 40%), hsl(172 66% 50%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
     --shadow-soft: 0 4px 24px -4px hsl(222 47% 11% / 0.08);
     --shadow-glow: 0 0 32px hsl(166 76% 40% / 0.15);
@@ -568,11 +564,7 @@ layer(base);
     /* Custom Dark Theme Variables */
     --glass-bg: 222 47% 8% / 0.9;
     --glass-border: 210 40% 98% / 0.08;
-    --gradient-primary: linear-gradient(
-      135deg,
-      hsl(166 76% 45%),
-      hsl(172 66% 55%)
-    );
+    --gradient-primary: linear-gradient(135deg, hsl(166 76% 45%), hsl(172 66% 55%));
     --gradient-card: linear-gradient(145deg, hsl(222 47% 10%), hsl(222 47% 7%));
     --shadow-soft: 0 4px 24px -4px hsl(0 0% 0% / 0.4);
     --shadow-glow: 0 0 32px hsl(166 76% 50% / 0.2);
@@ -590,7 +582,9 @@ layer(base);
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
     /* Hide scrollbars globally */
     -ms-overflow-style: none;
     scrollbar-width: none;

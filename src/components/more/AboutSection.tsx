@@ -30,8 +30,8 @@ export function AboutSection() {
 
       <div className="text-left pt-4 border-t border-border space-y-3 overflow-hidden">
         <p className="text-xs text-muted-foreground">
-          This expense manager was created to be open-source and free, because
-          all other apps want to monetize themselves.
+          This expense manager was created to be open-source and free, because all other apps want
+          to monetize themselves.
         </p>
 
         <div className="space-y-1.5">
