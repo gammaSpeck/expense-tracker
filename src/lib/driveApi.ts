@@ -1,6 +1,6 @@
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
-const BACKUP_FOLDER_NAME = "ExTrack Backups";
+export const BACKUP_FOLDER_NAME = "ExTrack Backups";
 
 /**
  * Escapes a value for use inside a single-quoted Drive Files.list query string.

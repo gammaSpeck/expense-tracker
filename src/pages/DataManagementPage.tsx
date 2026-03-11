@@ -3,19 +3,15 @@ import { ChevronLeft, Database } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BackupData } from "@/components/more/BackupData";
+import { BackupCard } from "@/components/more/BackupCard";
 import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { FactoryReset } from "@/components/more/FactoryReset";
-import { BackupReminderSettings } from "@/components/more/BackupReminderSettings";
-import { GoogleDriveSettings } from "@/components/more/GoogleDriveSettings";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const autoOpenBackup = Boolean(
-    (location.state as { openBackup?: boolean } | null)?.openBackup,
-  );
+  const autoOpenBackup = Boolean((location.state as { openBackup?: boolean } | null)?.openBackup);
   const [backupRefreshKey, setBackupRefreshKey] = useState(0);
 
   function handleBackupSuccess() {
@@ -50,44 +46,32 @@ export default function DataManagementPage() {
           transition={{ delay: 0.1 }}
           className="space-y-3"
         >
+          {/* Backup card */}
           <div className="p-4 rounded-xl bg-card border border-border/50">
-            <BackupReminderSettings key={backupRefreshKey} />
-          </div>
-
-          {/* Google Drive */}
-          <div className="p-4 rounded-xl bg-card border border-border/50">
-            <GoogleDriveSettings />
-          </div>
-
-          {/* Backup */}
-          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-2">
-            <h2 className="text-sm font-medium">Backup</h2>
-            <p className="text-xs text-muted-foreground">
-              Save a full JSON snapshot to your device or Google Drive.
-            </p>
-            <BackupData
+            <BackupCard
+              key={backupRefreshKey}
               openOnMount={autoOpenBackup}
-              onSuccess={handleBackupSuccess}
+              onBackupSuccess={handleBackupSuccess}
             />
           </div>
 
-          {/* Export Data */}
-          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-2">
-            <h2 className="text-sm font-medium">Export Data</h2>
-            <p className="text-xs text-muted-foreground">
-              Download your data as JSON or CSV. Does not affect backup
-              reminders.
-            </p>
-            <ExportData />
-          </div>
+          {/* Import & Export card */}
+          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-4">
+            <h2 className="text-sm font-semibold">Import & Export</h2>
 
-          {/* Import */}
-          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-2">
-            <h2 className="text-sm font-medium">Import Backup</h2>
-            <p className="text-xs text-muted-foreground">
-              Restore from a JSON backup file. Choose merge or override mode.
-            </p>
-            <ImportData />
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Export your data as JSON or CSV. Does not affect backup reminders.
+              </p>
+              <ExportData />
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Restore from a JSON backup file. Choose merge or override mode.
+              </p>
+              <ImportData />
+            </div>
           </div>
 
           {/* Danger Zone */}

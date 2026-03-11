@@ -43,16 +43,15 @@ export function BackupReminderSettings() {
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(
     initialPreferences.lastBackupDate,
   );
-  const [lastBackupMode, setLastBackupMode] = useState(
-    initialPreferences.lastBackupMode,
-  );
+  const [lastBackupMode, setLastBackupMode] = useState(initialPreferences.lastBackupMode);
 
   const lastBackupText = useMemo(() => {
     const daysSince = getDaysSinceLastBackup(lastBackupDate);
 
     if (daysSince === null) return "Last backed up: never";
 
-    const dateText = daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
+    const dateText =
+      daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
     const modeSuffix =
       lastBackupMode === "device"
         ? " · Device"

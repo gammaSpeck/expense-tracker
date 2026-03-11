@@ -13,37 +13,40 @@ import {
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { markBackupCompleted } from "@/lib/backupReminder";
 import { toast } from "sonner";
-import {
-  isDriveConnected,
-  getDriveCredentials,
-  saveDriveCredentials,
-} from "@/db/driveCredentials";
-import {
-  getValidAccessToken,
-  DriveSessionExpiredError,
-  initiateGoogleAuth,
-} from "@/lib/driveAuth";
+import { isDriveConnected, getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
+import { getValidAccessToken, DriveSessionExpiredError, initiateGoogleAuth } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
 
 interface BackupDataProps {
   openOnMount?: boolean;
   onSuccess?: () => void;
+  driveConnected?: boolean;
 }
 
 export function BackupData({
   openOnMount = false,
   onSuccess,
+  driveConnected: driveConnectedProp,
 }: BackupDataProps) {
   const [open, setOpen] = useState(false);
   const [saveTo, setSaveTo] = useState<"device" | "drive">("device");
   const [isBackingUp, setIsBackingUp] = useState(false);
   const hasAutoOpenedRef = useRef(false);
-  const [driveConnected, setDriveConnected] = useState(false);
+  const [internalDriveConnected, setInternalDriveConnected] = useState(false);
+
+  // Use externally-provided state when available, otherwise check independently
+  const driveConnected =
+    driveConnectedProp !== undefined ? driveConnectedProp : internalDriveConnected;
 
   useEffect(() => {
-    isDriveConnected().then(setDriveConnected);
-  }, []);
+    if (driveConnectedProp !== undefined) return;
+    isDriveConnected().then(setInternalDriveConnected);
+  }, [driveConnectedProp]);
 
+  // Reset saveTo to device if Drive gets disconnected while dialog is open
+  useEffect(() => {
+    if (!driveConnected) setSaveTo("device");
+  }, [driveConnected]);
   useEffect(() => {
     if (!openOnMount || hasAutoOpenedRef.current) return;
     setOpen(true);
@@ -99,12 +102,7 @@ export function BackupData({
           await saveDriveCredentials({ ...creds, folderID });
         }
 
-        const { webViewLink } = await uploadFileToDrive(
-          blob,
-          filename,
-          folderID,
-          accessToken,
-        );
+        const { webViewLink } = await uploadFileToDrive(blob, filename, folderID, accessToken);
 
         markBackupCompleted("drive");
         toast.success("Backup saved to Google Drive", {
@@ -138,11 +136,7 @@ export function BackupData({
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        variant="outline"
-        className="w-full justify-start"
-      >
+      <Button onClick={() => setOpen(true)} variant="outline" className="w-full justify-start">
         <Archive className="h-4 w-4 mr-2" />
         Create Backup
       </Button>
@@ -196,11 +190,7 @@ export function BackupData({
               </div>
             </div>
 
-            <Button
-              onClick={handleBackup}
-              disabled={isBackingUp}
-              className="w-full"
-            >
+            <Button onClick={handleBackup} disabled={isBackingUp} className="w-full">
               {isBackingUp ? "Saving…" : "Create Backup"}
             </Button>
           </div>

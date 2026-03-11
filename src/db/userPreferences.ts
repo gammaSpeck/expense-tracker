@@ -94,8 +94,7 @@ class UserPreferences {
           : DEFAULT_BACKUP_REMINDER_PREFERENCES.reminderSchedule;
 
       const rawMode = parsed.lastBackupMode;
-      const lastBackupMode =
-        rawMode === "device" || rawMode === "drive" ? rawMode : null;
+      const lastBackupMode = rawMode === "device" || rawMode === "drive" ? rawMode : null;
 
       return {
         reminderSchedule: schedule,

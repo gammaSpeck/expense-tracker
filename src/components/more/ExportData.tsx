@@ -43,11 +43,7 @@ export function ExportData() {
           null,
           2,
         );
-        downloadFile(
-          json,
-          `extrack-export-${dateToken}.json`,
-          "application/json",
-        );
+        downloadFile(json, `extrack-export-${dateToken}.json`, "application/json");
       }
 
       toast.success(`Exported ${data.expenses.length} expenses`);
@@ -62,11 +58,7 @@ export function ExportData() {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        variant="outline"
-        className="w-full justify-start"
-      >
+      <Button onClick={() => setOpen(true)} variant="outline" className="w-full justify-start">
         <Download className="h-4 w-4 mr-2" />
         Export Data
       </Button>
@@ -108,11 +100,7 @@ export function ExportData() {
               </div>
             </div>
 
-            <Button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="w-full"
-            >
+            <Button onClick={handleExport} disabled={isExporting} className="w-full">
               <Download className="h-4 w-4 mr-2" />
               {isExporting ? "Exporting..." : "Export Data"}
             </Button>
