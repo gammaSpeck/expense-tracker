@@ -43,14 +43,24 @@ export function BackupReminderSettings() {
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(
     initialPreferences.lastBackupDate,
   );
+  const [lastBackupMode, setLastBackupMode] = useState(
+    initialPreferences.lastBackupMode,
+  );
 
   const lastBackupText = useMemo(() => {
     const daysSince = getDaysSinceLastBackup(lastBackupDate);
 
     if (daysSince === null) return "Last backed up: never";
-    if (daysSince === 0) return "Last backed up: today";
-    return `Last backed up: ${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
-  }, [lastBackupDate]);
+
+    const dateText = daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
+    const modeSuffix =
+      lastBackupMode === "device"
+        ? " · Device"
+        : lastBackupMode === "drive"
+          ? " · Google Drive"
+          : "";
+    return `Last backed up: ${dateText}${modeSuffix}`;
+  }, [lastBackupDate, lastBackupMode]);
 
   const scheduleHelperText = useMemo(() => {
     switch (schedule) {
@@ -71,6 +81,7 @@ export function BackupReminderSettings() {
     const updated = setBackupReminderSchedule(nextSchedule);
     setSchedule(updated.reminderSchedule);
     setLastBackupDate(updated.lastBackupDate);
+    setLastBackupMode(updated.lastBackupMode);
   };
 
   return (

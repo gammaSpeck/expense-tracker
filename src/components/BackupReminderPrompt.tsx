@@ -92,7 +92,7 @@ export function BackupReminderPrompt() {
                 <Button
                   onClick={() => {
                     setDismissed(true);
-                    navigate("/settings/data", { state: { openExport: true } });
+                    navigate("/settings/data", { state: { openBackup: true } });
                   }}
                   size="sm"
                   className="h-8 text-xs font-medium shadow-md hover:shadow-lg transition-all"

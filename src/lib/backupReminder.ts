@@ -1,11 +1,14 @@
 import { differenceInCalendarDays, format, isValid, parseISO } from "date-fns";
 import {
+  type BackupMode,
   type BackupReminderPreferences,
   type BackupReminderSchedule,
   MONTHLY_REMINDER_DAY,
   WEEKLY_REMINDER_DAY,
   userPreferences,
 } from "@/db/userPreferences";
+
+export type { BackupMode };
 
 function toDateKey(value: Date): string {
   return format(value, "yyyy-MM-dd");
@@ -23,6 +26,7 @@ export function getBackupReminderPreferences(): BackupReminderPreferences {
       ? preferences.reminderSchedule
       : "weekly",
     lastBackupDate: preferences.lastBackupDate,
+    lastBackupMode: preferences.lastBackupMode,
     bannerLastShownDate: preferences.bannerLastShownDate,
   };
 }
@@ -96,9 +100,13 @@ export function markBackupReminderBannerShown(now: Date = new Date()): BackupRem
   });
 }
 
-export function markBackupCompleted(now: Date = new Date()): BackupReminderPreferences {
+export function markBackupCompleted(
+  mode: "device" | "drive",
+  now: Date = new Date(),
+): BackupReminderPreferences {
   return userPreferences.updateBackupReminderPreferences({
     lastBackupDate: toDateKey(now),
+    lastBackupMode: mode,
   });
 }
 

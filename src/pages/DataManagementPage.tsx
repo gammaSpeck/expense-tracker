@@ -1,7 +1,9 @@
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ChevronLeft, Database } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { BackupData } from "@/components/more/BackupData";
 import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { FactoryReset } from "@/components/more/FactoryReset";
@@ -11,7 +13,14 @@ import { GoogleDriveSettings } from "@/components/more/GoogleDriveSettings";
 export default function DataManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const autoOpenExport = Boolean((location.state as { openExport?: boolean } | null)?.openExport);
+  const autoOpenBackup = Boolean(
+    (location.state as { openBackup?: boolean } | null)?.openBackup,
+  );
+  const [backupRefreshKey, setBackupRefreshKey] = useState(0);
+
+  function handleBackupSuccess() {
+    setBackupRefreshKey((k) => k + 1);
+  }
 
   return (
     <LazyMotion features={domAnimation}>
@@ -42,7 +51,7 @@ export default function DataManagementPage() {
           className="space-y-3"
         >
           <div className="p-4 rounded-xl bg-card border border-border/50">
-            <BackupReminderSettings />
+            <BackupReminderSettings key={backupRefreshKey} />
           </div>
 
           {/* Google Drive */}
@@ -50,13 +59,26 @@ export default function DataManagementPage() {
             <GoogleDriveSettings />
           </div>
 
-          {/* Export */}
+          {/* Backup */}
           <div className="p-4 rounded-xl bg-card border border-border/50 space-y-2">
-            <h2 className="text-sm font-medium">Export Backup</h2>
+            <h2 className="text-sm font-medium">Backup</h2>
             <p className="text-xs text-muted-foreground">
-              Download all your expenses and categories as a backup file.
+              Save a full JSON snapshot to your device or Google Drive.
             </p>
-            <ExportData openOnMount={autoOpenExport} />
+            <BackupData
+              openOnMount={autoOpenBackup}
+              onSuccess={handleBackupSuccess}
+            />
+          </div>
+
+          {/* Export Data */}
+          <div className="p-4 rounded-xl bg-card border border-border/50 space-y-2">
+            <h2 className="text-sm font-medium">Export Data</h2>
+            <p className="text-xs text-muted-foreground">
+              Download your data as JSON or CSV. Does not affect backup
+              reminders.
+            </p>
+            <ExportData />
           </div>
 
           {/* Import */}

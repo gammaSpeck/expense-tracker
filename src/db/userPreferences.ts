@@ -2,9 +2,12 @@ import { Theme } from "@/types/expense";
 
 export type BackupReminderSchedule = "never" | "daily" | "weekly" | "monthly";
 
+export type BackupMode = "device" | "drive";
+
 export interface BackupReminderPreferences {
   reminderSchedule: BackupReminderSchedule;
   lastBackupDate: string | null;
+  lastBackupMode: BackupMode | null;
   bannerLastShownDate: string | null;
 }
 
@@ -20,6 +23,7 @@ const MONTHLY_REMINDER_DAY = 1;
 const DEFAULT_BACKUP_REMINDER_PREFERENCES: BackupReminderPreferences = {
   reminderSchedule: "weekly",
   lastBackupDate: null,
+  lastBackupMode: null,
   bannerLastShownDate: null,
 };
 
@@ -89,9 +93,14 @@ class UserPreferences {
           ? reminderSchedule
           : DEFAULT_BACKUP_REMINDER_PREFERENCES.reminderSchedule;
 
+      const rawMode = parsed.lastBackupMode;
+      const lastBackupMode =
+        rawMode === "device" || rawMode === "drive" ? rawMode : null;
+
       return {
         reminderSchedule: schedule,
         lastBackupDate: typeof parsed.lastBackupDate === "string" ? parsed.lastBackupDate : null,
+        lastBackupMode,
         bannerLastShownDate:
           typeof parsed.bannerLastShownDate === "string" ? parsed.bannerLastShownDate : null,
       };
