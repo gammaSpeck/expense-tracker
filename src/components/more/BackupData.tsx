@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
-import { Archive, HardDrive, CloudUpload } from "lucide-react";
+import { Archive, HardDrive, CloudUpload, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +11,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
-import { markBackupCompleted } from "@/lib/backup";
+import { markBackupCompleted, getStoredPassphrase, encryptData } from "@/lib/backup";
+import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
 import {
   isDriveConnected,
@@ -41,6 +42,9 @@ export function BackupData({
   const [isBackingUp, setIsBackingUp] = useState(false);
   const hasAutoOpenedRef = useRef(false);
   const [internalDriveConnected, setInternalDriveConnected] = useState(false);
+  const [passphraseSetupOpen, setPassphraseSetupOpen] = useState(false);
+  // Pending action: run backup after passphrase is set
+  const pendingSaveToRef = useRef<"device" | "drive" | null>(null);
 
   // Use externally-provided state when available, otherwise check independently
   const driveConnected =
@@ -68,13 +72,21 @@ export function BackupData({
   };
 
   async function handleBackup() {
+    // Gate: ensure passphrase is set before attempting backup
+    const passphrase = await getStoredPassphrase();
+    if (!passphrase) {
+      pendingSaveToRef.current = saveTo;
+      setPassphraseSetupOpen(true);
+      return;
+    }
+
     setIsBackingUp(true);
     try {
       const data = await exportAllData();
       const dateToken = format(new Date(), "yyyy-MM-dd");
-      const filename = `extrack-backup-${dateToken}.json`;
+      const filename = `extrack-backup-${dateToken}.extrack`;
 
-      const json = JSON.stringify(
+      const plainJson = JSON.stringify(
         {
           exportDate: new Date().toISOString(),
           version: "1.0",
@@ -84,6 +96,8 @@ export function BackupData({
         null,
         2,
       );
+
+      const encrypted = await encryptData(plainJson);
 
       if (saveTo === "drive") {
         let accessToken: string;
@@ -103,7 +117,7 @@ export function BackupData({
           return;
         }
 
-        const blob = new Blob([json], { type: "application/json" });
+        const blob = new Blob([encrypted], { type: "application/octet-stream" });
         const creds = await getDriveCredentials();
         if (!creds) return;
         const folderID = await findOrCreateBackupFolder(accessToken);
@@ -127,7 +141,7 @@ export function BackupData({
           },
         });
       } else {
-        const blob = new Blob([json], { type: "application/json" });
+        const blob = new Blob([encrypted], { type: "application/octet-stream" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -160,6 +174,25 @@ export function BackupData({
         Create Backup
       </Button>
 
+      {/* Passphrase setup gate — shown when backup is attempted without a passphrase */}
+      <SetupPassphraseDialog
+        open={passphraseSetupOpen}
+        onClose={() => {
+          setPassphraseSetupOpen(false);
+          pendingSaveToRef.current = null;
+        }}
+        onSuccess={() => {
+          setPassphraseSetupOpen(false);
+          // Re-trigger backup with the same save destination
+          if (pendingSaveToRef.current) {
+            setSaveTo(pendingSaveToRef.current);
+            pendingSaveToRef.current = null;
+            // Small delay so state flush completes
+            setTimeout(() => handleBackup(), 0);
+          }
+        }}
+      />
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -170,6 +203,12 @@ export function BackupData({
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Encryption notice */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-green-500 shrink-0" />
+              Backups are end-to-end encrypted (.extrack)
+            </div>
+
             {/* Save To */}
             <div className="space-y-2">
               <Label className="text-sm text-muted-foreground">Save to</Label>
