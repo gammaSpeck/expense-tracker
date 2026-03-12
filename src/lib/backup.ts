@@ -1,6 +1,5 @@
 import { differenceInCalendarDays, format, isValid, parseISO } from "date-fns";
 import {
-  type BackupMode,
   type BackupReminderPreferences,
   type BackupReminderSchedule,
   MONTHLY_REMINDER_DAY,
@@ -8,14 +7,17 @@ import {
   userPreferences,
 } from "@/db/userPreferences";
 
-export type { BackupMode };
-
 function toDateKey(value: Date): string {
   return format(value, "yyyy-MM-dd");
 }
 
 function isReminderSchedule(value: unknown): value is BackupReminderSchedule {
-  return value === "never" || value === "daily" || value === "weekly" || value === "monthly";
+  return (
+    value === "never" ||
+    value === "daily" ||
+    value === "weekly" ||
+    value === "monthly"
+  );
 }
 
 export function getBackupReminderPreferences(): BackupReminderPreferences {
@@ -41,7 +43,10 @@ export function shouldShowBackupReminderBanner(
   const todayKey = toDateKey(now);
   if (preferences.bannerLastShownDate === todayKey) return false;
 
-  const daysSinceLastBackup = getDaysSinceLastBackup(preferences.lastBackupDate, now);
+  const daysSinceLastBackup = getDaysSinceLastBackup(
+    preferences.lastBackupDate,
+    now,
+  );
 
   if (daysSinceLastBackup === null) return true;
 
@@ -94,7 +99,9 @@ export function getDaysSinceLastBackup(
   return Math.max(0, differenceInCalendarDays(now, parsed));
 }
 
-export function markBackupReminderBannerShown(now: Date = new Date()): BackupReminderPreferences {
+export function markBackupReminderBannerShown(
+  now: Date = new Date(),
+): BackupReminderPreferences {
   return userPreferences.updateBackupReminderPreferences({
     bannerLastShownDate: toDateKey(now),
   });

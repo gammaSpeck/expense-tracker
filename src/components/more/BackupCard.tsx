@@ -4,7 +4,7 @@ import {
   getBackupReminderPreferences,
   getDaysSinceLastBackup,
   setBackupReminderSchedule,
-} from "@/lib/backupReminder";
+} from "@/lib/backup";
 import { type BackupReminderSchedule } from "@/db/userPreferences";
 import {
   Select,
@@ -50,11 +50,20 @@ interface BackupCardProps {
   onBackupSuccess?: () => void;
 }
 
-export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardProps) {
+export function BackupCard({
+  openOnMount = false,
+  onBackupSuccess,
+}: BackupCardProps) {
   const initialPrefs = getBackupReminderPreferences();
-  const [schedule, setSchedule] = useState<BackupReminderSchedule>(initialPrefs.reminderSchedule);
-  const [lastBackupDate, setLastBackupDate] = useState<string | null>(initialPrefs.lastBackupDate);
-  const [lastBackupMode, setLastBackupMode] = useState(initialPrefs.lastBackupMode);
+  const [schedule, setSchedule] = useState<BackupReminderSchedule>(
+    initialPrefs.reminderSchedule,
+  );
+  const [lastBackupDate, setLastBackupDate] = useState<string | null>(
+    initialPrefs.lastBackupDate,
+  );
+  const [lastBackupMode, setLastBackupMode] = useState(
+    initialPrefs.lastBackupMode,
+  );
   const [creds, setCreds] = useState<DriveCredentials | null>(null);
   const [isUnlinking, setIsUnlinking] = useState(false);
 
@@ -66,7 +75,9 @@ export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardP
     const daysSince = getDaysSinceLastBackup(lastBackupDate);
     if (daysSince === null) return "Last backed up: never";
     const dateText =
-      daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
+      daysSince === 0
+        ? "today"
+        : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
     const modeSuffix =
       lastBackupMode === "device"
         ? " · Device"
@@ -108,7 +119,9 @@ export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardP
         <span className="text-sm">Reminders</span>
         <Select
           value={schedule}
-          onValueChange={(v) => handleScheduleChange(v as BackupReminderSchedule)}
+          onValueChange={(v) =>
+            handleScheduleChange(v as BackupReminderSchedule)
+          }
         >
           <SelectTrigger className="h-8 w-32 text-xs">
             <SelectValue placeholder="Select" />
@@ -131,9 +144,12 @@ export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardP
             <span className="text-sm">Google Drive</span>
             {driveConnected ? (
               <div>
-                <p className="text-xs text-muted-foreground">{creds!.accountEmail}</p>
                 <p className="text-xs text-muted-foreground">
-                  Folder: <span className="text-primary">{BACKUP_FOLDER_NAME}</span>
+                  {creds!.accountEmail}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Folder:{" "}
+                  <span className="text-primary">{BACKUP_FOLDER_NAME}</span>
                 </p>
               </div>
             ) : (
@@ -163,8 +179,9 @@ export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardP
               <AlertDialogHeader>
                 <AlertDialogTitle>Disconnect Google Drive?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This removes your Google account from ExTrack. Existing backups in Drive will not
-                  be deleted — you can reconnect anytime.
+                  This removes your Google account from ExTrack. Existing
+                  backups in Drive will not be deleted — you can reconnect
+                  anytime.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

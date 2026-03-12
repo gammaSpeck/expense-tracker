@@ -7,7 +7,7 @@ import {
   getDaysSinceLastBackup,
   markBackupReminderBannerShown,
   shouldShowBackupReminderBanner,
-} from "@/lib/backupReminder";
+} from "@/lib/backup";
 import { type BackupReminderSchedule } from "@/db/userPreferences";
 
 type PromptState = {
@@ -51,7 +51,9 @@ function getInitialPromptState(): PromptState {
   }
 
   const scheduleLabel = getScheduleLabel(preferences.reminderSchedule);
-  const daysSinceLastBackup = getDaysSinceLastBackup(preferences.lastBackupDate);
+  const daysSinceLastBackup = getDaysSinceLastBackup(
+    preferences.lastBackupDate,
+  );
 
   return {
     visible: true,
@@ -85,8 +87,12 @@ export function BackupReminderPrompt() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-foreground mb-1">Backup reminder</h3>
-              <p className="text-xs text-muted-foreground mb-3">{promptState.message}</p>
+              <h3 className="text-sm font-semibold text-foreground mb-1">
+                Backup reminder
+              </h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                {promptState.message}
+              </p>
 
               <div className="flex gap-2">
                 <Button
