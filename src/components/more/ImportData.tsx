@@ -69,6 +69,12 @@ export function ImportData() {
     setPendingEncryptedText(null);
     setManualPassphrase("");
 
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast.error("File too large (max 10 MB)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     const text = await selectedFile.text();
 
     if (!isEncryptedFile(text)) {
@@ -128,10 +134,12 @@ export function ImportData() {
         toast.error("Invalid backup file");
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Decryption failed";
+      const msg = err instanceof Error ? err.message : "";
       // "Wrong passphrase" — keep file loaded so user can retry
       toast.error(
-        msg.includes("Wrong passphrase") ? "Wrong passphrase — try again" : msg,
+        msg.includes("Wrong passphrase")
+          ? "Wrong passphrase — try again"
+          : "Decryption failed. The file may be corrupted.",
       );
     } finally {
       setIsDecrypting(false);
