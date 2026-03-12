@@ -3,6 +3,7 @@ import {
   Eye,
   EyeOff,
   KeyRound,
+  Pencil,
   ShieldCheck,
   AlertTriangle,
 } from "lucide-react";
@@ -83,7 +84,7 @@ function SetupForm({ onSuccess }: SetupFormProps) {
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
             placeholder="Enter passphrase"
-            className="pr-10"
+            className="pr-10 focus-visible:ring-0 focus-visible:ring-offset-0"
             autoComplete="new-password"
           />
           <button
@@ -112,7 +113,7 @@ function SetupForm({ onSuccess }: SetupFormProps) {
           onChange={(e) => setConfirm(e.target.value)}
           placeholder="Re-enter passphrase"
           autoComplete="new-password"
-          className={mismatch ? "border-destructive" : ""}
+          className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${mismatch ? "border-destructive" : ""}`}
         />
         {mismatch && (
           <p className="text-xs text-destructive">Passphrases do not match</p>
@@ -259,7 +260,7 @@ function ChangePassphraseDialog({
                 }}
                 placeholder="Current passphrase"
                 autoComplete="current-password"
-                className={verifyError ? "border-destructive pr-10" : "pr-10"}
+                className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${verifyError ? "border-destructive pr-10" : "pr-10"}`}
               />
               <button
                 type="button"
@@ -291,6 +292,7 @@ function ChangePassphraseDialog({
               onChange={(e) => setNext(e.target.value)}
               placeholder="New passphrase (min 8 chars)"
               autoComplete="new-password"
+              className="focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
@@ -306,7 +308,7 @@ function ChangePassphraseDialog({
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Re-enter new passphrase"
               autoComplete="new-password"
-              className={mismatch ? "border-destructive" : ""}
+              className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${mismatch ? "border-destructive" : ""}`}
             />
             {mismatch && (
               <p className="text-xs text-destructive">
@@ -338,6 +340,7 @@ export function EncryptionSettings() {
   const [showPassphrase, setShowPassphrase] = useState(false);
   const [storedPassphrase, setStoredPassphrase] = useState<string | null>(null);
   const [changeDialogOpen, setChangeDialogOpen] = useState(false);
+  const [setupDialogOpen, setSetupDialogOpen] = useState(false);
 
   async function load() {
     const p = await getStoredPassphrase();
@@ -359,7 +362,18 @@ export function EncryptionSettings() {
       </div>
 
       {!hasPassphrase ? (
-        <SetupForm onSuccess={load} />
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">Passphrase:</span>
+          <span className="text-sm text-muted-foreground italic">Unset</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSetupDialogOpen(true)}
+          >
+            <KeyRound className="h-3.5 w-3.5 mr-1.5" />
+            Set Passphrase
+          </Button>
+        </div>
       ) : (
         <div className="space-y-3">
           <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
@@ -370,43 +384,50 @@ export function EncryptionSettings() {
             </p>
           </div>
 
-          {/* Masked passphrase display */}
-          <div className="space-y-1">
-            <Label className="text-sm">Passphrase</Label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 px-3 py-2 rounded-md bg-muted text-sm font-mono tracking-widest select-none">
-                {showPassphrase && storedPassphrase
-                  ? storedPassphrase
-                  : "●".repeat(12)}
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPassphrase((v) => !v)}
-                className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={
-                  showPassphrase ? "Hide passphrase" : "Show passphrase"
-                }
-              >
-                {showPassphrase ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
+          {/* Masked passphrase display with inline actions */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground shrink-0">
+              Passphrase:
+            </span>
+            <span className="flex-1 font-mono tracking-widest text-sm select-none">
+              {showPassphrase && storedPassphrase
+                ? storedPassphrase
+                : "●".repeat(12)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowPassphrase((v) => !v)}
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={
+                showPassphrase ? "Hide passphrase" : "Show passphrase"
+              }
+            >
+              {showPassphrase ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setChangeDialogOpen(true)}
+              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Change passphrase"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setChangeDialogOpen(true)}
-            className="w-full"
-          >
-            <KeyRound className="h-4 w-4 mr-2" />
-            Change Passphrase
-          </Button>
         </div>
       )}
+
+      <SetupPassphraseDialog
+        open={setupDialogOpen}
+        onClose={() => setSetupDialogOpen(false)}
+        onSuccess={() => {
+          setSetupDialogOpen(false);
+          load();
+        }}
+      />
 
       <ChangePassphraseDialog
         open={changeDialogOpen}
@@ -432,7 +453,12 @@ export function SetupPassphraseDialog({
   onSuccess,
 }: SetupPassphraseDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -440,7 +466,8 @@ export function SetupPassphraseDialog({
             Set Up Encryption First
           </DialogTitle>
           <DialogDescription>
-            Backups are always encrypted. Please set a passphrase before continuing.
+            Backups are always encrypted. Please set a passphrase before
+            continuing.
           </DialogDescription>
         </DialogHeader>
         <SetupForm onSuccess={onSuccess} />

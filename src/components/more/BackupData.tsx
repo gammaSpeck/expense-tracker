@@ -11,7 +11,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
-import { markBackupCompleted, getStoredPassphrase, encryptData } from "@/lib/backup";
+import {
+  markBackupCompleted,
+  getStoredPassphrase,
+  encryptData,
+} from "@/lib/backup";
 import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
 import {
@@ -43,8 +47,6 @@ export function BackupData({
   const hasAutoOpenedRef = useRef(false);
   const [internalDriveConnected, setInternalDriveConnected] = useState(false);
   const [passphraseSetupOpen, setPassphraseSetupOpen] = useState(false);
-  // Pending action: run backup after passphrase is set
-  const pendingSaveToRef = useRef<"device" | "drive" | null>(null);
 
   // Use externally-provided state when available, otherwise check independently
   const driveConnected =
@@ -61,10 +63,19 @@ export function BackupData({
   useEffect(() => {
     if (!driveConnected) setSaveTo("device");
   }, [driveConnected]);
+  async function handleOpenBackup() {
+    const passphrase = await getStoredPassphrase();
+    if (!passphrase) {
+      setPassphraseSetupOpen(true);
+    } else {
+      setOpen(true);
+    }
+  }
+
   useEffect(() => {
     if (!openOnMount || hasAutoOpenedRef.current) return;
-    setOpen(true);
     hasAutoOpenedRef.current = true;
+    handleOpenBackup();
   }, [openOnMount]);
 
   const resetForm = () => {
@@ -72,14 +83,6 @@ export function BackupData({
   };
 
   async function handleBackup() {
-    // Gate: ensure passphrase is set before attempting backup
-    const passphrase = await getStoredPassphrase();
-    if (!passphrase) {
-      pendingSaveToRef.current = saveTo;
-      setPassphraseSetupOpen(true);
-      return;
-    }
-
     setIsBackingUp(true);
     try {
       const data = await exportAllData();
@@ -117,7 +120,9 @@ export function BackupData({
           return;
         }
 
-        const blob = new Blob([encrypted], { type: "application/octet-stream" });
+        const blob = new Blob([encrypted], {
+          type: "application/octet-stream",
+        });
         const creds = await getDriveCredentials();
         if (!creds) return;
         const folderID = await findOrCreateBackupFolder(accessToken);
@@ -141,7 +146,9 @@ export function BackupData({
           },
         });
       } else {
-        const blob = new Blob([encrypted], { type: "application/octet-stream" });
+        const blob = new Blob([encrypted], {
+          type: "application/octet-stream",
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -166,7 +173,7 @@ export function BackupData({
   return (
     <>
       <Button
-        onClick={() => setOpen(true)}
+        onClick={handleOpenBackup}
         variant="outline"
         className="w-full justify-start"
       >
@@ -177,19 +184,10 @@ export function BackupData({
       {/* Passphrase setup gate — shown when backup is attempted without a passphrase */}
       <SetupPassphraseDialog
         open={passphraseSetupOpen}
-        onClose={() => {
-          setPassphraseSetupOpen(false);
-          pendingSaveToRef.current = null;
-        }}
+        onClose={() => setPassphraseSetupOpen(false)}
         onSuccess={() => {
           setPassphraseSetupOpen(false);
-          // Re-trigger backup with the same save destination
-          if (pendingSaveToRef.current) {
-            setSaveTo(pendingSaveToRef.current);
-            pendingSaveToRef.current = null;
-            // Small delay so state flush completes
-            setTimeout(() => handleBackup(), 0);
-          }
+          setOpen(true);
         }}
       />
 
