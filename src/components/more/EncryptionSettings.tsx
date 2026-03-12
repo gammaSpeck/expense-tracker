@@ -11,18 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -146,68 +137,31 @@ function ChangePassphraseDialog({
   onClose,
   onSuccess,
 }: ChangeDialogProps) {
-  // Step 1: confirm intent (warning), Step 2: verify + change form
   const [step, setStep] = useState<"warn" | "form">("warn");
-  const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [showFields, setShowFields] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [verifyError, setVerifyError] = useState("");
 
-  function handleOpenChange(v: boolean) {
-    if (!v) {
-      // Reset state on close
-      setStep("warn");
-      setCurrent("");
-      setNext("");
-      setConfirm("");
-      setVerifyError("");
-      onClose();
-    }
-  }
-
-  const mismatch = confirm.length > 0 && next !== confirm;
-  const canSubmit = current.length > 0 && next.length >= 8 && next === confirm;
-
-  async function handleChange() {
-    if (!canSubmit) return;
-    setIsSaving(true);
-    setVerifyError("");
-    try {
-      // Verify current passphrase by attempting a trivial encrypt→decrypt round
-      // We don't have a ciphertext on hand, so we just check it matches what's stored.
-      const stored = await getStoredPassphrase();
-      if (current !== stored) {
-        setVerifyError("Current passphrase is incorrect");
-        return;
-      }
-      await storePassphrase(next);
-      toast.success(
-        "Passphrase updated — old backup files will still require the old passphrase",
-      );
-      onSuccess();
-      handleOpenChange(false);
-    } catch {
-      toast.error("Failed to update passphrase");
-    } finally {
-      setIsSaving(false);
-    }
+  function handleClose() {
+    setStep("warn");
+    onClose();
   }
 
   if (!open) return null;
 
-  // Step 1: Warning dialog
-  if (step === "warn") {
-    return (
-      <AlertDialog open={open} onOpenChange={handleOpenChange}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
+  return (
+    <>
+      {/* Step 1: Warning — use plain Dialog so buttons don't auto-close */}
+      <Dialog
+        open={step === "warn"}
+        onOpenChange={(v) => {
+          if (!v) handleClose();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Change Encryption Passphrase?
-            </AlertDialogTitle>
-            <AlertDialogDescription asChild>
+            </DialogTitle>
+            <DialogDescription asChild>
               <div className="space-y-2 text-sm">
                 <p>
                   Changing your passphrase will <strong>not</strong> re-encrypt
@@ -219,116 +173,45 @@ function ChangePassphraseDialog({
                   the new passphrase.
                 </p>
               </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => setStep("form")}>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button onClick={() => setStep("form")}>
               I understand, continue
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-  // Step 2: Change form (rendered as a regular dialog-like overlay via AlertDialog)
-  return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Change Passphrase</AlertDialogTitle>
-          <AlertDialogDescription>
-            Verify your current passphrase, then enter a new one.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <div className="space-y-3 py-2">
-          {/* Current passphrase */}
-          <div className="space-y-1">
-            <Label htmlFor="chg-current" className="text-sm">
-              Current Passphrase
-            </Label>
-            <div className="relative">
-              <Input
-                id="chg-current"
-                type={showFields ? "text" : "password"}
-                value={current}
-                onChange={(e) => {
-                  setCurrent(e.target.value);
-                  setVerifyError("");
-                }}
-                placeholder="Current passphrase"
-                autoComplete="current-password"
-                className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${verifyError ? "border-destructive pr-10" : "pr-10"}`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowFields((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={showFields ? "Hide" : "Show"}
-              >
-                {showFields ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {verifyError && (
-              <p className="text-xs text-destructive">{verifyError}</p>
-            )}
-          </div>
-
-          {/* New passphrase */}
-          <div className="space-y-1">
-            <Label htmlFor="chg-new" className="text-sm">
-              New Passphrase
-            </Label>
-            <Input
-              id="chg-new"
-              type={showFields ? "text" : "password"}
-              value={next}
-              onChange={(e) => setNext(e.target.value)}
-              placeholder="New passphrase (min 8 chars)"
-              autoComplete="new-password"
-              className="focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-
-          {/* Confirm new */}
-          <div className="space-y-1">
-            <Label htmlFor="chg-confirm" className="text-sm">
-              Confirm New Passphrase
-            </Label>
-            <Input
-              id="chg-confirm"
-              type={showFields ? "text" : "password"}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Re-enter new passphrase"
-              autoComplete="new-password"
-              className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${mismatch ? "border-destructive" : ""}`}
-            />
-            {mismatch && (
-              <p className="text-xs text-destructive">
-                Passphrases do not match
-              </p>
-            )}
-          </div>
-        </div>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleChange}
-            disabled={!canSubmit || isSaving}
-          >
-            {isSaving ? "Updating..." : "Update Passphrase"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {/* Step 2: Set new passphrase — same form as first-time setup */}
+      <Dialog
+        open={step === "form"}
+        onOpenChange={(v) => {
+          if (!v) handleClose();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-amber-500" />
+              Set New Passphrase
+            </DialogTitle>
+            <DialogDescription>
+              Old backups will still require the previous passphrase.
+            </DialogDescription>
+          </DialogHeader>
+          <SetupForm
+            onSuccess={() => {
+              onSuccess();
+              handleClose();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -465,7 +348,7 @@ export function SetupPassphraseDialog({
             <ShieldCheck className="h-5 w-5 text-amber-500" />
             Set Up Encryption First
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-left">
             Backups are always encrypted. Please set a passphrase before
             continuing.
           </DialogDescription>

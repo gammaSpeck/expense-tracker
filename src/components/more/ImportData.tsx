@@ -196,7 +196,7 @@ export function ImportData() {
                 if (e.key === "Enter") handleManualDecrypt();
               }}
               placeholder="Enter backup passphrase"
-              className="pr-10"
+              className="pr-10 focus-visible:ring-0 focus-visible:ring-offset-0"
               autoComplete="current-password"
               autoFocus
             />
