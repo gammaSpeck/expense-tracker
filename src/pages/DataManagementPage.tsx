@@ -12,9 +12,7 @@ import { EncryptionSettings } from "@/components/more/EncryptionSettings";
 export default function DataManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const autoOpenBackup = Boolean(
-    (location.state as { openBackup?: boolean } | null)?.openBackup,
-  );
+  const autoOpenBackup = Boolean((location.state as { openBackup?: boolean } | null)?.openBackup);
   const [backupRefreshKey, setBackupRefreshKey] = useState(0);
 
   function handleBackupSuccess() {
@@ -69,16 +67,14 @@ export default function DataManagementPage() {
 
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">
-                Export your data as JSON or CSV. Does not affect backup
-                reminders.
+                Export your data as JSON or CSV. Does not affect backup reminders.
               </p>
               <ExportData />
             </div>
 
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">
-                Restore from an encrypted .extrack backup file. Choose merge or
-                override mode.
+                Restore from an encrypted .extrack backup file. Choose merge or override mode.
               </p>
               <ImportData />
             </div>

@@ -43,9 +43,7 @@ export function BackupReminderSettings() {
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(
     initialPreferences.lastBackupDate,
   );
-  const [lastBackupMode, setLastBackupMode] = useState(
-    initialPreferences.lastBackupMode,
-  );
+  const [lastBackupMode, setLastBackupMode] = useState(initialPreferences.lastBackupMode);
 
   const lastBackupText = useMemo(() => {
     const daysSince = getDaysSinceLastBackup(lastBackupDate);
@@ -53,9 +51,7 @@ export function BackupReminderSettings() {
     if (daysSince === null) return "Last backed up: never";
 
     const dateText =
-      daysSince === 0
-        ? "today"
-        : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
+      daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`;
     const modeSuffix =
       lastBackupMode === "device"
         ? " · Device"
@@ -100,9 +96,7 @@ export function BackupReminderSettings() {
         <div className="text-sm font-medium">Frequency</div>
         <Select
           value={schedule}
-          onValueChange={(value) =>
-            handleScheduleChange(value as BackupReminderSchedule)
-          }
+          onValueChange={(value) => handleScheduleChange(value as BackupReminderSchedule)}
         >
           <SelectTrigger className="h-8 w-32 text-xs">
             <SelectValue placeholder="Select" />

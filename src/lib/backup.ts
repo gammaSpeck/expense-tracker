@@ -37,15 +37,10 @@ function b64uEncode(buf: Uint8Array<ArrayBuffer>): string {
 function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
   const b64 = str.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(b64);
-  return Uint8Array.from(bin, (c) =>
-    c.charCodeAt(0),
-  ) as Uint8Array<ArrayBuffer>;
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;
 }
 
-async function deriveKey(
-  passphrase: string,
-  salt: Uint8Array<ArrayBuffer>,
-): Promise<CryptoKey> {
+async function deriveKey(passphrase: string, salt: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -87,12 +82,8 @@ export async function encryptData(plaintext: string): Promise<string> {
   const passphrase = await getStoredPassphrase();
   if (!passphrase) throw new Error("No encryption passphrase set");
 
-  const salt = crypto.getRandomValues(
-    new Uint8Array(16),
-  ) as Uint8Array<ArrayBuffer>;
-  const iv = crypto.getRandomValues(
-    new Uint8Array(12),
-  ) as Uint8Array<ArrayBuffer>;
+  const salt = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array<ArrayBuffer>;
+  const iv = crypto.getRandomValues(new Uint8Array(12)) as Uint8Array<ArrayBuffer>;
   const key = await deriveKey(passphrase, salt);
 
   const ciphertext = await crypto.subtle.encrypt(
@@ -109,18 +100,13 @@ export async function encryptData(plaintext: string): Promise<string> {
     iterations: ITERATIONS,
     salt: b64uEncode(salt),
     iv: b64uEncode(iv),
-    ciphertext: b64uEncode(
-      new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>,
-    ),
+    ciphertext: b64uEncode(new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>),
   };
 
   return JSON.stringify(envelope, null, 2);
 }
 
-export async function decryptData(
-  encryptedJson: string,
-  passphrase?: string,
-): Promise<string> {
+export async function decryptData(encryptedJson: string, passphrase?: string): Promise<string> {
   let envelope: ExtrackEnvelope;
   try {
     envelope = JSON.parse(encryptedJson) as ExtrackEnvelope;
@@ -156,11 +142,7 @@ export async function decryptData(
   );
 
   try {
-    const plaintext = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
-      key,
-      ciphertext,
-    );
+    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
     return new TextDecoder().decode(plaintext);
   } catch {
     throw new Error("Wrong passphrase — decryption failed");
@@ -181,12 +163,7 @@ function toDateKey(value: Date): string {
 }
 
 function isReminderSchedule(value: unknown): value is BackupReminderSchedule {
-  return (
-    value === "never" ||
-    value === "daily" ||
-    value === "weekly" ||
-    value === "monthly"
-  );
+  return value === "never" || value === "daily" || value === "weekly" || value === "monthly";
 }
 
 export function getBackupReminderPreferences(): BackupReminderPreferences {
@@ -212,10 +189,7 @@ export function shouldShowBackupReminderBanner(
   const todayKey = toDateKey(now);
   if (preferences.bannerLastShownDate === todayKey) return false;
 
-  const daysSinceLastBackup = getDaysSinceLastBackup(
-    preferences.lastBackupDate,
-    now,
-  );
+  const daysSinceLastBackup = getDaysSinceLastBackup(preferences.lastBackupDate, now);
 
   if (daysSinceLastBackup === null) return true;
 
@@ -268,9 +242,7 @@ export function getDaysSinceLastBackup(
   return Math.max(0, differenceInCalendarDays(now, parsed));
 }
 
-export function markBackupReminderBannerShown(
-  now: Date = new Date(),
-): BackupReminderPreferences {
+export function markBackupReminderBannerShown(now: Date = new Date()): BackupReminderPreferences {
   return userPreferences.updateBackupReminderPreferences({
     bannerLastShownDate: toDateKey(now),
   });

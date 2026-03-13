@@ -161,7 +161,7 @@ function ChangePassphraseDialog({
               <AlertTriangle className="h-5 w-5 text-amber-500" />
               Change Encryption Passphrase?
             </DialogTitle>
-            <DialogDescription asChild>
+            <DialogDescription asChild className="text-left">
               <div className="space-y-2 text-sm">
                 <p>
                   Changing your passphrase will <strong>not</strong> re-encrypt
@@ -199,7 +199,7 @@ function ChangePassphraseDialog({
               <ShieldCheck className="h-5 w-5 text-amber-500" />
               Set New Passphrase
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left">
               Old backups will still require the previous passphrase.
             </DialogDescription>
           </DialogHeader>

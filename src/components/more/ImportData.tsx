@@ -6,11 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { importData, db } from "@/db/expenseTrackerDb";
 import { Expense, Category } from "@/types/expense";
-import {
-  isEncryptedFile,
-  decryptData,
-  getStoredPassphrase,
-} from "@/lib/backup";
+import { isEncryptedFile, decryptData, getStoredPassphrase } from "@/lib/backup";
 import { toast } from "sonner";
 
 interface ImportPreview {
@@ -29,9 +25,7 @@ export function ImportData() {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Encrypted-file state
-  const [pendingEncryptedText, setPendingEncryptedText] = useState<
-    string | null
-  >(null);
+  const [pendingEncryptedText, setPendingEncryptedText] = useState<string | null>(null);
   const [manualPassphrase, setManualPassphrase] = useState("");
   const [showManualPass, setShowManualPass] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
@@ -39,8 +33,7 @@ export function ImportData() {
   function buildPreview(jsonText: string): boolean {
     try {
       const data = JSON.parse(jsonText);
-      if (!data.expenses || !data.categories)
-        throw new Error("Invalid backup file");
+      if (!data.expenses || !data.categories) throw new Error("Invalid backup file");
 
       const sortedExpenses = [...data.expenses].sort((a: Expense, b: Expense) =>
         a.date.localeCompare(b.date),
@@ -90,9 +83,7 @@ export function ImportData() {
         const plaintext = await decryptData(text, stored);
         // Guard: reject CSV exports masquerading as backups
         if (!plaintext.trimStart().startsWith("{")) {
-          toast.error(
-            "This file is an encrypted export, not a restorable backup",
-          );
+          toast.error("This file is an encrypted export, not a restorable backup");
           if (fileInputRef.current) fileInputRef.current.value = "";
           return;
         }
@@ -114,14 +105,9 @@ export function ImportData() {
     if (!pendingEncryptedText || !manualPassphrase) return;
     setIsDecrypting(true);
     try {
-      const plaintext = await decryptData(
-        pendingEncryptedText,
-        manualPassphrase,
-      );
+      const plaintext = await decryptData(pendingEncryptedText, manualPassphrase);
       if (!plaintext.trimStart().startsWith("{")) {
-        toast.error(
-          "This file is an encrypted export, not a restorable backup",
-        );
+        toast.error("This file is an encrypted export, not a restorable backup");
         setPendingEncryptedText(null);
         setManualPassphrase("");
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -187,8 +173,7 @@ export function ImportData() {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-          Encrypted file detected. Enter the passphrase used when this backup
-          was created.
+          Encrypted file detected. Enter the passphrase used when this backup was created.
         </div>
         <div className="space-y-2">
           <Label htmlFor="import-pass" className="text-sm">
@@ -214,11 +199,7 @@ export function ImportData() {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label={showManualPass ? "Hide" : "Show"}
             >
-              {showManualPass ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showManualPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
@@ -270,10 +251,7 @@ export function ImportData() {
 
       <div className="space-y-3">
         <Label className="text-sm text-muted-foreground">Import Mode</Label>
-        <RadioGroup
-          value={mode}
-          onValueChange={(v) => setMode(v as "merge" | "override")}
-        >
+        <RadioGroup value={mode} onValueChange={(v) => setMode(v as "merge" | "override")}>
           <div className="flex items-start gap-3 p-3 rounded-lg border border-border">
             <RadioGroupItem value="merge" id="merge" className="mt-1" />
             <div>
@@ -288,15 +266,10 @@ export function ImportData() {
           <div className="flex items-start gap-3 p-3 rounded-lg border border-destructive/30">
             <RadioGroupItem value="override" id="override" className="mt-1" />
             <div>
-              <Label
-                htmlFor="override"
-                className="cursor-pointer font-medium text-destructive"
-              >
+              <Label htmlFor="override" className="cursor-pointer font-medium text-destructive">
                 Override (Destructive)
               </Label>
-              <p className="text-xs text-muted-foreground">
-                Delete all existing data and replace
-              </p>
+              <p className="text-xs text-muted-foreground">Delete all existing data and replace</p>
             </div>
           </div>
         </RadioGroup>
@@ -306,11 +279,7 @@ export function ImportData() {
         <Button variant="outline" onClick={handleCancel} className="flex-1">
           Cancel
         </Button>
-        <Button
-          onClick={handleImport}
-          disabled={isImporting}
-          className="flex-1"
-        >
+        <Button onClick={handleImport} disabled={isImporting} className="flex-1">
           {isImporting ? "Importing..." : "Confirm Import"}
         </Button>
       </div>
@@ -323,42 +292,38 @@ async function mergeImportData(data: {
   expenses: Expense[];
   categories: Category[];
 }): Promise<void> {
-  await db.transaction(
-    "rw",
-    [db.expenses, db.categories, db.tagMetadata],
-    async () => {
-      // Import categories (skip if already exists by id)
-      for (const category of data.categories) {
-        const exists = await db.categories.get(category.id);
-        if (!exists) {
-          await db.categories.add(category);
-        }
+  await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    // Import categories (skip if already exists by id)
+    for (const category of data.categories) {
+      const exists = await db.categories.get(category.id);
+      if (!exists) {
+        await db.categories.add(category);
       }
+    }
 
-      // Import expenses (skip if already exists by id)
-      for (const expense of data.expenses) {
-        const exists = await db.expenses.get(expense.id);
-        if (!exists) {
-          await db.expenses.add(expense);
+    // Import expenses (skip if already exists by id)
+    for (const expense of data.expenses) {
+      const exists = await db.expenses.get(expense.id);
+      if (!exists) {
+        await db.expenses.add(expense);
 
-          // Update tag metadata
-          for (const tag of expense.tags) {
-            const tagMeta = await db.tagMetadata.get(tag);
-            if (tagMeta) {
-              await db.tagMetadata.update(tag, {
-                count: tagMeta.count + 1,
-                lastUsed: new Date().toISOString(),
-              });
-            } else {
-              await db.tagMetadata.add({
-                tag,
-                count: 1,
-                lastUsed: new Date().toISOString(),
-              });
-            }
+        // Update tag metadata
+        for (const tag of expense.tags) {
+          const tagMeta = await db.tagMetadata.get(tag);
+          if (tagMeta) {
+            await db.tagMetadata.update(tag, {
+              count: tagMeta.count + 1,
+              lastUsed: new Date().toISOString(),
+            });
+          } else {
+            await db.tagMetadata.add({
+              tag,
+              count: 1,
+              lastUsed: new Date().toISOString(),
+            });
           }
         }
       }
-    },
-  );
+    }
+  });
 }

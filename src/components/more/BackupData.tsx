@@ -11,23 +11,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
-import {
-  markBackupCompleted,
-  getStoredPassphrase,
-  encryptData,
-} from "@/lib/backup";
+import { markBackupCompleted, getStoredPassphrase, encryptData } from "@/lib/backup";
 import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
-import {
-  isDriveConnected,
-  getDriveCredentials,
-  saveDriveCredentials,
-} from "@/db/driveCredentials";
-import {
-  getValidAccessToken,
-  DriveSessionExpiredError,
-  initiateGoogleAuth,
-} from "@/lib/driveAuth";
+import { isDriveConnected, getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
+import { getValidAccessToken, DriveSessionExpiredError, initiateGoogleAuth } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
 
 interface BackupDataProps {
@@ -50,9 +38,7 @@ export function BackupData({
 
   // Use externally-provided state when available, otherwise check independently
   const driveConnected =
-    driveConnectedProp !== undefined
-      ? driveConnectedProp
-      : internalDriveConnected;
+    driveConnectedProp !== undefined ? driveConnectedProp : internalDriveConnected;
 
   useEffect(() => {
     if (driveConnectedProp !== undefined) return;
@@ -131,12 +117,7 @@ export function BackupData({
           await saveDriveCredentials({ ...creds, folderID });
         }
 
-        const { webViewLink } = await uploadFileToDrive(
-          blob,
-          filename,
-          folderID,
-          accessToken,
-        );
+        const { webViewLink } = await uploadFileToDrive(blob, filename, folderID, accessToken);
 
         markBackupCompleted("drive");
         toast.success("Backup saved to Google Drive", {
@@ -172,11 +153,7 @@ export function BackupData({
 
   return (
     <>
-      <Button
-        onClick={handleOpenBackup}
-        variant="outline"
-        className="w-full justify-start"
-      >
+      <Button onClick={handleOpenBackup} variant="outline" className="w-full justify-start">
         <Archive className="h-4 w-4 mr-2" />
         Create Backup
       </Button>
@@ -193,7 +170,7 @@ export function BackupData({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>Backup</DialogTitle>
             <DialogDescription>
               Save a full JSON backup of your expenses and categories.
@@ -246,11 +223,7 @@ export function BackupData({
               </div>
             </div>
 
-            <Button
-              onClick={handleBackup}
-              disabled={isBackingUp}
-              className="w-full"
-            >
+            <Button onClick={handleBackup} disabled={isBackingUp} className="w-full">
               {isBackingUp ? "Saving…" : "Create Backup"}
             </Button>
           </div>

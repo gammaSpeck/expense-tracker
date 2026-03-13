@@ -90,11 +90,7 @@ export function ExportData() {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        variant="outline"
-        className="w-full justify-start"
-      >
+      <Button onClick={() => setOpen(true)} variant="outline" className="w-full justify-start">
         <Download className="h-4 w-4 mr-2" />
         Export Data
       </Button>
@@ -112,7 +108,7 @@ export function ExportData() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="text-left">
             <DialogTitle>Export Data</DialogTitle>
             <DialogDescription>
               Download all your expenses and categories as a file.
@@ -156,25 +152,14 @@ export function ExportData() {
               />
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                <Label
-                  htmlFor="export-encrypt"
-                  className="text-sm cursor-pointer"
-                >
+                <Label htmlFor="export-encrypt" className="text-sm cursor-pointer">
                   Encrypt this export
                 </Label>
               </div>
-              {encrypt && (
-                <span className="ml-auto text-xs text-muted-foreground">
-                  .extrack
-                </span>
-              )}
+              {encrypt && <span className="ml-auto text-xs text-muted-foreground">.extrack</span>}
             </div>
 
-            <Button
-              onClick={handleExport}
-              disabled={isExporting}
-              className="w-full"
-            >
+            <Button onClick={handleExport} disabled={isExporting} className="w-full">
               <Download className="h-4 w-4 mr-2" />
               {isExporting ? "Exporting..." : "Export Data"}
             </Button>

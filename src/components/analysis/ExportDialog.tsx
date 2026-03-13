@@ -12,7 +12,7 @@ type Props = {
 export default function ExportDialog({ open, onOpenChange, onExportCSV, onExportJSON }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="text-left">
         <DialogHeader>
           <DialogTitle>Export Data</DialogTitle>
         </DialogHeader>
