@@ -1,0 +1,6 @@
+{
+  "recommendations": [
+    // Oxc: provides both oxlint diagnostics and oxfmt formatting in VS Code.
+    "oxc.oxc-vscode"
+  ]
+}

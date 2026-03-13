@@ -1,0 +1,26 @@
+{
+  // Use oxfmt (via the Oxc extension) as the formatter for all JS/TS files —
+  // this matches what `pnpm fix` runs with `oxfmt --write`.
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+  },
+
+  // Use oxlint (via the Oxc extension) for diagnostics — disable the
+  // built-in TS/JS validator to avoid duplicate or conflicting errors.
+  "oxc.enable": true,
+  "js/ts.validate.enabled": false,
+
+  // Silence any Prettier suggestions so it can't override oxfmt on save.
+  "prettier.enable": false,
+}
