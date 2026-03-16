@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.4.0...v1.5.0) (2026-03-16)
+
+
+### Features
+
+* **backup-reminder:** implement backup reminder system and user preferences ([#29](https://github.com/gammaSpeck/expense-tracker/issues/29)) ([a9ced6e](https://github.com/gammaSpeck/expense-tracker/commit/a9ced6e667d82704f0dfd61c1c3a45825b2e1480))
+* **backup:** separate backup and export functionalities with new components and updated settings ([#35](https://github.com/gammaSpeck/expense-tracker/issues/35)) ([e0f8c8d](https://github.com/gammaSpeck/expense-tracker/commit/e0f8c8d32a93eef40705fb2f81d998c165036f37))
+* **backups:** implement end-to-end encryption for backups and exports ([#36](https://github.com/gammaSpeck/expense-tracker/issues/36)) ([b4b0841](https://github.com/gammaSpeck/expense-tracker/commit/b4b0841a9f8e64e65f8a330866ab7fc0e5b74140))
+* **google-drive:** integrate Google Drive backup functionality and settings ([#31](https://github.com/gammaSpeck/expense-tracker/issues/31)) ([5c4ee9c](https://github.com/gammaSpeck/expense-tracker/commit/5c4ee9c24c25b1b895f4d54743bfbc4778380641))
+* **security:** enhance security headers and switch to Web Oauth client ([#34](https://github.com/gammaSpeck/expense-tracker/issues/34)) ([257fcaa](https://github.com/gammaSpeck/expense-tracker/commit/257fcaa73d1ca8830007589dd5524d82632192d5))
+
 ## [1.4.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.3.1...v1.4.0) (2026-03-02)
 
 
