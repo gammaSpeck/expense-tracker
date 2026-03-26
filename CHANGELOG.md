@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.0...v1.5.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* **ui:** fixed page break when passphrase is too long ([#38](https://github.com/gammaSpeck/expense-tracker/issues/38)) ([15f539c](https://github.com/gammaSpeck/expense-tracker/commit/15f539cf137aed36a0fe9e988729bafacae0bd64))
+
 ## [1.5.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.4.0...v1.5.0) (2026-03-16)
 
 
