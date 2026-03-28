@@ -4,23 +4,24 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "[javascript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
   },
   "[typescript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "oxc.oxc-vscode",
   },
 
   // Use oxlint (via the Oxc extension) for diagnostics — disable the
   // built-in TS/JS validator to avoid duplicate or conflicting errors.
   "oxc.enable": true,
-  "js/ts.validate.enabled": false,
+  "js/ts.validate.enabled": true,
 
   // Silence any Prettier suggestions so it can't override oxfmt on save.
-  "prettier.enable": false
+  "prettier.enable": false,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
 }
