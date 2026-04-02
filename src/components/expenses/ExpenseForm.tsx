@@ -39,7 +39,8 @@ const expenseSchema = z.object({
   value: z
     .number({ error: "Amount is required" })
     .positive("Must be positive")
-    .max(10000000, "Maximum 10,000,000"),
+    .max(10000000, "Maximum 10,000,000")
+    .nullable(), // Only default value can be null, user must input something
   category: z.string().min(1, "Category required"),
   description: z.string().optional(),
   tags: z.array(z.string()).max(4, "Maximum 4 tags"),
@@ -178,8 +179,9 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
     setImagePreview(undefined);
   };
 
-  const onSubmit = async (data: ExpenseFormData) => {
+  const onSubmit = async ({ value, ...rest }: ExpenseFormData) => {
     try {
+      const data = { value: value || 0, ...rest }; // default to 0 if null for safety
       if (expense) {
         await updateExpense(expense.id, data);
         toast.success("Expense updated");
