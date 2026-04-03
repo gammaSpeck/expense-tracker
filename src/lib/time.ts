@@ -38,8 +38,8 @@ export function formatTime24(time12: string): string {
   try {
     const date = parse(time12, "h:mm a", new Date());
     return format(date, "HH:mm");
-  } catch {
-    console.error("Error formatting time:", error);
+  } catch (e) {
+    console.error("Error formatting time:", e);
     return time12; // Fallback to original value
   }
 }

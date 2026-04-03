@@ -252,7 +252,7 @@ export default function CategoriesPage() {
                 className="bg-destructive hover:bg-destructive/90"
                 disabled={
                   deleteAction === "move" &&
-                  deleteData &&
+                  !!deleteData &&
                   deleteData.expenseCount > 0 &&
                   !moveToCategory
                 }

@@ -69,7 +69,7 @@ export default function TrendSection({
               }
             />
             <Tooltip
-              formatter={(value: number) => [`${currency.symbol}${formatValue(value)}`, "Amount"]}
+              formatter={(value) => [`${currency.symbol}${formatValue(Number(value))}`, "Amount"]}
               contentStyle={{
                 backgroundColor: "hsl(var(--card))",
                 border: "1px solid hsl(var(--border))",
