@@ -8,6 +8,7 @@ import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { FactoryReset } from "@/components/more/FactoryReset";
 import { EncryptionSettings } from "@/components/more/EncryptionSettings";
+import { CsvImportWizard } from "@/components/more/CsvImportWizard";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
@@ -77,6 +78,13 @@ export default function DataManagementPage() {
                 Restore from an encrypted .extrack backup file. Choose merge or override mode.
               </p>
               <ImportData />
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Import expenses from any app that exports CSV. Map columns and categories before committing.
+              </p>
+              <CsvImportWizard />
             </div>
           </div>
 
