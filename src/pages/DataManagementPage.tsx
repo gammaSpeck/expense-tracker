@@ -8,6 +8,7 @@ import { ExportData } from "@/components/more/ExportData";
 import { ImportData } from "@/components/more/ImportData";
 import { FactoryReset } from "@/components/more/FactoryReset";
 import { EncryptionSettings } from "@/components/more/EncryptionSettings";
+import { CsvImportWizard } from "@/components/more/CsvImportWizard";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
