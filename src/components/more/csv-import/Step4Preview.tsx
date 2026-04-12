@@ -141,7 +141,11 @@ export default function Step4Preview({
 
   return (
     <LazyMotion features={domAnimation}>
-      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 overflow-x-hidden">
+      <m.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4 overflow-x-hidden"
+      >
         {/* Summary counts */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <SummaryCard label="Total rows" value={totalRows} />
