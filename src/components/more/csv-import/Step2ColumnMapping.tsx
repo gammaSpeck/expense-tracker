@@ -123,7 +123,9 @@ export default function Step2ColumnMapping({
                       {csvHeaders
                         .filter((h) => !selected.includes(h))
                         .map((h) => (
-                          <SelectItem key={h} value={h}>{h}</SelectItem>
+                          <SelectItem key={h} value={h}>
+                            {h}
+                          </SelectItem>
                         ))}
                     </SelectContent>
                   </Select>
@@ -135,7 +137,10 @@ export default function Step2ColumnMapping({
                           variant="secondary"
                           className="text-xs cursor-pointer"
                           onClick={() =>
-                            updateColumnMapping("tagColumns", selected.filter((x) => x !== s))
+                            updateColumnMapping(
+                              "tagColumns",
+                              selected.filter((x) => x !== s),
+                            )
                           }
                         >
                           {s} ×
@@ -167,9 +172,7 @@ export default function Step2ColumnMapping({
 
                 <Select
                   value={selectedCol ?? NOT_MAPPED}
-                  onValueChange={(v) =>
-                    updateColumnMapping(field.key, v === NOT_MAPPED ? null : v)
-                  }
+                  onValueChange={(v) => updateColumnMapping(field.key, v === NOT_MAPPED ? null : v)}
                 >
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue placeholder="— Not mapped —" />
@@ -177,7 +180,9 @@ export default function Step2ColumnMapping({
                   <SelectContent>
                     <SelectItem value={NOT_MAPPED}>— Not mapped —</SelectItem>
                     {csvHeaders.map((h) => (
-                      <SelectItem key={h} value={h}>{h}</SelectItem>
+                      <SelectItem key={h} value={h}>
+                        {h}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -201,8 +206,12 @@ export default function Step2ColumnMapping({
         </div>
 
         <div className="flex justify-between pt-2">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handleNext} disabled={hasErrors}>Next</Button>
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button onClick={handleNext} disabled={hasErrors}>
+            Next
+          </Button>
         </div>
       </m.div>
     </LazyMotion>

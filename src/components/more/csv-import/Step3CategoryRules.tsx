@@ -3,6 +3,7 @@ import { LazyMotion, domAnimation, m } from "framer-motion";
 import { Lock, Plus, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -10,11 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import type { Category } from "@/types/expense";
 import type { IgnoreRule } from "./useCsvImport";
@@ -31,6 +28,8 @@ interface Props {
   addIgnoreRule: () => void;
   updateIgnoreRule: (index: number, rule: IgnoreRule) => void;
   removeIgnoreRule: (index: number) => void;
+  addIgnoreRuleWithValues: (col: string, val: string) => void;
+  mappedCategoryCol: string | null;
   csvHeaders: string[];
   mappedDateCol: string | null;
   mappedAmountCol: string | null;
@@ -59,6 +58,8 @@ export default function Step3CategoryRules({
   addIgnoreRule,
   updateIgnoreRule,
   removeIgnoreRule,
+  addIgnoreRuleWithValues,
+  mappedCategoryCol,
   csvHeaders,
   mappedDateCol,
   mappedAmountCol,
@@ -91,31 +92,75 @@ export default function Step3CategoryRules({
           {uniqueCategoryValues.length === 0 ? (
             <p className="text-xs text-muted-foreground italic">No category values found in CSV.</p>
           ) : (
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              {uniqueCategoryValues.map((csvVal) => (
-                <div key={csvVal} className="flex items-center gap-2">
-                  <span className="text-sm truncate min-w-0 flex-1">{csvVal}</span>
-                  <span className="text-muted-foreground text-xs">→</span>
-                  <Select
-                    value={categoryRules[csvVal] ?? ""}
-                    onValueChange={(v) => handleRuleChange(csvVal, v)}
-                  >
-                    <SelectTrigger className="h-8 text-xs w-[180px] shrink-0">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          <span className="flex items-center gap-1.5">
-                            <ColorDot color={c.color} />
-                            {c.name}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+            <div className="space-y-2 overflow-y-auto pr-1">
+              {uniqueCategoryValues.map((csvVal) => {
+                const isIgnored = mappedCategoryCol
+                  ? ignoreRules.some((r) => r.column === mappedCategoryCol && r.value === csvVal)
+                  : false;
+                return (
+                  <div key={csvVal} className="flex items-center gap-2">
+                    {isIgnored ? (
+                      <>
+                        <span className="text-sm wrap-break-word min-w-0 w-1/2 line-through text-muted-foreground">
+                          {csvVal}
+                        </span>
+                        <span className="flex items-center gap-2 ml-auto shrink-0">
+                          <Badge variant="secondary" className="text-xs">
+                            Ignored
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-xs h-7"
+                            onClick={() =>
+                              removeIgnoreRule(
+                                ignoreRules.findIndex(
+                                  (r) => r.column === mappedCategoryCol && r.value === csvVal,
+                                ),
+                              )
+                            }
+                          >
+                            Keep
+                          </Button>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm wrap-break-word min-w-0 w-1/2">{csvVal}</span>
+                        <span className="text-muted-foreground text-xs">→</span>
+                        <Select
+                          value={categoryRules[csvVal] ?? ""}
+                          onValueChange={(v) => handleRuleChange(csvVal, v)}
+                        >
+                          <SelectTrigger className="h-8 text-xs w-45 shrink-0">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                <span className="flex items-center gap-1.5">
+                                  <ColorDot color={c.color} />
+                                  {c.name}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs h-7 shrink-0"
+                          onClick={() =>
+                            mappedCategoryCol && addIgnoreRuleWithValues(mappedCategoryCol, csvVal)
+                          }
+                        >
+                          Skip
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -123,7 +168,8 @@ export default function Step3CategoryRules({
         {/* Default category */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium">
-            Default category <span className="text-muted-foreground text-xs">(for unmapped values)</span>
+            Default category{" "}
+            <span className="text-muted-foreground text-xs">(for unmapped values)</span>
           </label>
           <Select value={defaultCategoryId} onValueChange={setDefaultCategoryId}>
             <SelectTrigger className="h-9 text-sm">
@@ -154,12 +200,16 @@ export default function Step3CategoryRules({
             Advanced Rules
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-3 space-y-3">
-            <p className="text-xs text-muted-foreground">Configure which rows to skip during import</p>
+            <p className="text-xs text-muted-foreground">
+              Configure which rows to skip during import
+            </p>
 
             {/* System rules */}
             <div className="space-y-1.5">
               <SystemRule label={`Skip row if "${mappedDateCol || "Date"}" cell is empty`} />
-              <SystemRule label={`Skip row if "${mappedAmountCol || "Amount"}" cell is empty or non-numeric`} />
+              <SystemRule
+                label={`Skip row if "${mappedAmountCol || "Amount"}" cell is empty or non-numeric`}
+              />
             </div>
 
             {/* Custom rules */}
@@ -175,7 +225,9 @@ export default function Step3CategoryRules({
                     </SelectTrigger>
                     <SelectContent>
                       {csvHeaders.map((h) => (
-                        <SelectItem key={h} value={h}>{h}</SelectItem>
+                        <SelectItem key={h} value={h}>
+                          {h}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -186,7 +238,12 @@ export default function Step3CategoryRules({
                     placeholder="Value"
                     className="h-8 text-xs flex-1"
                   />
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeIgnoreRule(i)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={() => removeIgnoreRule(i)}
+                  >
                     <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -199,8 +256,12 @@ export default function Step3CategoryRules({
         </Collapsible>
 
         <div className="flex justify-between pt-2">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={onNext} disabled={hasDefaultError}>Next</Button>
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button onClick={onNext} disabled={hasDefaultError}>
+            Next
+          </Button>
         </div>
       </m.div>
     </LazyMotion>

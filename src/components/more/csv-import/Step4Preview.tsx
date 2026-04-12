@@ -13,11 +13,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown } from "lucide-react";
 import { db } from "@/db/expenseTrackerDb";
 import type { Expense, Category } from "@/types/expense";
@@ -64,21 +60,21 @@ export default function Step4Preview({
   }, [categories]);
 
   const filteredRows = useMemo(() => {
-    if (!search.trim()) return validRows.slice(0, 50);
+    if (!search.trim()) return validRows.slice(0, 10);
     const q = search.toLowerCase();
     return validRows
       .filter((r) => {
         const cat = categoryMap.get(r.category);
         return (
-          r.date.toLowerCase().includes(q) ||
-          r.time.toLowerCase().includes(q) ||
           String(r.value).includes(q) ||
           (cat?.name ?? "").toLowerCase().includes(q) ||
           (r.description ?? "").toLowerCase().includes(q) ||
-          r.tags.some((t) => t.toLowerCase().includes(q))
+          r.tags.some((t) => t.toLowerCase().includes(q)) ||
+          r.date.toLowerCase().includes(q) ||
+          r.time.toLowerCase().includes(q)
         );
       })
-      .slice(0, 50);
+      .slice(0, 10);
   }, [validRows, search, categoryMap]);
 
   async function handleImport() {
@@ -145,13 +141,17 @@ export default function Step4Preview({
 
   return (
     <LazyMotion features={domAnimation}>
-      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 overflow-x-hidden">
         {/* Summary counts */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <SummaryCard label="Total rows" value={totalRows} />
           <SummaryCard label="To import" value={validRows.length} variant="primary" />
           <SummaryCard label="Skipped (rules)" value={skippedByRules} />
-          <SummaryCard label="Data errors" value={dataErrors.length} variant={dataErrors.length > 0 ? "warning" : undefined} />
+          <SummaryCard
+            label="Data errors"
+            value={dataErrors.length}
+            variant={dataErrors.length > 0 ? "warning" : undefined}
+          />
         </div>
 
         {/* Error details */}
@@ -191,18 +191,23 @@ export default function Step4Preview({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Date</TableHead>
-                    <TableHead className="text-xs">Time</TableHead>
-                    <TableHead className="text-xs">Amount</TableHead>
-                    <TableHead className="text-xs">Category</TableHead>
-                    <TableHead className="text-xs">Description</TableHead>
-                    <TableHead className="text-xs">Tags</TableHead>
+                    <TableHead className="text-xs sticky left-0 z-10 bg-card whitespace-nowrap min-w-[140px]">
+                      Category
+                    </TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Description</TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Tags</TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Amount</TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Date</TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredRows.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-xs text-muted-foreground py-6">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center text-xs text-muted-foreground py-6"
+                      >
                         No matching rows in preview
                       </TableCell>
                     </TableRow>
@@ -211,19 +216,21 @@ export default function Step4Preview({
                       const cat = categoryMap.get(row.category);
                       return (
                         <TableRow key={row.id}>
-                          <TableCell className="text-xs whitespace-nowrap">{row.date}</TableCell>
-                          <TableCell className="text-xs">{row.time}</TableCell>
-                          <TableCell className="text-xs">{row.value}</TableCell>
-                          <TableCell className="text-xs whitespace-nowrap">
-                            {cat && <ColorDot color={cat.color} />}{" "}
-                            {cat?.name ?? "Unknown"}
+                          <TableCell className="text-xs sticky left-0 z-10 bg-card whitespace-nowrap">
+                            <span className="flex items-center gap-1.5">
+                              {cat && <ColorDot color={cat.color} />}
+                              {cat?.name ?? "Unknown"}
+                            </span>
                           </TableCell>
-                          <TableCell className="text-xs max-w-[120px] truncate">
+                          <TableCell className="text-xs max-w-30 truncate">
                             {row.description ?? "—"}
                           </TableCell>
-                          <TableCell className="text-xs">
+                          <TableCell className="text-xs whitespace-nowrap">
                             {row.tags.length > 0 ? row.tags.join(", ") : "—"}
                           </TableCell>
+                          <TableCell className="text-xs whitespace-nowrap">{row.value}</TableCell>
+                          <TableCell className="text-xs whitespace-nowrap">{row.date}</TableCell>
+                          <TableCell className="text-xs whitespace-nowrap">{row.time}</TableCell>
                         </TableRow>
                       );
                     })
@@ -232,9 +239,9 @@ export default function Step4Preview({
               </Table>
             </div>
 
-            {validRows.length > 50 && (
+            {validRows.length > 10 && (
               <p className="text-xs text-muted-foreground text-center">
-                Showing first 50 of {validRows.length} rows
+                Showing first 10 of {validRows.length} rows
               </p>
             )}
           </div>
@@ -247,7 +254,9 @@ export default function Step4Preview({
         )}
 
         <div className="flex justify-between pt-2">
-          <Button variant="outline" onClick={onBack}>Back</Button>
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
           <Button onClick={handleImport} disabled={validRows.length === 0 || isImporting}>
             {isImporting ? "Importing..." : `Import ${validRows.length} rows`}
           </Button>

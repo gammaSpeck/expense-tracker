@@ -75,10 +75,7 @@ export function useCsvImport(categories: Category[]) {
   }, [csvRows, columnMapping.category]);
 
   // Auto-set default category to "Others" on first load
-  const othersCategory = useMemo(
-    () => categories.find((c) => c.name === "Others"),
-    [categories],
-  );
+  const othersCategory = useMemo(() => categories.find((c) => c.name === "Others"), [categories]);
 
   const setStepSafe = useCallback((s: number) => {
     setStep(s);
@@ -95,6 +92,10 @@ export function useCsvImport(categories: Category[]) {
 
   const addIgnoreRule = useCallback(() => {
     setIgnoreRules((prev) => [...prev, { column: "", value: "" }]);
+  }, []);
+
+  const addIgnoreRuleWithValues = useCallback((column: string, value: string) => {
+    setIgnoreRules((prev) => [...prev, { column, value }]);
   }, []);
 
   const updateIgnoreRule = useCallback((index: number, rule: IgnoreRule) => {
@@ -126,9 +127,15 @@ export function useCsvImport(categories: Category[]) {
 
       // System rules
       const rawDate = (row[dateCol] ?? "").trim();
-      if (!rawDate) { skipped++; continue; }
+      if (!rawDate) {
+        skipped++;
+        continue;
+      }
       const rawAmount = (row[amountCol] ?? "").trim();
-      if (!rawAmount || isNaN(parseFloat(rawAmount))) { skipped++; continue; }
+      if (!rawAmount || isNaN(parseFloat(rawAmount))) {
+        skipped++;
+        continue;
+      }
 
       // Custom ignore rules
       let ignored = false;
@@ -138,7 +145,10 @@ export function useCsvImport(categories: Category[]) {
           break;
         }
       }
-      if (ignored) { skipped++; continue; }
+      if (ignored) {
+        skipped++;
+        continue;
+      }
 
       // Date parsing
       let dateExtracted = rawDate;
@@ -150,12 +160,14 @@ export function useCsvImport(categories: Category[]) {
       let parsedDate: Date | null = null;
       // Try DD/MM/YYYY first
       const d1 = parse(dateExtracted, "dd/MM/yyyy", new Date());
-      if (isValid(d1)) { parsedDate = d1; }
-      else {
+      if (isValid(d1)) {
+        parsedDate = d1;
+      } else {
         // Try YYYY-MM-DD
         const d2 = parse(dateExtracted, "yyyy-MM-dd", new Date());
-        if (isValid(d2)) { parsedDate = d2; }
-        else {
+        if (isValid(d2)) {
+          parsedDate = d2;
+        } else {
           // Try MM/DD/YYYY
           const d3 = parse(dateExtracted, "MM/dd/yyyy", new Date());
           if (isValid(d3)) parsedDate = d3;
@@ -188,8 +200,9 @@ export function useCsvImport(categories: Category[]) {
           }
           // Try HH:mm:ss then HH:mm
           const t1 = parse(timeExtracted, "HH:mm:ss", new Date());
-          if (isValid(t1)) { formattedTime = format(t1, "HH:mm"); }
-          else {
+          if (isValid(t1)) {
+            formattedTime = format(t1, "HH:mm");
+          } else {
             const t2 = parse(timeExtracted, "HH:mm", new Date());
             if (isValid(t2)) formattedTime = format(t2, "HH:mm");
           }
@@ -198,9 +211,8 @@ export function useCsvImport(categories: Category[]) {
 
       // Category
       const rawCat = (row[catCol] ?? "").trim();
-      const resolvedCatId = rawCat && categoryRules[rawCat]
-        ? categoryRules[rawCat]
-        : defaultCategoryId;
+      const resolvedCatId =
+        rawCat && categoryRules[rawCat] ? categoryRules[rawCat] : defaultCategoryId;
 
       // Tags
       const tags: string[] = [];
@@ -252,14 +264,27 @@ export function useCsvImport(categories: Category[]) {
   }, [othersCategory?.id]);
 
   return {
-    step, setStep: setStepSafe,
-    csvHeaders, csvRows, setParsedData,
-    columnMapping, updateColumnMapping, setColumnMapping,
+    step,
+    setStep: setStepSafe,
+    csvHeaders,
+    csvRows,
+    setParsedData,
+    columnMapping,
+    updateColumnMapping,
+    setColumnMapping,
     uniqueCategoryValues,
-    categoryRules, setCategoryRules,
-    defaultCategoryId, setDefaultCategoryId,
-    ignoreRules, addIgnoreRule, updateIgnoreRule, removeIgnoreRule,
-    validRows, skippedByRules, dataErrors,
+    categoryRules,
+    setCategoryRules,
+    defaultCategoryId,
+    setDefaultCategoryId,
+    ignoreRules,
+    addIgnoreRule,
+    addIgnoreRuleWithValues,
+    updateIgnoreRule,
+    removeIgnoreRule,
+    validRows,
+    skippedByRules,
+    dataErrors,
     runTransformation,
     resetAll,
     othersCategory,
