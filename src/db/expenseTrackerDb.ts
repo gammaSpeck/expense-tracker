@@ -125,6 +125,29 @@ export async function addExpense(
   return id;
 }
 
+// All-or-nothing bulk add. Rolls back the entire batch if any row fails.
+export async function addExpenses(
+  expenses: Omit<Expense, "id" | "createdAt" | "updatedAt">[],
+): Promise<string[]> {
+  const now = new Date().toISOString();
+  const records: Expense[] = expenses.map((e) => ({
+    ...e,
+    id: uuidv4(),
+    createdAt: now,
+    updatedAt: now,
+  }));
+
+  await db.transaction("rw", db.expenses, db.tagMetadata, async () => {
+    await db.expenses.bulkAdd(records);
+    const uniqueTags = [...new Set(records.flatMap((r) => r.tags))];
+    for (const tag of uniqueTags) {
+      await updateTagMetadata(tag);
+    }
+  });
+
+  return records.map((r) => r.id);
+}
+
 export async function updateExpense(
   id: string,
   updates: Partial<Omit<Expense, "id" | "createdAt">>,
