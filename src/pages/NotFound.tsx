@@ -5,8 +5,9 @@ const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+    const pathname = location.pathname;
+    console.error("404 Error: User attempted to access non-existent route:", pathname);
+  }, [location]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">

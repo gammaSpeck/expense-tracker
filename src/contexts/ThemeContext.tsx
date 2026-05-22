@@ -47,7 +47,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     root.classList.add(resolved);
     // Use setTimeout to avoid cascading renders
-    setTimeout(() => setResolvedTheme(resolved), 0);
+    const timeoutId = window.setTimeout(() => setResolvedTheme(resolved), 0);
+    return () => window.clearTimeout(timeoutId);
   }, [theme]);
 
   useEffect(() => {
