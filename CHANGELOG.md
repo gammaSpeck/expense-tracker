@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.1...v1.5.2) (2026-08-09)
+
+
+### Bug Fixes
+
+* **data-loss:** fixes the auto data wipe out bug ([#41](https://github.com/gammaSpeck/expense-tracker/issues/41)) ([1cb0c99](https://github.com/gammaSpeck/expense-tracker/commit/1cb0c99929fb02b8cd1386461bd14b6fddb2b63b))
+
 ## [1.5.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.0...v1.5.1) (2026-03-22)
 
 
