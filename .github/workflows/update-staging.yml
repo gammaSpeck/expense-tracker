@@ -10,11 +10,11 @@ permissions:
 
 jobs:
   deploy_staging:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       # Checks out whatever branch/tag was picked in the "Use workflow from" dropdown.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Push checked-out ref to staging
         run: |
