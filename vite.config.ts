@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     },
   };
 });

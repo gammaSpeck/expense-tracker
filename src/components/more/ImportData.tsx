@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { importData, db } from "@/db/expenseTrackerDb";
 import { Expense, Category } from "@/types/expense";
 import { isEncryptedFile, decryptData, getStoredPassphrase } from "@/lib/backup";
+import { captureError } from "@/lib/telemetry";
 import { toast } from "sonner";
 
 interface ImportPreview {
@@ -151,7 +152,8 @@ export function ImportData() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch {
+    } catch (err) {
+      captureError("import_failed", err, { mode });
       toast.error("Import failed");
     } finally {
       setIsImporting(false);

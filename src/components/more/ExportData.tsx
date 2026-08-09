@@ -14,6 +14,7 @@ import {
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { Expense, Category } from "@/types/expense";
 import { encryptData, getStoredPassphrase } from "@/lib/backup";
+import { captureError } from "@/lib/telemetry";
 import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
 
@@ -82,6 +83,7 @@ export function ExportData() {
       resetForm();
       setOpen(false);
     } catch (err) {
+      captureError("export_failed", err, { format: formatType, encrypted: encrypt });
       toast.error(err instanceof Error ? err.message : "Export failed");
     } finally {
       setIsExporting(false);

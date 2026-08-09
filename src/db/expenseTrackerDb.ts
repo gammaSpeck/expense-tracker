@@ -1,6 +1,7 @@
 import Dexie, { Table } from "dexie";
 import { Expense, Category, TagMetadata } from "@/types/expense";
 import { v4 as uuidv4 } from "uuid";
+import { userPreferences } from "@/db/userPreferences";
 
 // Category colors palette
 export const CATEGORY_COLORS = [
@@ -84,12 +85,38 @@ class ExpenseDatabase extends Dexie {
 
 export const db = new ExpenseDatabase();
 
-// Initialize database with default categories
-export async function initializeDatabase(): Promise<void> {
-  const categoryCount = await db.categories.count();
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (!navigator.storage?.persist) return false;
+  if (await navigator.storage.persisted()) return true;
+  return navigator.storage.persist();
+}
 
+// Initialize database with default categories
+export type StartupState =
+  | { status: "ready" }
+  | { status: "seeded" }
+  | { status: "data-loss"; lastSeenExpenseCount: number; installedAt: string; lastSeenAt: string };
+
+export async function initializeDatabase(): Promise<StartupState> {
+  const [expenseCount, categoryCount] = await Promise.all([
+    db.expenses.count(),
+    db.categories.count(),
+  ]);
+  const marker = userPreferences.getInstallMarker();
+
+  // Prior install recorded expenses and the table is now empty: do not seed over the evidence.
+  if (marker && marker.lastSeenExpenseCount > 0 && expenseCount === 0) {
+    return {
+      status: "data-loss",
+      lastSeenExpenseCount: marker.lastSeenExpenseCount,
+      installedAt: marker.installedAt,
+      lastSeenAt: marker.lastSeenAt,
+    };
+  }
+
+  const now = new Date().toISOString();
+  let seeded = false;
   if (categoryCount === 0) {
-    const now = new Date().toISOString();
     const categories: Category[] = DEFAULT_CATEGORIES.map((cat) => ({
       ...cat,
       id: uuidv4(),
@@ -97,8 +124,16 @@ export async function initializeDatabase(): Promise<void> {
     }));
 
     await db.categories.bulkAdd(categories);
-    console.log("Default categories initialized");
+    seeded = true;
   }
+
+  userPreferences.setInstallMarker({
+    installedAt: marker?.installedAt ?? now,
+    lastSeenAt: now,
+    lastSeenExpenseCount: expenseCount,
+  });
+
+  return { status: seeded ? "seeded" : "ready" };
 }
 
 // Expense CRUD operations
@@ -116,6 +151,13 @@ export async function addExpense(
   };
 
   await db.expenses.add(newExpense);
+
+  const marker = userPreferences.getInstallMarker();
+  userPreferences.setInstallMarker({
+    installedAt: marker?.installedAt ?? now,
+    lastSeenAt: now,
+    lastSeenExpenseCount: await db.expenses.count(),
+  });
 
   // Update tag metadata
   for (const tag of expense.tags) {

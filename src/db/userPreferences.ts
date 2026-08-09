@@ -11,10 +11,17 @@ export interface BackupReminderPreferences {
   bannerLastShownDate: string | null;
 }
 
+export interface InstallMarker {
+  installedAt: string; // ISO
+  lastSeenAt: string; // ISO
+  lastSeenExpenseCount: number;
+}
+
 const STORAGE_KEYS = {
   currency: "expense-tracker-currency",
   theme: "expense-tracker-theme",
   backupReminder: "expense-tracker-backup-reminder",
+  install: "expense-tracker-install",
 } as const;
 
 const WEEKLY_REMINDER_DAY = 0;
@@ -123,6 +130,21 @@ class UserPreferences {
     };
 
     return this.setBackupReminderPreferences(nextPreferences);
+  }
+
+  getInstallMarker(): InstallMarker | null {
+    const rawValue = this.getItem(STORAGE_KEYS.install);
+    if (!rawValue) return null;
+
+    try {
+      return JSON.parse(rawValue) as InstallMarker;
+    } catch {
+      return null;
+    }
+  }
+
+  setInstallMarker(marker: InstallMarker): void {
+    this.setItem(STORAGE_KEYS.install, JSON.stringify(marker));
   }
 
   clearAll(): void {
