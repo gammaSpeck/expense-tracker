@@ -98,6 +98,7 @@ export function BackupData({
             err instanceof DriveSessionExpiredError
               ? "Google Drive session expired. Please reconnect."
               : "Could not connect to Google Drive. Please reconnect.";
+          captureError("backup_failed", err, { target: "drive", stage: "auth" });
           toast.error(message, {
             action: {
               label: "Go to Settings",

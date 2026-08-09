@@ -1,7 +1,7 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
@@ -33,6 +33,8 @@ const queryClient = new QueryClient();
 
 function AppContent() {
   const [lossCount, setLossCount] = useState<number | null>(null);
+  const [lossDialogOpen, setLossDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     void (async () => {
@@ -48,6 +50,7 @@ function AppContent() {
 
       if (state.status === "data-loss") {
         setLossCount(state.lastSeenExpenseCount);
+        setLossDialogOpen(true);
         capture("data_loss_detected", {
           lastSeenExpenseCount: state.lastSeenExpenseCount,
           installedAt: state.installedAt,
@@ -74,6 +77,7 @@ function AppContent() {
       </Routes>
       {lossCount !== null && (
         <DataLossDialog
+          open={lossDialogOpen}
           lastSeenExpenseCount={lossCount}
           onStartFresh={() => {
             const freshNow = new Date().toISOString();
@@ -82,8 +86,13 @@ function AppContent() {
               lastSeenAt: freshNow,
               lastSeenExpenseCount: 0,
             });
+            setLossDialogOpen(false);
             setLossCount(null);
             void initializeDatabase();
+          }}
+          onRestore={() => {
+            setLossDialogOpen(false);
+            navigate("/settings/data");
           }}
         />
       )}

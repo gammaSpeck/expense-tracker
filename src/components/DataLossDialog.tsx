@@ -7,18 +7,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useNavigate } from "react-router";
 
 interface DataLossDialogProps {
+  open: boolean;
   lastSeenExpenseCount: number;
   onStartFresh: () => void;
+  onRestore: () => void;
 }
 
-export function DataLossDialog({ lastSeenExpenseCount, onStartFresh }: DataLossDialogProps) {
-  const navigate = useNavigate();
-
+export function DataLossDialog({
+  open,
+  lastSeenExpenseCount,
+  onStartFresh,
+  onRestore,
+}: DataLossDialogProps) {
   return (
-    <AlertDialog open>
+    <AlertDialog open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Data missing</AlertDialogTitle>
@@ -41,7 +45,7 @@ export function DataLossDialog({ lastSeenExpenseCount, onStartFresh }: DataLossD
           <AlertDialogAction onClick={onStartFresh} className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
             Start fresh
           </AlertDialogAction>
-          <AlertDialogAction onClick={() => navigate("/settings/data")}>
+          <AlertDialogAction onClick={onRestore}>
             Restore from backup
           </AlertDialogAction>
         </AlertDialogFooter>

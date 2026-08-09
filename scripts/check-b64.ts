@@ -2,6 +2,17 @@
 // Run with: bun scripts/check-b64.ts
 import { b64uEncode, b64uDecode } from "@/lib/backup";
 
+// crypto.getRandomValues rejects inputs over 65,536 bytes per spec — fill large
+// buffers in bounded chunks instead of one oversized call.
+function randomBytes(length: number): Uint8Array {
+  const buf = new Uint8Array(length);
+  const CHUNK = 65536;
+  for (let i = 0; i < length; i += CHUNK) {
+    crypto.getRandomValues(buf.subarray(i, Math.min(i + CHUNK, length)));
+  }
+  return buf;
+}
+
 function assertEq(actual: unknown, expected: unknown, msg: string): void {
   if (actual !== expected) {
     throw new Error(`FAIL: ${msg} — expected ${expected}, got ${actual}`);
@@ -18,7 +29,7 @@ function oldB64uEncode(buf: Uint8Array): string {
 
 let oldThrew = false;
 try {
-  oldB64uEncode(crypto.getRandomValues(new Uint8Array(5 * 1024 * 1024)));
+  oldB64uEncode(randomBytes(5 * 1024 * 1024));
 } catch (err) {
   oldThrew = err instanceof RangeError && /Maximum call stack size exceeded/.test(err.message);
 }
@@ -28,7 +39,7 @@ if (!oldThrew) {
 console.log("OK: pre-fix b64uEncode reproduces RangeError: Maximum call stack size exceeded");
 
 // 2. New implementation must not throw, and must match Node's own base64url encoding.
-const big = crypto.getRandomValues(new Uint8Array(5 * 1024 * 1024));
+const big = randomBytes(5 * 1024 * 1024);
 const encoded = b64uEncode(big);
 assertEq(encoded, Buffer.from(big).toString("base64url"), "5 MB base64url encoding");
 assertEq(
@@ -49,7 +60,7 @@ console.log("OK: sizes 0,1,2,32767,32768,32769,65536 all round-trip byte-identic
 // 4. Full AES-GCM envelope round-trip at 5 MB, using the same shape as encryptData/decryptData.
 async function checkEnvelopeRoundTrip(): Promise<void> {
   const passphrase = "correct horse battery staple";
-  const plaintext = crypto.getRandomValues(new Uint8Array(5 * 1024 * 1024));
+  const plaintext = randomBytes(5 * 1024 * 1024);
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
 

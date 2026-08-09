@@ -21,15 +21,21 @@ export function capture(event: string, properties?: Record<string, unknown>): vo
 }
 
 // Attaches { name, message } extracted from `err` to `properties` and fires `event`.
+// Message is capped, not allowlisted: full stable error-code taxonomy is a
+// bigger design change (loses exact diagnostic text like the RangeError this
+// feature exists to catch) — deferred pending a product decision.
+const MAX_MESSAGE_LENGTH = 300;
+
 export function captureError(
   event: string,
   err: unknown,
   properties?: Record<string, unknown>,
 ): void {
   if (!enabled) return;
+  const message = err instanceof Error ? err.message : String(err);
   posthog.capture(event, {
     ...properties,
     name: err instanceof Error ? err.name : "unknown",
-    message: err instanceof Error ? err.message : String(err),
+    message: message.length > MAX_MESSAGE_LENGTH ? `${message.slice(0, MAX_MESSAGE_LENGTH)}…` : message,
   });
 }

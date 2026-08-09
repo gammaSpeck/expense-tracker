@@ -137,7 +137,20 @@ class UserPreferences {
     if (!rawValue) return null;
 
     try {
-      return JSON.parse(rawValue) as InstallMarker;
+      const parsed = JSON.parse(rawValue) as Partial<InstallMarker> | null;
+      if (
+        !parsed ||
+        typeof parsed.installedAt !== "string" ||
+        typeof parsed.lastSeenAt !== "string" ||
+        Number.isNaN(Date.parse(parsed.installedAt)) ||
+        Number.isNaN(Date.parse(parsed.lastSeenAt)) ||
+        typeof parsed.lastSeenExpenseCount !== "number" ||
+        !Number.isFinite(parsed.lastSeenExpenseCount) ||
+        parsed.lastSeenExpenseCount < 0
+      ) {
+        return null;
+      }
+      return parsed as InstallMarker;
     } catch {
       return null;
     }

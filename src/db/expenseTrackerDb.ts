@@ -91,6 +91,18 @@ export async function requestPersistentStorage(): Promise<boolean> {
   return navigator.storage.persist();
 }
 
+// Preserves installedAt, bumps lastSeenAt, and records the current expense
+// count — the signal initializeDatabase() compares against to detect a wipe.
+export function touchInstallMarker(expenseCount: number): void {
+  const marker = userPreferences.getInstallMarker();
+  const now = new Date().toISOString();
+  userPreferences.setInstallMarker({
+    installedAt: marker?.installedAt ?? now,
+    lastSeenAt: now,
+    lastSeenExpenseCount: expenseCount,
+  });
+}
+
 // Initialize database with default categories
 export type StartupState =
   | { status: "ready" }
@@ -127,11 +139,7 @@ export async function initializeDatabase(): Promise<StartupState> {
     seeded = true;
   }
 
-  userPreferences.setInstallMarker({
-    installedAt: marker?.installedAt ?? now,
-    lastSeenAt: now,
-    lastSeenExpenseCount: expenseCount,
-  });
+  touchInstallMarker(expenseCount);
 
   return { status: seeded ? "seeded" : "ready" };
 }
@@ -152,12 +160,7 @@ export async function addExpense(
 
   await db.expenses.add(newExpense);
 
-  const marker = userPreferences.getInstallMarker();
-  userPreferences.setInstallMarker({
-    installedAt: marker?.installedAt ?? now,
-    lastSeenAt: now,
-    lastSeenExpenseCount: await db.expenses.count(),
-  });
+  touchInstallMarker(await db.expenses.count());
 
   // Update tag metadata
   for (const tag of expense.tags) {
@@ -184,6 +187,7 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   await db.expenses.delete(id);
+  touchInstallMarker(await db.expenses.count());
 }
 
 export async function getExpense(id: string): Promise<Expense | undefined> {
@@ -388,4 +392,6 @@ export async function importData(data: {
 
     await db.tagMetadata.bulkAdd(tagMetadata);
   });
+
+  touchInstallMarker(data.expenses.length);
 }

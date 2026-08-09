@@ -48,7 +48,7 @@ export function AboutSection() {
             <ul className="text-xs text-muted-foreground space-y-0.5">
               <li>• No backend server exists</li>
               <li>• All data stored on your device</li>
-              <li>• Anonymous error reports only — no personal data</li>
+              <li>• Anonymous error &amp; diagnostic reports only — no personal data</li>
               <li>• Your data never leaves your phone</li>
             </ul>
           </div>
