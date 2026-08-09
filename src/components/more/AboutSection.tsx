@@ -1,5 +1,6 @@
 import { config } from "@/config";
 import { Github, Lock, Folder, PiggyBank } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 const versionLabel =
   config.env === "production" ? `v${config.appVersion}` : `v${config.appVersion}.${config.env}`;
@@ -14,7 +15,7 @@ export function AboutSection() {
 
       <div className="text-xs text-muted-foreground space-y-0.5">
         <p>Version {versionLabel}</p>
-        <p>Last Updated: {config.buildTime}</p>
+        <p>Last Updated: {format(parseISO(config.buildTime), "dd MMMM yyyy")}</p>
       </div>
 
       <div className="text-xs">
@@ -47,7 +48,7 @@ export function AboutSection() {
             <ul className="text-xs text-muted-foreground space-y-0.5">
               <li>• No backend server exists</li>
               <li>• All data stored on your device</li>
-              <li>• No tracking, no analytics</li>
+              <li>• Anonymous error &amp; diagnostic reports only — no personal data</li>
               <li>• Your data never leaves your phone</li>
             </ul>
           </div>

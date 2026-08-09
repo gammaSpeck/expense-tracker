@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { importData, db } from "@/db/expenseTrackerDb";
+import { importData, touchInstallMarker, db } from "@/db/expenseTrackerDb";
 import { Expense, Category } from "@/types/expense";
 import { isEncryptedFile, decryptData, getStoredPassphrase } from "@/lib/backup";
+import { captureError } from "@/lib/telemetry";
 import { toast } from "sonner";
 
 interface ImportPreview {
@@ -121,6 +122,7 @@ export function ImportData() {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
+      captureError("import_failed", err, { stage: "decrypt" });
       // "Wrong passphrase" — keep file loaded so user can retry
       toast.error(
         msg.includes("Wrong passphrase")
@@ -151,7 +153,8 @@ export function ImportData() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch {
+    } catch (err) {
+      captureError("import_failed", err, { mode, stage: "write" });
       toast.error("Import failed");
     } finally {
       setIsImporting(false);
@@ -326,4 +329,6 @@ async function mergeImportData(data: {
       }
     }
   });
+
+  touchInstallMarker(await db.expenses.count());
 }

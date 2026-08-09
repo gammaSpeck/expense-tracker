@@ -1,1 +1,4 @@
-/* /index.html 200
+/xtk/static/*  https://us-assets.i.posthog.com/static/:splat  200!
+/xtk/array/*   https://us-assets.i.posthog.com/array/:splat   200!
+/xtk/*         https://us.i.posthog.com/:splat                200!
+/*             /index.html                                    200

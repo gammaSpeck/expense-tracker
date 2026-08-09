@@ -1,13 +1,17 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
-import { lazy, useEffect } from "react";
-import { initializeDatabase } from "@/db/expenseTrackerDb";
+import { DataLossDialog } from "@/components/DataLossDialog";
+import { lazy, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { initializeDatabase, requestPersistentStorage } from "@/db/expenseTrackerDb";
+import { userPreferences } from "@/db/userPreferences";
+import { capture } from "@/lib/telemetry";
 
 import HomePage from "./pages/HomePage";
 
@@ -28,8 +32,32 @@ const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
 const queryClient = new QueryClient();
 
 function AppContent() {
+  const [lossCount, setLossCount] = useState<number | null>(null);
+  const [lossDialogOpen, setLossDialogOpen] = useState(false);
+  const navigate = useNavigate();
+
   useEffect(() => {
-    initializeDatabase();
+    void (async () => {
+      const persisted = await requestPersistentStorage();
+      const state = await initializeDatabase();
+      capture("app_opened", { persisted, startup: state.status });
+
+      if (!persisted) {
+        toast.warning("This browser may delete your data automatically. Back up regularly.", {
+          action: { label: "Back up now", onClick: () => (window.location.href = "/settings/data") },
+        });
+      }
+
+      if (state.status === "data-loss") {
+        setLossCount(state.lastSeenExpenseCount);
+        setLossDialogOpen(true);
+        capture("data_loss_detected", {
+          lastSeenExpenseCount: state.lastSeenExpenseCount,
+          installedAt: state.installedAt,
+          lastSeenAt: state.lastSeenAt,
+        });
+      }
+    })();
   }, []);
 
   return (
@@ -47,6 +75,27 @@ function AppContent() {
         <Route path="/settings/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {lossCount !== null && (
+        <DataLossDialog
+          open={lossDialogOpen}
+          lastSeenExpenseCount={lossCount}
+          onStartFresh={() => {
+            const freshNow = new Date().toISOString();
+            userPreferences.setInstallMarker({
+              installedAt: freshNow,
+              lastSeenAt: freshNow,
+              lastSeenExpenseCount: 0,
+            });
+            setLossDialogOpen(false);
+            setLossCount(null);
+            void initializeDatabase();
+          }}
+          onRestore={() => {
+            setLossDialogOpen(false);
+            navigate("/settings/data");
+          }}
+        />
+      )}
       <BackupReminderPrompt />
     </AppLayout>
   );

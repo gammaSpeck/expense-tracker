@@ -14,6 +14,7 @@ import {
 import { db, initializeDatabase } from "@/db/expenseTrackerDb";
 import { userPreferences } from "@/db/userPreferences";
 import { clearPassphrase } from "@/lib/backup";
+import { captureError } from "@/lib/telemetry";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 
@@ -37,7 +38,8 @@ export function FactoryReset() {
       toast.success("All data cleared. App reset to default state.");
       setOpen(false);
       navigate("/");
-    } catch {
+    } catch (err) {
+      captureError("factory_reset_failed", err);
       toast.error("Factory reset failed");
     } finally {
       setIsResetting(false);

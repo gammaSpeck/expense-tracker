@@ -1,14 +1,9 @@
 # This is done only as a workaround to Netlify's branch based deploys for staging env
 name: Update Staging
-run-name: Update staging to ${{ github.event.inputs.ref || 'staging' }}
+run-name: Update staging to ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
-    inputs:
-      ref:
-        description: "Tag or branch name to point staging at (e.g. v1.2.3 or feature-branch)"
-        required: true
-        default: main
 
 permissions:
   contents: write
@@ -17,28 +12,12 @@ jobs:
   deploy_staging:
     runs-on: ubuntu-latest
     steps:
+      # Checks out whatever branch/tag was picked in the "Use workflow from" dropdown.
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update staging branch with provided ref
-        env:
-          REF: "${{ github.event.inputs.ref }}"
+      - name: Push checked-out ref to staging
         run: |
           set -euo pipefail
-          echo "Updating 'staging' branch to ref: ${REF}"
-
-          git fetch --all --tags --force
-
-          if git rev-parse --verify "refs/tags/${REF}" >/dev/null 2>&1; then
-            echo "Resolved '${REF}' as a tag"
-            TARGET=$(git rev-parse "refs/tags/${REF}")
-          elif git rev-parse --verify "refs/remotes/origin/${REF}" >/dev/null 2>&1; then
-            echo "Resolved '${REF}' as a branch"
-            TARGET=$(git rev-parse "refs/remotes/origin/${REF}")
-          else
-            echo "ERROR: Ref '${REF}' could not be resolved as a tag or branch." >&2
-            exit 1
-          fi
-
-          echo "Pushing ${TARGET} to origin/staging"
-          git push -f origin "${TARGET}:refs/heads/staging"
+          echo "Pushing ${{ github.ref_name }} (${{ github.sha }}) to origin/staging"
+          git push -f origin HEAD:refs/heads/staging

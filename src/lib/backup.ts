@@ -27,14 +27,17 @@ interface ExtrackEnvelope {
   ciphertext: string;
 }
 
-function b64uEncode(buf: Uint8Array<ArrayBuffer>): string {
-  return btoa(String.fromCharCode(...buf))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+const B64_CHUNK = 0x8000; // 32 KiB of args per call — far under any engine's argument limit
+
+export function b64uEncode(buf: Uint8Array<ArrayBuffer>): string {
+  let bin = "";
+  for (let i = 0; i < buf.length; i += B64_CHUNK) {
+    bin += String.fromCharCode(...buf.subarray(i, i + B64_CHUNK));
+  }
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
+export function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
   const b64 = str.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(b64);
   return Uint8Array.from(bin, (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;

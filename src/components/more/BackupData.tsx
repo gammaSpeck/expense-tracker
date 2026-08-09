@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { markBackupCompleted, getStoredPassphrase, encryptData } from "@/lib/backup";
+import { capture, captureError } from "@/lib/telemetry";
 import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
 import { isDriveConnected, getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
@@ -97,6 +98,7 @@ export function BackupData({
             err instanceof DriveSessionExpiredError
               ? "Google Drive session expired. Please reconnect."
               : "Could not connect to Google Drive. Please reconnect.";
+          captureError("backup_failed", err, { target: "drive", stage: "auth" });
           toast.error(message, {
             action: {
               label: "Go to Settings",
@@ -120,6 +122,7 @@ export function BackupData({
         const { webViewLink } = await uploadFileToDrive(blob, filename, folderID, accessToken);
 
         markBackupCompleted("drive");
+        capture("backup_succeeded", { target: "drive", expenseCount: data.expenses.length });
         toast.success("Backup saved to Google Drive", {
           action: {
             label: "View in Drive ↗",
@@ -138,6 +141,7 @@ export function BackupData({
         URL.revokeObjectURL(url);
 
         markBackupCompleted("device");
+        capture("backup_succeeded", { target: "device", expenseCount: data.expenses.length });
         toast.success("Backup saved to device");
       }
 
@@ -145,6 +149,7 @@ export function BackupData({
       setOpen(false);
       onSuccess?.();
     } catch (err) {
+      captureError("backup_failed", err, { target: saveTo });
       toast.error(err instanceof Error ? err.message : "Backup failed");
     } finally {
       setIsBackingUp(false);
