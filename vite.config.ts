@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react-swc";
 import { visualizer } from "rollup-plugin-visualizer";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import tailwindcss from "@tailwindcss/vite";
 
 import packageJson from "./package.json" with { type: "json" };
 
@@ -35,6 +36,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
+      tailwindcss(),
       mode === "development" && componentTagger(),
       pwaPlugin,
       process.env.ANALYZE === "true" && (visualizerPlugin as Plugin),

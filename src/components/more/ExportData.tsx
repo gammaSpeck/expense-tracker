@@ -12,6 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
+import { downloadFile } from "@/lib/download";
 import { Expense, Category } from "@/types/expense";
 import { encryptData, getStoredPassphrase } from "@/lib/backup";
 import { captureError } from "@/lib/telemetry";
@@ -200,12 +201,3 @@ function generateCSV(expenses: Expense[], categories: Category[]): string {
   return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
 }
 
-function downloadFile(content: string, filename: string, type: string) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}

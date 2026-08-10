@@ -29,3 +29,9 @@ dev-dist
 
 
 .env
+
+# TODO: Check on these later on
+.fallow/
+.fallowrc.json
+docs/old-backups
+deadcode.json

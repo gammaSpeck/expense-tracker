@@ -11,40 +11,31 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { exportAllData } from "@/db/expenseTrackerDb";
+import { downloadFile } from "@/lib/download";
 import { markBackupCompleted, getStoredPassphrase, encryptData } from "@/lib/backup";
 import { capture, captureError } from "@/lib/telemetry";
 import { SetupPassphraseDialog } from "@/components/more/EncryptionSettings";
 import { toast } from "sonner";
-import { isDriveConnected, getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
+import { getDriveCredentials, saveDriveCredentials } from "@/db/driveCredentials";
 import { getValidAccessToken, DriveSessionExpiredError, initiateGoogleAuth } from "@/lib/driveAuth";
 import { uploadFileToDrive, findOrCreateBackupFolder } from "@/lib/driveApi";
 
 interface BackupDataProps {
   openOnMount?: boolean;
   onSuccess?: () => void;
-  driveConnected?: boolean;
+  driveConnected: boolean;
 }
 
 export function BackupData({
   openOnMount = false,
   onSuccess,
-  driveConnected: driveConnectedProp,
+  driveConnected,
 }: BackupDataProps) {
   const [open, setOpen] = useState(false);
   const [saveTo, setSaveTo] = useState<"device" | "drive">("device");
   const [isBackingUp, setIsBackingUp] = useState(false);
   const hasAutoOpenedRef = useRef(false);
-  const [internalDriveConnected, setInternalDriveConnected] = useState(false);
   const [passphraseSetupOpen, setPassphraseSetupOpen] = useState(false);
-
-  // Use externally-provided state when available, otherwise check independently
-  const driveConnected =
-    driveConnectedProp !== undefined ? driveConnectedProp : internalDriveConnected;
-
-  useEffect(() => {
-    if (driveConnectedProp !== undefined) return;
-    isDriveConnected().then(setInternalDriveConnected);
-  }, [driveConnectedProp]);
 
   // Reset saveTo to device if Drive gets disconnected while dialog is open
   useEffect(() => {
@@ -130,15 +121,7 @@ export function BackupData({
           },
         });
       } else {
-        const blob = new Blob([encrypted], {
-          type: "application/octet-stream",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(url);
+        downloadFile(encrypted, filename, "application/octet-stream");
 
         markBackupCompleted("device");
         capture("backup_succeeded", { target: "device", expenseCount: data.expenses.length });

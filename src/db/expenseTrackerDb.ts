@@ -1,6 +1,5 @@
 import Dexie, { Table } from "dexie";
 import { Expense, Category, TagMetadata } from "@/types/expense";
-import { v4 as uuidv4 } from "uuid";
 import { userPreferences } from "@/db/userPreferences";
 
 // Category colors palette
@@ -131,7 +130,7 @@ export async function initializeDatabase(): Promise<StartupState> {
   if (categoryCount === 0) {
     const categories: Category[] = DEFAULT_CATEGORIES.map((cat) => ({
       ...cat,
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       createdAt: now,
     }));
 
@@ -149,7 +148,7 @@ export async function addExpense(
   expense: Omit<Expense, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
   const now = new Date().toISOString();
-  const id = uuidv4();
+  const id = crypto.randomUUID();
 
   const newExpense: Expense = {
     ...expense,
@@ -200,13 +199,9 @@ export async function getAllExpenses(): Promise<Expense[]> {
   return db.expenses.orderBy("[date+time]").reverse().toArray();
 }
 
-export async function getExpensesByCategory(categoryId: string): Promise<Expense[]> {
-  return db.expenses.where("category").equals(categoryId).toArray();
-}
-
 // Category CRUD operations
 export async function addCategory(category: Omit<Category, "id" | "createdAt">): Promise<string> {
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   const now = new Date().toISOString();
 
   await db.categories.add({
@@ -334,18 +329,6 @@ export async function renameTag(oldTag: string, newTag: string): Promise<void> {
     await db.tagMetadata.delete(oldTag);
     await db.tagMetadata.put({ ...metadata, tag: newTag });
   }
-}
-
-// Get expenses count per category
-export async function getCategoryExpenseCounts(): Promise<Record<string, number>> {
-  const expenses = await db.expenses.toArray();
-  const counts: Record<string, number> = {};
-
-  for (const expense of expenses) {
-    counts[expense.category] = (counts[expense.category] || 0) + 1;
-  }
-
-  return counts;
 }
 
 // Export all data

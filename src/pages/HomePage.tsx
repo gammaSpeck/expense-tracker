@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { LazyMotion, domAnimation, m } from "framer-motion";
 import { format } from "date-fns";
 import { getCurrentTime24 } from "@/lib/time";
 import { Plus, ArrowRight } from "lucide-react";
@@ -79,14 +78,9 @@ export default function HomePage() {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
         {/* Monthly Summary Card */}
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="summary-card"
-        >
+        <div className="summary-card animate-slide-in-up">
           <p className="text-sm opacity-80">This Month's Expenses</p>
           <p className="text-3xl font-bold mt-1">
             {currency.symbol}
@@ -101,14 +95,12 @@ export default function HomePage() {
           <p className="text-xs opacity-60 mt-2">
             {format(monthStart, "d MMM")} - {format(monthEnd, "d MMM yyyy")}
           </p>
-        </m.div>
+        </div>
 
         {/* Recent Transactions */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4"
+        <div
+          className="space-y-4 animate-slide-in-up"
+          style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
         >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Recent Transactions</h2>
@@ -134,7 +126,7 @@ export default function HomePage() {
             onDelete={(expense) => setExpenseToDelete(expense)}
             emptyMessage={"No expenses yet. Add your first one!"}
           />
-        </m.div>
+        </div>
 
         {/* FAB */}
         {isMobile && <FloatingActionButton />}
@@ -160,6 +152,5 @@ export default function HomePage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </LazyMotion>
   );
 }

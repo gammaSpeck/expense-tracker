@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from "react";
-import { LazyMotion, domAnimation, m } from "framer-motion";
 import { format, subWeeks, subMonths, subYears, addWeeks, addMonths, addYears } from "date-fns";
 
 import {
@@ -21,6 +20,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { cn } from "@/lib/utils";
+import { downloadFile } from "@/lib/download";
 import { useAnalysisSummary, useCategories, getDateRangeForPeriod } from "@/hooks/useExpenseData";
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { TimePeriod, ExpenseFilters, DateRange } from "@/types/expense";
@@ -155,13 +155,11 @@ export default function AnalysisPage() {
           ].join(",");
         }),
       ];
-      const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expenses-${format(new Date(), "yyyy-MM-dd")}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadFile(
+        csvRows.join("\n"),
+        `expenses-${format(new Date(), "yyyy-MM-dd")}.csv`,
+        "text/csv",
+      );
       toast.success("Exported successfully");
       setShowExportDialog(false);
     } catch {
@@ -173,15 +171,11 @@ export default function AnalysisPage() {
     try {
       const data = await exportAllData();
       const exportData = { exportDate: new Date().toISOString(), ...data };
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expenses-${format(new Date(), "yyyy-MM-dd")}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadFile(
+        JSON.stringify(exportData, null, 2),
+        `expenses-${format(new Date(), "yyyy-MM-dd")}.json`,
+        "application/json",
+      );
       toast.success("Exported successfully");
       setShowExportDialog(false);
     } catch {
@@ -190,19 +184,16 @@ export default function AnalysisPage() {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
       <div className="px-4 py-6 max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="animate-slide-in-up">
           <h1 className="text-xl font-semibold">Analysis</h1>
-        </m.div>
+        </div>
 
         {/* Period Selector */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="space-y-3 p-4 bg-card rounded-xl border border-border/50"
+        <div
+          className="space-y-3 p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
+          style={{ animationDelay: "50ms", animationFillMode: "backwards" }}
         >
           {/* Tabs */}
           <Tabs value={periodTab} onValueChange={handlePeriodChange}>
@@ -322,17 +313,15 @@ export default function AnalysisPage() {
             </Label>
             <Switch id="exclude-adhoc" checked={excludeAdhoc} onCheckedChange={setExcludeAdhoc} />
           </div>
-        </m.div>
+        </div>
 
         {/* Category Breakdown */}
         {summary.totalTransactions > 0 ? (
           <>
             {/* Summary Stats */}
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+            <div
+              className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-slide-in-up"
+              style={{ animationDelay: "150ms", animationFillMode: "backwards" }}
             >
               <div className="p-4 bg-card rounded-xl border border-border/50">
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -384,13 +373,11 @@ export default function AnalysisPage() {
                   <p className="text-sm text-muted-foreground">No data</p>
                 )}
               </div>
-            </m.div>
+            </div>
 
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="p-4 bg-card rounded-xl border border-border/50"
+            <div
+              className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
+              style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
             >
               <Suspense
                 fallback={
@@ -404,14 +391,12 @@ export default function AnalysisPage() {
                   formatValue={formatValue}
                 />
               </Suspense>
-            </m.div>
+            </div>
 
             {/* Spending Trend */}
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="p-4 bg-card rounded-xl border border-border/50"
+            <div
+              className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
+              style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
             >
               <Suspense
                 fallback={
@@ -427,30 +412,27 @@ export default function AnalysisPage() {
                   granularityOptions={granularityOptions as TrendGranularity[]}
                 />
               </Suspense>
-            </m.div>
+            </div>
           </>
         ) : (
-          <m.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex flex-col items-center justify-center py-12 text-muted-foreground"
+          <div
+            className="flex flex-col items-center justify-center py-12 text-muted-foreground animate-slide-in-up"
+            style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
           >
             <p>No expense data for this period</p>
-          </m.div>
+          </div>
         )}
 
         {/* Export Button */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: "250ms", animationFillMode: "backwards" }}
         >
           <Button variant="outline" className="w-full" onClick={() => setShowExportDialog(true)}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-        </m.div>
+        </div>
 
         {/* Export Dialog */}
         <ExportDialog
@@ -460,6 +442,5 @@ export default function AnalysisPage() {
           onExportJSON={handleExportJSON}
         />
       </div>
-    </LazyMotion>
   );
 }
