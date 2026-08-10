@@ -90,26 +90,7 @@ export interface AnalysisSummary {
   dailyTrend: DailySummary[];
 }
 
-// Export types
-export type ExportFormat = "csv" | "json";
-
-export interface ExportOptions {
-  format: ExportFormat;
-  includeAttachments: boolean;
-  respectFilters: boolean;
-}
-
 // Theme types
 export type Theme = "light" | "dark" | "system";
 
-// Navigation
-export type NavTab = "home" | "add" | "categories" | "analysis";
 
-// Context menu for long press
-export interface ContextMenuAction {
-  id: string;
-  label: string;
-  icon: string;
-  variant?: "default" | "destructive";
-  onClick: () => void;
-}

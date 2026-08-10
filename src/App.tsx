@@ -1,6 +1,5 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -28,8 +27,6 @@ const AddExpensePage = lazy(() => import("@/pages/AddExpensePage"));
 const CategoriesPage = lazy(() => import("@/pages/CategoriesPage"));
 const AnalysisPage = lazy(() => import("@/pages/AnalysisPage"));
 const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
-
-const queryClient = new QueryClient();
 
 function AppContent() {
   const [lossCount, setLossCount] = useState<number | null>(null);
@@ -111,19 +108,17 @@ function RootRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CurrencyProvider>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Sonner position="top-right" duration={3000} />
-          <BrowserRouter>
-            <RootRoutes />
-          </BrowserRouter>
-          <ReloadPrompt />
-        </TooltipProvider>
-      </ThemeProvider>
-    </CurrencyProvider>
-  </QueryClientProvider>
+  <CurrencyProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Sonner position="top-right" duration={3000} />
+        <BrowserRouter>
+          <RootRoutes />
+        </BrowserRouter>
+        <ReloadPrompt />
+      </TooltipProvider>
+    </ThemeProvider>
+  </CurrencyProvider>
 );
 
 export default App;

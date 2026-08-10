@@ -115,15 +115,6 @@
       "env": {
         "es2020": true,
         "browser": true
-      },
-      "globals": {
-        "AudioWorkletGlobalScope": "readonly",
-        "AudioWorkletProcessor": "readonly",
-        "currentFrame": "readonly",
-        "currentTime": "readonly",
-        "registerProcessor": "readonly",
-        "sampleRate": "readonly",
-        "WorkletGlobalScope": "readonly"
       }
     }
   ]

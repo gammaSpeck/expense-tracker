@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { LazyMotion, domAnimation, m } from "framer-motion";
 import { Search, ArrowLeft, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -65,26 +64,19 @@ export default function TransactionsPage() {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
       <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3"
-        >
+        <div className="flex items-center gap-3 animate-slide-in-up">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">All Transactions</h1>
-        </m.div>
+        </div>
 
         {/* Search */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05 }}
-          className="sticky top-0 z-20 bg-background/95 backdrop-blur-xs -mx-4 px-4 py-2"
+        <div
+          className="sticky top-0 z-20 bg-background/95 backdrop-blur-xs -mx-4 px-4 py-2 animate-slide-in-up"
+          style={{ animationDelay: "50ms", animationFillMode: "backwards" }}
         >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -109,10 +101,10 @@ export default function TransactionsPage() {
               {expenses.length !== 1 ? "s" : ""}
             </p>
           )}
-        </m.div>
+        </div>
 
         {/* Transaction List */}
-        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+        <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
           <ExpenseList
             expenses={expenses}
             categories={categories}
@@ -123,7 +115,7 @@ export default function TransactionsPage() {
             grouped
             emptyMessage={search ? "No matching transactions" : "No transactions yet"}
           />
-        </m.div>
+        </div>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
@@ -146,6 +138,5 @@ export default function TransactionsPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </LazyMotion>
   );
 }

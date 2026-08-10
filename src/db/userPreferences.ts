@@ -174,9 +174,4 @@ class UserPreferences {
 
 export const userPreferences = new UserPreferences();
 
-export {
-  STORAGE_KEYS,
-  DEFAULT_BACKUP_REMINDER_PREFERENCES,
-  WEEKLY_REMINDER_DAY,
-  MONTHLY_REMINDER_DAY,
-};
+export { WEEKLY_REMINDER_DAY, MONTHLY_REMINDER_DAY };

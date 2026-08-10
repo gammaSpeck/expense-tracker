@@ -4,6 +4,8 @@ import {
   clearDriveCredentials,
   isTokenExpired,
 } from "../db/driveCredentials";
+import { config } from "@/config";
+import { b64uEncode } from "@/lib/backup";
 
 /**
  * Thrown by getValidAccessToken when the refresh token is invalid/revoked.
@@ -17,35 +19,24 @@ export class DriveSessionExpiredError extends Error {
   }
 }
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_ID as string;
+const CLIENT_ID = config.gDrive.clientId;
 // For Desktop app OAuth clients, client_secret is required by Google's token
 // endpoint even with PKCE. This is not truly secret for Desktop app clients —
 // PKCE provides the actual security guarantee.
-const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLOUD_DRIVE_OAUTH2_CLIENT_SECRET as string;
-const SCOPES = "https://www.googleapis.com/auth/drive.file email profile";
-const SESSION_VERIFIER_KEY = "expense-tracker-pkce-verifier";
-
-// ---------------------------------------------------------------------------
-// PKCE helpers
-// ---------------------------------------------------------------------------
-
-function base64urlEncode(buffer: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
+const CLIENT_SECRET = config.gDrive.clientSecret;
+const SCOPES = "https://www.googleapis.com/auth/drive.file email profile" as const;
+const SESSION_VERIFIER_KEY = "expense-tracker-pkce-verifier" as const;
 
 export function generateCodeVerifier(): string {
   const array = new Uint8Array(64);
   crypto.getRandomValues(array);
-  return base64urlEncode(array.buffer);
+  return b64uEncode(array);
 }
 
 export async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoded = new TextEncoder().encode(verifier);
   const digest = await crypto.subtle.digest("SHA-256", encoded);
-  return base64urlEncode(digest);
+  return b64uEncode(new Uint8Array(digest) as Uint8Array<ArrayBuffer>);
 }
 
 // ---------------------------------------------------------------------------

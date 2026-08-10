@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { LazyMotion, domAnimation, m } from "framer-motion";
 import { Plus, Trash2, Edit, FolderOpen, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -75,21 +74,16 @@ export default function CategoriesPage() {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
       <div className="px-4 py-6 max-w-2xl mx-auto space-y-6">
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between"
-        >
+        <div className="flex items-center justify-between animate-slide-in-up">
           <h1 className="text-xl font-semibold">Categories</h1>
           <Button onClick={() => setShowCreateDialog(true)} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             Add Category
           </Button>
-        </m.div>
+        </div>
 
-        <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+        <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
           <Tabs defaultValue="categories" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="categories" className="flex items-center gap-2">
@@ -105,13 +99,11 @@ export default function CategoriesPage() {
             <TabsContent value="categories" className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {categories.map((category, index) => (
-                  <m.div
+                  <div
                     key={category.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    style={{ animationDelay: `${index * 30}ms`, animationFillMode: "backwards" }}
                     className={cn(
-                      "p-4 rounded-xl bg-card border border-border/50",
+                      "p-4 rounded-xl bg-card border border-border/50 animate-slide-in-up",
                       "flex items-center gap-3",
                       "hover:border-primary/20 transition-colors",
                     )}
@@ -143,7 +135,7 @@ export default function CategoriesPage() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </m.div>
+                  </div>
                 ))}
               </div>
             </TabsContent>
@@ -152,7 +144,7 @@ export default function CategoriesPage() {
               <TagTab />
             </TabsContent>
           </Tabs>
-        </m.div>
+        </div>
 
         {/* Create Dialog */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -263,6 +255,5 @@ export default function CategoriesPage() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </LazyMotion>
   );
 }
