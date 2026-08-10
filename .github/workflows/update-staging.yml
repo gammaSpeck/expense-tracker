@@ -1,23 +1,48 @@
 # This is done only as a workaround to Netlify's branch based deploys for staging env
 name: Update Staging
-run-name: Update staging to ${{ github.ref_name }}
+run-name: "Update staging to ${{ github.event_name == 'pull_request' && format('main (PR #{0})', github.event.pull_request.number) || github.ref_name }}"
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   deploy_staging:
+    # Skip PRs that were closed without merging; workflow_dispatch always runs.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-slim
     steps:
-      # Checks out whatever branch/tag was picked in the "Use workflow from" dropdown.
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Push checked-out ref to staging
+      # Only merged PRs titled as a Conventional Commits feat/fix should touch staging.
+      - name: Check PR title is feat/fix
+        if: github.event_name == 'pull_request'
+        id: title_check
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
-          echo "Pushing ${{ github.ref_name }} (${{ github.sha }}) to origin/staging"
+          if [[ "$PR_TITLE" =~ ^(feat|fix)(\(.+\))?!?: ]]; then
+            echo "matched=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "matched=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR title '$PR_TITLE' is not a feat/fix — skipping staging update."
+          fi
+
+      # workflow_dispatch checks out whatever ref was picked in the "Use workflow from"
+      # dropdown; a merged PR checks out the base branch (main) post-merge.
+      - name: Checkout repository
+        if: github.event_name == 'workflow_dispatch' || steps.title_check.outputs.matched == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref_name }}
+
+      - name: Push checked-out ref to staging
+        if: github.event_name == 'workflow_dispatch' || steps.title_check.outputs.matched == 'true'
+        run: |
+          set -euo pipefail
+          echo "Pushing $(git rev-parse --abbrev-ref HEAD) ($(git rev-parse HEAD)) to origin/staging"
           git push -f origin HEAD:refs/heads/staging
