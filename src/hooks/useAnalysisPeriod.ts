@@ -4,17 +4,21 @@ import { getDateRangeForPeriod } from "@/hooks/useExpenseData";
 import { formatPeriodDisplay } from "@/components/analysis/analysisUtils";
 import { TimePeriod, DateRange } from "@/types/expense";
 
+const ADD_FN: Record<"week" | "month" | "year", (date: Date, amount: number) => Date> = {
+  week: addWeeks,
+  month: addMonths,
+  year: addYears,
+};
+const SUB_FN: Record<"week" | "month" | "year", (date: Date, amount: number) => Date> = {
+  week: subWeeks,
+  month: subMonths,
+  year: subYears,
+};
+
 function stepPeriod(date: Date, periodTab: TimePeriod, direction: 1 | -1): Date {
-  switch (periodTab) {
-    case "week":
-      return direction === 1 ? addWeeks(date, 1) : subWeeks(date, 1);
-    case "month":
-      return direction === 1 ? addMonths(date, 1) : subMonths(date, 1);
-    case "year":
-      return direction === 1 ? addYears(date, 1) : subYears(date, 1);
-    default:
-      return date;
-  }
+  if (periodTab === "custom") return date;
+  const step = direction === 1 ? ADD_FN[periodTab] : SUB_FN[periodTab];
+  return step(date, 1);
 }
 
 export function useAnalysisPeriod() {
