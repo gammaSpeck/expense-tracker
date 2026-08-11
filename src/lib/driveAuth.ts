@@ -1,3 +1,9 @@
+// fallow-ignore-file security-sink
+// The open-redirect candidate at `window.location.href = ...` below is a
+// false positive: the target is a template literal with a hardcoded
+// `https://accounts.google.com/...` prefix, so it can never resolve to a
+// javascript: URL or an attacker-chosen host — only the OAuth query params
+// (URLSearchParams-encoded) vary.
 import {
   getDriveCredentials,
   saveDriveCredentials,

@@ -1,3 +1,9 @@
+// fallow-ignore-file security-sink
+// The open-redirect candidate at `window.open(webViewLink, "_blank")` below
+// is a false positive: webViewLink is not user input — it's the
+// `webViewLink` field from uploadFileToDrive's own authenticated Drive API
+// response for the file this app just uploaded, always a
+// https://drive.google.com/... URL.
 import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { Archive, HardDrive, CloudUpload, ShieldCheck } from "lucide-react";

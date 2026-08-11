@@ -1,3 +1,9 @@
+// fallow-ignore-file security-sink
+// SSRF candidates at the three `fetch(...)` calls below are false positives:
+// DRIVE_API / DRIVE_UPLOAD_API are hardcoded string constants, so the request
+// host is never attacker-controlled. The dynamic parts are either a
+// query-escaped + encodeURIComponent'd string, or a Drive file ID returned by
+// Google's own Drive API response (not user input).
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
 export const BACKUP_FOLDER_NAME = "ExTrack Backups";

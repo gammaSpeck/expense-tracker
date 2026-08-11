@@ -16,3 +16,34 @@ jobs:
     uses: ./.github/workflows/e2e.yml
     with:
       environment: local
+
+  fallow:
+    name: Fallow analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - uses: fallow-rs/fallow@v3
+        with:
+          command: audit
+          format: sarif
+          gate: new-only
+          comment: true
+      - uses: fallow-rs/fallow@v3
+        with:
+          command: security
+          format: sarif
+          fail-on-issues: false
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: fallow-results.sarif

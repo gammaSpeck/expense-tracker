@@ -1,0 +1,54 @@
+{
+  // This file is JSONC: fallow reads these comments; generic JSON tools may not.
+  "$schema": "./node_modules/fallow/schema.json",
+  "entry": [
+    "src/index.{ts,tsx,js,jsx}",
+    "src/main.{ts,tsx,js,jsx}"
+  ],
+  "ignorePatterns": ["**/*.d.ts", "docs/**", "public/**"],
+  "ignoreExports": [
+    { "file": "src/components/ui/**", "exports": ["*"] }
+  ],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "unresolved-imports": "error",
+    "unlisted-dependencies": "error",
+    "unused-dependencies": "error",
+    "unused-files": "error",
+    "circular-dependencies": "error",
+    "re-export-cycle": "error",
+    "boundary-violation": "error",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "dev-dependencies-in-production": "warn",
+    "test-only-dependencies": "warn",
+    "stale-suppressions": "warn"
+  },
+  "duplicates": {
+    "mode": "mild",
+    "minTokens": 50,
+    "minLines": 5
+  },
+  "health": {
+    "maxCyclomatic": 20,
+    "maxCognitive": 15
+  },
+  "boundaries": {
+    "zones": [
+      { "name": "ui", "patterns": ["src/pages/**", "src/components/**"] },
+      { "name": "state", "patterns": ["src/contexts/**", "src/hooks/**"] },
+      { "name": "data", "patterns": ["src/db/**"] },
+      { "name": "shared", "patterns": ["src/lib/**", "src/types/**", "src/config/**"] }
+    ],
+    // "shared: allow []" (isolating src/lib from src/db) was dropped: the
+    // fresh scan found src/lib/backup.ts -> src/db/userPreferences.ts and
+    // src/lib/driveAuth.ts -> src/db/driveCredentials.ts, both legitimate
+    // service-layer usage of the db layer, not an accidental inversion.
+    "rules": [
+      { "from": "data", "allow": ["shared"] }
+    ]
+  },
+  "audit": {
+    "gate": "new-only"
+  }
+}

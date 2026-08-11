@@ -30,11 +30,12 @@ dev-dist
 
 .env
 
-# TODO: Check on these later on
+# Fallow (https://docs.fallow.tools) — machine-local cache and one-off dumps.
+# .fallowrc.json is committed policy and must NOT be listed here.
 .fallow/
-.fallowrc.json
-docs/old-backups
 deadcode.json
+
+docs/old-backups
 
 # Playwright
 test-results/
