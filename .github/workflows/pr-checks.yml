@@ -33,17 +33,28 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - uses: fallow-rs/fallow@v3
+        id: fallow-audit
         with:
           command: audit
           format: sarif
           gate: new-only
           comment: true
+          artifacts-dir: fallow-audit-out
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: fallow-audit-out/fallow-results.sarif
+          category: fallow-audit
       - uses: fallow-rs/fallow@v3
+        id: fallow-security
+        if: always()
         with:
           command: security
           format: sarif
           fail-on-issues: false
+          artifacts-dir: fallow-security-out
       - uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: fallow-results.sarif
+          sarif_file: fallow-security-out/fallow-results.sarif
+          category: fallow-security
