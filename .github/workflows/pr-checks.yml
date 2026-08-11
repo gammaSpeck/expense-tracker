@@ -40,11 +40,15 @@ jobs:
           gate: new-only
           comment: true
           artifacts-dir: fallow-audit-out
+      - name: Tag audit SARIF runs with distinct categories
+        if: always()
+        run: |
+          jq '.runs |= [range(length) as $i | .[$i] + {automationDetails: {id: ("fallow-audit-" + ($i|tostring) + "/")}}]' \
+            fallow-audit-out/fallow-results.sarif > fallow-audit-out/fallow-results.tagged.sarif
       - uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: fallow-audit-out/fallow-results.sarif
-          category: fallow-audit
+          sarif_file: fallow-audit-out/fallow-results.tagged.sarif
       - uses: fallow-rs/fallow@v3
         id: fallow-security
         if: always()
