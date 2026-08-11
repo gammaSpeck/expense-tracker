@@ -1,21 +1,11 @@
 import { useNavigate, useParams } from "react-router";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { useExpense } from "@/hooks/useExpenseData";
 import { deleteExpense } from "@/db/expenseTrackerDb";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { EditExpenseHeader } from "@/components/expenses/EditExpenseHeader";
 
 export default function EditExpensePage() {
   const navigate = useNavigate();
@@ -59,44 +49,7 @@ export default function EditExpensePage() {
   return (
     <div className="px-4 py-6 max-w-lg mx-auto">
       <div className="space-y-6 animate-slide-in-up">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" aria-label="Go back" onClick={() => navigate(-1)} className="h-9 w-9">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-semibold">Edit Expense</h1>
-          </div>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                aria-label="Delete expense"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this expense? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <EditExpenseHeader onBack={() => navigate(-1)} onDelete={handleDelete} />
 
         <ExpenseForm expense={expense} onSuccess={handleSuccess} onCancel={() => navigate(-1)} />
       </div>

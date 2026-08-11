@@ -31,7 +31,10 @@
   },
   "health": {
     "maxCyclomatic": 20,
-    "maxCognitive": 15
+    "maxCognitive": 15,
+    // e2e specs are scored out: a Playwright `test.describe` body is a container for
+    // several `test()` calls, not a unit, so its length is not a maintainability signal.
+    "ignore": ["tests/**"]
   },
   "boundaries": {
     "zones": [

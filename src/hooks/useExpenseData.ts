@@ -1,12 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, getAllExpenses, getAllCategories, getAllTags } from "@/db/expenseTrackerDb";
-import {
-  Expense,
-  ExpenseFilters,
-  AnalysisSummary,
-  CategorySummary,
-  DailySummary,
-} from "@/types/expense";
+import { Expense, ExpenseFilters, AnalysisSummary } from "@/types/expense";
 import { useMemo } from "react";
 import {
   startOfWeek,
@@ -18,6 +12,7 @@ import {
   parseISO,
   isWithinInterval,
 } from "date-fns";
+import { buildCategoryBreakdown, buildDailyTrend } from "@/lib/expenseAnalysis";
 
 export function useExpenses() {
   const expenses = useLiveQuery(() => getAllExpenses(), [], []);
@@ -32,11 +27,6 @@ export function useCategories() {
 export function useTags() {
   const tags = useLiveQuery(() => getAllTags(), [], []);
   return tags;
-}
-
-export function useCategory(id: string | undefined) {
-  const category = useLiveQuery(() => (id ? db.categories.get(id) : undefined), [id], undefined);
-  return category;
 }
 
 export function useExpense(id: string | undefined) {
@@ -117,48 +107,9 @@ export function useAnalysisSummary(filters: ExpenseFilters): AnalysisSummary {
     const totalTransactions = filteredExpenses.length;
     const averageExpense = totalTransactions > 0 ? totalExpenses / totalTransactions : 0;
 
-    // Category breakdown
-    const categoryTotals: Record<string, { total: number; count: number }> = {};
-
-    for (const expense of filteredExpenses) {
-      if (!categoryTotals[expense.category]) {
-        categoryTotals[expense.category] = { total: 0, count: 0 };
-      }
-      categoryTotals[expense.category].total += expense.value;
-      categoryTotals[expense.category].count += 1;
-    }
-
-    const categoryBreakdown: CategorySummary[] = Object.entries(categoryTotals)
-      .map(([categoryId, { total, count }]) => {
-        const category = categories.find((c) => c.id === categoryId);
-        return {
-          categoryId,
-          categoryName: category?.name || "Unknown",
-          categoryColor: category?.color || "#64748B",
-          categoryIcon: category?.icon || "MoreHorizontal",
-          total,
-          count,
-          percentage: totalExpenses > 0 ? (total / totalExpenses) * 100 : 0,
-        };
-      })
-      .sort((a, b) => b.total - a.total);
-
+    const categoryBreakdown = buildCategoryBreakdown(filteredExpenses, categories, totalExpenses);
     const topCategory = categoryBreakdown[0] || null;
-
-    // Daily trend
-    const dailyTotals: Record<string, { total: number; count: number }> = {};
-
-    for (const expense of filteredExpenses) {
-      if (!dailyTotals[expense.date]) {
-        dailyTotals[expense.date] = { total: 0, count: 0 };
-      }
-      dailyTotals[expense.date].total += expense.value;
-      dailyTotals[expense.date].count += 1;
-    }
-
-    const dailyTrend: DailySummary[] = Object.entries(dailyTotals)
-      .map(([date, { total, count }]) => ({ date, total, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
+    const dailyTrend = buildDailyTrend(filteredExpenses);
 
     return {
       totalExpenses,

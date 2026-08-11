@@ -1,7 +1,6 @@
-import { useRegisterSW } from "virtual:pwa-register/react";
-import { useEffect, useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { RefreshCw, X } from "lucide-react";
+import { useReloadPromptState } from "@/hooks/useReloadPromptState";
+import { ReloadPromptActions } from "@/components/ReloadPromptActions";
 
 /**
  * ReloadPrompt - PWA Update Notification Component
@@ -17,43 +16,7 @@ import { RefreshCw, X } from "lucide-react";
  * - Positioned above bottom navigation
  */
 export function ReloadPrompt() {
-  const {
-    offlineReady: [offlineReady, setOfflineReady],
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegistered(r) {
-      console.log("SW Registered: " + r);
-    },
-    onRegisterError(error) {
-      console.log("SW registration error", error);
-    },
-  });
-
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const close = useCallback(() => {
-    setOfflineReady(false);
-    setNeedRefresh(false);
-  }, [setOfflineReady, setNeedRefresh]);
-
-  useEffect(() => {
-    if (!(needRefresh || offlineReady)) return;
-
-    // Auto-dismiss after 10 seconds if no interaction (only for offline ready)
-    const timer = setTimeout(() => {
-      if (offlineReady && !needRefresh) {
-        close();
-      }
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [offlineReady, needRefresh, close]);
-
-  const handleUpdate = async () => {
-    setIsUpdating(true);
-    await updateServiceWorker(true);
-  };
+  const { offlineReady, needRefresh, isUpdating, close, handleUpdate } = useReloadPromptState();
 
   if (!(needRefresh || offlineReady)) return null;
 
@@ -80,38 +43,12 @@ export function ReloadPrompt() {
                   : "The app is cached and ready to work offline."}
               </p>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                {needRefresh && (
-                  <Button
-                    onClick={handleUpdate}
-                    disabled={isUpdating}
-                    size="sm"
-                    className="h-8 text-xs font-medium shadow-md hover:shadow-lg transition-all"
-                  >
-                    {isUpdating ? (
-                      <>
-                        <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                        Updating...
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                        Update Now
-                      </>
-                    )}
-                  </Button>
-                )}
-                <Button
-                  onClick={close}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 text-xs font-medium"
-                  disabled={isUpdating}
-                >
-                  {needRefresh ? "Later" : "Dismiss"}
-                </Button>
-              </div>
+              <ReloadPromptActions
+                needRefresh={needRefresh}
+                isUpdating={isUpdating}
+                onUpdate={handleUpdate}
+                onClose={close}
+              />
             </div>
 
             {/* Close button */}

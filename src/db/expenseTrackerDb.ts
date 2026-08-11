@@ -189,10 +189,6 @@ export async function deleteExpense(id: string): Promise<void> {
   touchInstallMarker(await db.expenses.count());
 }
 
-export async function getExpense(id: string): Promise<Expense | undefined> {
-  return db.expenses.get(id);
-}
-
 // Returns all expenses ordered by date and time (descending)
 export async function getAllExpenses(): Promise<Expense[]> {
   // Dexie compound sort (date+time):
@@ -239,10 +235,6 @@ export async function deleteCategory(id: string, moveToCategory?: string): Promi
   }
 
   await db.categories.delete(id);
-}
-
-export async function getCategory(id: string): Promise<Category | undefined> {
-  return db.categories.get(id);
 }
 
 export async function getAllCategories(): Promise<Category[]> {

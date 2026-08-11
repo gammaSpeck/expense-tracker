@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryFormData } from "@/types/expense";
-import { addCategory, updateCategory, getCategoryByName } from "@/db/expenseTrackerDb";
 import { IconPicker } from "@/components/categories/CategoryIcon";
 import { ColorPicker } from "@/components/categories/ColorPicker";
-import { CATEGORY_COLORS } from "@/db/expenseTrackerDb";
-import { toast } from "sonner";
+import { buildCategoryDefaultValues } from "@/lib/categoryDefaults";
+import { useCategoryFormSubmit } from "@/hooks/useCategoryFormSubmit";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name required").max(30, "Max 30 characters"),
@@ -24,18 +23,6 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
-  const defaultValues: CategoryFormData = category
-    ? {
-        name: category.name,
-        icon: category.icon,
-        color: category.color,
-      }
-    : {
-        name: "",
-        icon: "Tag",
-        color: CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)],
-      };
-
   const {
     register,
     handleSubmit,
@@ -44,37 +31,12 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
     formState: { errors, isSubmitting },
   } = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
-    defaultValues,
+    defaultValues: buildCategoryDefaultValues(category),
   });
 
   const selectedIcon = watch("icon");
   const selectedColor = watch("color");
-
-  const onSubmit = async (data: CategoryFormData) => {
-    try {
-      // Check for duplicate name (only for new categories or name changes)
-      if (!category || category.name !== data.name) {
-        const existing = await getCategoryByName(data.name);
-        if (existing) {
-          toast.error("A category with this name already exists");
-          return;
-        }
-      }
-
-      let id: string;
-      if (category) {
-        await updateCategory(category.id, data);
-        id = category.id;
-        toast.success("Category updated");
-      } else {
-        id = await addCategory(data);
-        toast.success("Category created");
-      }
-      onSuccess?.(id);
-    } catch {
-      toast.error("Failed to save category");
-    }
-  };
+  const { onSubmit } = useCategoryFormSubmit(category, onSuccess);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -88,11 +50,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
       {/* Icon Picker */}
       <div className="space-y-2">
         <Label>Icon</Label>
-        <IconPicker
-          value={selectedIcon}
-          onChange={(icon) => setValue("icon", icon)}
-          color={selectedColor}
-        />
+        <IconPicker value={selectedIcon} onChange={(icon) => setValue("icon", icon)} color={selectedColor} />
       </div>
 
       {/* Color Picker */}

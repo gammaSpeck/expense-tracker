@@ -62,3 +62,6 @@ jobs:
         with:
           sarif_file: fallow-security-out/fallow-results.sarif
           category: fallow-security
+      - name: Health score gate
+        if: always()
+        run: bunx fallow health --score --min-score 95
