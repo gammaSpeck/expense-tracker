@@ -119,6 +119,7 @@ export default function CategoriesPage() {
 
                     <div className="flex items-center gap-1">
                       <Button
+                        aria-label={`Edit ${category.name}`}
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
@@ -127,6 +128,7 @@ export default function CategoriesPage() {
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
+                        aria-label={`Delete ${category.name}`}
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-destructive hover:text-destructive"

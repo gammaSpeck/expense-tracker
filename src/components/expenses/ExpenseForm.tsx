@@ -243,7 +243,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
             name="category"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
+                <SelectTrigger aria-label="Category">
                   <SelectValue placeholder="Select category">
                     {field.value && categories.find((c) => c.id === field.value) && (
                       <div className="flex items-center gap-2">
@@ -333,6 +333,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
                 >
                   {tag}
                   <button
+                    aria-label={`Remove tag ${tag}`}
                     type="button"
                     onClick={() => removeTag(tag)}
                     className="hover:bg-primary/20 rounded-full p-0.5"
@@ -359,6 +360,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
                 className="flex-1 text-sm"
               />
               <Button
+                aria-label="Add tag"
                 type="button"
                 variant="outline"
                 size="icon"
@@ -399,6 +401,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      aria-label="Date"
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal text-sm",
@@ -424,10 +427,10 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
           </div>
 
           <div className="space-y-2">
-            <Label>Time</Label>
+            <Label htmlFor="time">Time</Label>
             <div className="relative">
               <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input type="time" className="pl-10 text-sm" {...register("time")} />
+              <Input id="time" type="time" className="pl-10 text-sm" {...register("time")} />
             </div>
           </div>
         </div>
@@ -462,6 +465,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
                 className="h-24 w-24 object-cover rounded-xl"
               />
               <button
+                aria-label="Remove attachment"
                 type="button"
                 onClick={removeImage}
                 className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90"
@@ -471,7 +475,7 @@ export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: Expense
             </div>
           ) : (
             <label className="flex items-center justify-center h-24 w-24 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} data-testid="attachment-input" />
               <ImagePlus className="h-6 w-6 text-muted-foreground" />
             </label>
           )}

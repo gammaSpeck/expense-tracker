@@ -231,6 +231,7 @@ export function ImportData() {
             type="file"
             accept=".extrack"
             className="hidden"
+            data-testid="import-file-input"
             onChange={handleFileSelect}
           />
           <Upload className="h-4 w-4" />
@@ -296,19 +297,32 @@ async function mergeImportData(data: {
   categories: Category[];
 }): Promise<void> {
   await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
-    // Import categories (skip if already exists by id)
+    // Import categories (skip by id; category names are unique per profile — default
+    // categories get a fresh random id every boot, so a name match on an existing row
+    // must remap the import to that row's id rather than re-inserting under the old id,
+    // or the `&name` unique index throws and aborts the whole merge).
+    const categoryIdMap = new Map<string, string>();
     for (const category of data.categories) {
-      const exists = await db.categories.get(category.id);
-      if (!exists) {
-        await db.categories.add(category);
+      const existingById = await db.categories.get(category.id);
+      if (existingById) {
+        categoryIdMap.set(category.id, category.id);
+        continue;
       }
+      const existingByName = await db.categories.where("name").equals(category.name).first();
+      if (existingByName) {
+        categoryIdMap.set(category.id, existingByName.id);
+        continue;
+      }
+      await db.categories.add(category);
+      categoryIdMap.set(category.id, category.id);
     }
 
     // Import expenses (skip if already exists by id)
     for (const expense of data.expenses) {
       const exists = await db.expenses.get(expense.id);
       if (!exists) {
-        await db.expenses.add(expense);
+        const category = categoryIdMap.get(expense.category) ?? expense.category;
+        await db.expenses.add({ ...expense, category });
 
         // Update tag metadata
         for (const tag of expense.tags) {

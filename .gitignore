@@ -35,3 +35,9 @@ dev-dist
 .fallowrc.json
 docs/old-backups
 deadcode.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

@@ -66,6 +66,7 @@ export function ExpenseCard({
 
   const cardContent = (
     <button
+      data-testid="expense-card"
       type="button"
       className={cn(
         "expense-card appearance-none text-left w-full",

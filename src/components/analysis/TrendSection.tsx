@@ -51,7 +51,7 @@ export default function TrendSection({
           </Select>
         )}
       </div>
-      <div className="h-64 **:outline-none">
+      <div className="h-64 **:outline-none" data-testid="spending-trend-chart">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={barData}>
             <XAxis

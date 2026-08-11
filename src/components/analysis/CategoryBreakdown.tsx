@@ -29,7 +29,7 @@ export default function CategoryBreakdown({
   return (
     <>
       <h3 className="text-sm font-medium mb-4">Category Breakdown</h3>
-      <div className="h-64 **:outline-none">
+      <div className="h-64 **:outline-none" data-testid="category-breakdown-chart">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -53,7 +53,7 @@ export default function CategoryBreakdown({
       </div>
 
       {/* Legend - ALL non-zero categories */}
-      <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0">
+      <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0" data-testid="category-breakdown-legend">
         {nonZeroCategories.map((cat) => (
           <div key={cat.categoryId} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 min-w-0">

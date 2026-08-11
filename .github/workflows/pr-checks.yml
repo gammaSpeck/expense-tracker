@@ -1,0 +1,18 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pr-checks-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    if: >-
+      startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') ||
+      github.actor == 'dependabot[bot]'
+    uses: ./.github/workflows/e2e.yml
+    with:
+      environment: local
