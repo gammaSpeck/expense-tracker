@@ -68,7 +68,7 @@
     "@vitejs/plugin-react-swc": "^4.3.0",
     "fallow": "3.14.0",
     "lovable-tagger": "^1.1.13",
-    "oxfmt": "^0.37.0",
+    "oxfmt": "^0.62.0",
     "oxlint": "^1.56.0",
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.9.3",
