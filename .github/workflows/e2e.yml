@@ -1,0 +1,54 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [local, staging, production]
+        default: staging
+
+concurrency:
+  group: e2e-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  local:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'local')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      E2E_ENV: local
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/e2e-setup
+      - run: bun run typecheck:e2e
+      - run: bun run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-local
+          path: playwright-report/
+          retention-days: 7
+
+  deployed:
+    if: github.event_name == 'workflow_dispatch' && inputs.environment != 'local'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_ENV: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/e2e-setup
+      - run: bunx playwright test --grep @smoke
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-${{ inputs.environment }}
+          path: playwright-report/
+          retention-days: 7

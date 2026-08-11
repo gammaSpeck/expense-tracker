@@ -10,7 +10,11 @@
     "build:dev": "vite build --mode development",
     "lint": "oxlint",
     "fix": "oxlint --fix && oxfmt --write",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:staging": "E2E_ENV=staging playwright test --grep @smoke",
+    "test:e2e:production": "E2E_ENV=production playwright test --grep @smoke",
+    "typecheck:e2e": "tsc -p tsconfig.playwright.json --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -50,6 +54,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^25.5.0",
     "@types/react": "^18.3.28",

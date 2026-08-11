@@ -13,7 +13,7 @@ export default function AddExpensePage() {
     <div className="px-4 py-6 max-w-lg mx-auto">
       <div className="space-y-6 animate-slide-in-up">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+          <Button variant="ghost" size="icon" aria-label="Go back" onClick={() => navigate(-1)} className="h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">Add Expense</h1>

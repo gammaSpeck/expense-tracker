@@ -46,7 +46,7 @@ export default function EditExpensePage() {
     return (
       <div className="px-4 py-6 max-w-lg mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+          <Button variant="ghost" size="icon" aria-label="Go back" onClick={() => navigate(-1)} className="h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">Edit Expense</h1>
@@ -61,7 +61,7 @@ export default function EditExpensePage() {
       <div className="space-y-6 animate-slide-in-up">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+            <Button variant="ghost" size="icon" aria-label="Go back" onClick={() => navigate(-1)} className="h-9 w-9">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-semibold">Edit Expense</h1>
@@ -70,6 +70,7 @@ export default function EditExpensePage() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
+                aria-label="Delete expense"
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 text-destructive hover:text-destructive"

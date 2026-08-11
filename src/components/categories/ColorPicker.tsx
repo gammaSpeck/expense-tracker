@@ -14,6 +14,8 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
 
         return (
           <button
+            aria-label={color}
+            aria-pressed={isSelected}
             key={color}
             type="button"
             onClick={() => onChange(color)}
