@@ -1,5 +1,6 @@
 import { test, expect } from "../support/fixtures";
-import { gotoApp } from "../support/app";
+import { gotoApp, daysAgo } from "../support/app";
+import { seedExpenses } from "../support/db";
 import { BASE_URL, isDeployed } from "../support/env";
 import { mockDrive } from "../support/mock-drive";
 
@@ -53,11 +54,14 @@ test.describe("drive-oauth", () => {
     async ({ page }) => {
       test.skip(isDeployed, "mocked Drive endpoints are not exercised against deployments");
 
-      await mockDrive(page);
+      const drive = await mockDrive(page);
       // exchangeCodeForTokens requires a PKCE verifier in sessionStorage (normally written by
       // initiateGoogleAuth before the real redirect) — seed it directly since this test jumps
       // straight to the callback.
-      await page.goto("/settings/data");
+      await gotoApp(page, "/settings/data");
+      await seedExpenses(page, [
+        { value: 1, categoryName: "Others", description: "Drive backup probe", date: daysAgo(0), time: "09:00" },
+      ]);
       await page.evaluate(() => sessionStorage.setItem("expense-tracker-pkce-verifier", "test-verifier"));
       await page.goto("/oauth/callback?code=test-code");
       await expect(page).toHaveURL(/\/settings\/data$/);
@@ -78,6 +82,26 @@ test.describe("drive-oauth", () => {
       await backupDialog.getByRole("button", { name: "Google Drive" }).click();
       await backupDialog.getByRole("button", { name: "Create Backup" }).click();
       await expect(page.getByText("Backup saved to Google Drive")).toBeVisible();
+
+      // Prove the upload was actually encrypted, not just that the UI claimed success: decrypt
+      // what was captured on the wire through the app's own import flow. A plaintext-leak
+      // regression would fail this decrypt/import instead of succeeding.
+      const uploaded = drive.lastUpload();
+      expect(uploaded, "Drive upload should have been captured").toBeTruthy();
+      expect(uploaded).not.toContain("Drive backup probe"); // ciphertext, not the raw description
+      await page.setInputFiles('[data-testid="import-file-input"]', {
+        name: "drive-backup.extrack",
+        mimeType: "application/octet-stream",
+        buffer: Buffer.from(uploaded!, "utf-8"),
+      });
+      // Auto-decrypts with the passphrase already stored earlier in this test — no manual
+      // passphrase entry needed (see ImportData.tsx's stored-passphrase fast path).
+      await page.getByLabel("Merge (Safe)").check();
+      await page.getByRole("button", { name: "Confirm Import" }).click();
+      await expect(page.getByText("Data imported successfully")).toBeVisible();
+      await page.goto("/transactions");
+      await expect(page.getByText("Drive backup probe")).toBeVisible();
+      await page.goto("/settings/data");
 
       await page.getByRole("button", { name: "Unlink" }).click();
       await page.getByRole("alertdialog").getByRole("button", { name: "Disconnect" }).click();

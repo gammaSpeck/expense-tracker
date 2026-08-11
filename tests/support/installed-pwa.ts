@@ -110,6 +110,14 @@ export async function runInstalledPwaJourney(handle: InstalledPwaHandle) {
   // 5. Offline reload still renders the shell; data survives a reload. Skipped where the
   // engine's own Playwright driver can't sustain it (see isWebkit's doc comment).
   if (!isWebkit) {
+    // A registered worker doesn't control the page that registered it until that page reloads
+    // (MDN: ServiceWorkerContainer.ready) — wait for control, then do one online reload so the
+    // worker is actually serving this page before cutting the network. Mirrors pwa.spec.ts's
+    // offline test; skipping this made the assertion below depend on lucky timing.
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.reload();
+    await page.evaluate(() => navigator.serviceWorker.ready);
+
     await handle.context.setOffline(true);
     await page.reload();
     await expect(page.getByTestId("expense-card").filter({ hasText: "Installed PWA journey" })).toBeVisible();

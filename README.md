@@ -83,7 +83,7 @@ absent (no error, no config to touch).
 **Run it:**
 
 ```bash
-bun run test:e2e             # full suite, local build (chromium-desktop + brave/chrome/safari installed-PWA journeys)
+bun run test:e2e             # full suite, local build (chromium-desktop + brave/chrome/webkit installed-PWA journeys)
 bun run test:e2e:staging     # @smoke subset against staging
 bun run test:e2e:production  # @smoke subset against production
 ```

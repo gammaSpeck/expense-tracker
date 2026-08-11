@@ -44,11 +44,20 @@ export async function readDownload(download: Download): Promise<string> {
 }
 
 /** Route mocks + localStorage seeding shared by the `page` fixture and the installed-PWA
- *  launchers: block the analytics beacon, and start every profile with the backup-reminder
- *  banner off, dark theme, INR currency. */
+ *  launchers: block the analytics beacon and Google Fonts, and start every profile with the
+ *  backup-reminder banner off, dark theme, INR currency. */
 export async function installHarness(target: Page | BrowserContext): Promise<void> {
   await target.route("**/xtk/**", (r) =>
     r.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
+  );
+  // `index.css` @imports fonts.googleapis.com, whose stylesheet then makes the browser fetch
+  // fonts.gstatic.com/*.woff2 — a real network call to a third-party CDN that has nothing to
+  // do with app correctness and occasionally 404s in this environment, flaking whichever test
+  // happens to be loading a page at the time. An empty stylesheet means no @font-face rules,
+  // so the woff2 requests never happen at all — falls back to a system font, which no test
+  // asserts on.
+  await target.route("**fonts.googleapis.com/**", (r) =>
+    r.fulfill({ status: 200, contentType: "text/css", body: "" }),
   );
   await target.addInitScript(() => {
     try {

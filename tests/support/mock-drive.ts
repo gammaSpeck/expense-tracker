@@ -1,11 +1,37 @@
 import type { Page } from "@playwright/test";
 
+export type MockDriveHandle = {
+  /** The "file" part's content from the most recent Drive upload — the raw bytes the app
+   *  actually sent over the wire, not just what it intended to send. `undefined` until an
+   *  upload happens. */
+  lastUpload(): string | undefined;
+};
+
+/** Extracts one named part's body from a `multipart/form-data` request. Google's upload API
+ *  (and `uploadFileToDrive`) sends the backup as a real multipart body via `fetch(FormData)`,
+ *  so this is the only way to see what was actually uploaded — not what the caller intended. */
+function extractMultipartPart(contentType: string, body: string, partName: string): string | undefined {
+  const match = /boundary=(?:"([^"]+)"|([^;]+))/.exec(contentType);
+  const boundary = match?.[1] ?? match?.[2];
+  if (!boundary) return undefined;
+  const marker = `--${boundary}`;
+  for (const part of body.split(marker)) {
+    if (!part.includes(`name="${partName}"`)) continue;
+    const headerEnd = part.indexOf("\r\n\r\n");
+    if (headerEnd === -1) continue;
+    return part.slice(headerEnd + 4).replace(/\r\n$/, "");
+  }
+  return undefined;
+}
+
 /**
  * Mocks the full Google Drive OAuth + Files API surface used by `src/lib/driveApi.ts` and
  * `src/lib/driveAuth.ts`. Register before navigation. Local/CI only — never used against a
  * live deployment.
  */
-export async function mockDrive(page: Page): Promise<void> {
+export async function mockDrive(page: Page): Promise<MockDriveHandle> {
+  let lastUploadContent: string | undefined;
+
   await page.route("**oauth2.googleapis.com/token", (route) =>
     route.fulfill({
       status: 200,
@@ -42,18 +68,22 @@ export async function mockDrive(page: Page): Promise<void> {
     });
   });
 
-  await page.route("**www.googleapis.com/upload/drive/v3/files**", (route) =>
-    route.fulfill({
+  await page.route("**www.googleapis.com/upload/drive/v3/files**", (route) => {
+    const req = route.request();
+    lastUploadContent = extractMultipartPart(req.headers()["content-type"] ?? "", req.postData() ?? "", "file");
+    return route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
         id: "file-1",
         webViewLink: "https://drive.google.com/file/d/file-1/view",
       }),
-    }),
-  );
+    });
+  });
 
   await page.route("**oauth2.googleapis.com/revoke*", (route) =>
     route.fulfill({ status: 200, contentType: "text/plain", body: "" }),
   );
+
+  return { lastUpload: () => lastUploadContent };
 }
