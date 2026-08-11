@@ -7,7 +7,7 @@
   "env": {
     "builtin": true
   },
-  "ignorePatterns": ["dist", "src/components/ui/**"],
+  "ignorePatterns": ["dist", "src/components/ui/**", ".omp/**"],
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
