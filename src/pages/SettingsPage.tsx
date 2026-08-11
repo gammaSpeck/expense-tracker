@@ -1,18 +1,12 @@
-import { Sun, Moon, Monitor, ChevronRight, Settings } from "lucide-react";
+import { ChevronRight, Settings } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import CurrencyDropdown from "@/components/more/CurrencyDropdown";
-import { cn } from "@/lib/utils";
+import { ThemeToggleRow } from "@/components/more/ThemeToggleRow";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-
-  const themes = [
-    { value: "light" as const, icon: Sun },
-    { value: "dark" as const, icon: Moon },
-    { value: "system" as const, icon: Monitor },
-  ];
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto space-y-4 overflow-x-hidden">
@@ -27,27 +21,7 @@ export default function SettingsPage() {
         className="space-y-1 animate-slide-in-up"
         style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
       >
-        {/* Theme Row */}
-        <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/50">
-          <span className="text-sm font-medium">Theme</span>
-          <div className="flex gap-1">
-            {themes.map(({ value, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => setTheme(value)}
-                className={cn(
-                  "p-2 rounded-lg transition-all",
-                  theme === value
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted hover:bg-muted/80 text-muted-foreground",
-                )}
-                aria-label={value}
-              >
-                <Icon className="h-4 w-4" />
-              </button>
-            ))}
-          </div>
-        </div>
+        <ThemeToggleRow theme={theme} setTheme={setTheme} />
 
         {/* Currency Row */}
         <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/50">

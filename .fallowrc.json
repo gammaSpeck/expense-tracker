@@ -1,0 +1,141 @@
+{
+  // This file is JSONC: fallow reads these comments; generic JSON tools may not.
+  "$schema": "./node_modules/fallow/schema.json",
+  "entry": [
+    "src/index.{ts,tsx,js,jsx}",
+    "src/main.{ts,tsx,js,jsx}"
+  ],
+  "ignorePatterns": ["**/*.d.ts", "docs/**", "public/**"],
+  "ignoreExports": [
+    { "file": "src/components/ui/**", "exports": ["*"] }
+  ],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "unresolved-imports": "error",
+    "unlisted-dependencies": "error",
+    "unused-dependencies": "error",
+    "unused-files": "error",
+    "circular-dependencies": "error",
+    "re-export-cycle": "error",
+    "boundary-violation": "error",
+    "unused-exports": "warn",
+    "unused-types": "warn",
+    "dev-dependencies-in-production": "warn",
+    "test-only-dependencies": "warn",
+    "stale-suppressions": "warn"
+  },
+  "duplicates": {
+    "mode": "mild",
+    "minTokens": 50,
+    "minLines": 5
+  },
+  "health": {
+    "maxCyclomatic": 20,
+    "maxCognitive": 15,
+    // e2e specs are scored out: a Playwright `test.describe` body is a container for
+    // several `test()` calls, not a unit, so its length is not a maintainability signal.
+    "ignore": ["tests/**"],
+    // CRAP = cyclomatic^2 + cyclomatic here (coverage_model: static_estimated, no Istanbul
+    // report wired in -> coverage reads as 0 project-wide), so any function with cyclomatic
+    // >=5 trips the default maxCrap 30 regardless of real test coverage or code quality.
+    // These are small, single-purpose functions whose branching is necessary business logic
+    // (error-path classification, move-vs-cascade delete, form validation, date-step lookup)
+    // -- not a code smell to refactor away. Ceilings below are the reported score + headroom,
+    // so real complexity growth beyond today's shape still gets flagged.
+    "thresholdOverrides": [
+      {
+        "files": ["src/components/categories/DeleteCategoryDialog.tsx"],
+        "functions": ["DeleteCategoryDialog"],
+        "maxCrap": 75,
+        "reason": "JSX conditional rendering (title/description branch, options panel gate, disabled-button guard) on an alert dialog; coverage-blind CRAP, not real complexity."
+      },
+      {
+        "files": ["src/components/categories/DeleteTagDialog.tsx"],
+        "maxCrap": 35,
+        "reason": "Pluralized confirmation copy; coverage-blind CRAP on a static dialog."
+      },
+      {
+        "files": ["src/components/expenses/ExpenseCardDetails.tsx"],
+        "functions": ["ExpenseCardDetails"],
+        "maxCrap": 45,
+        "reason": "Conditional date/tag-overflow rendering in a list row; coverage-blind CRAP."
+      },
+      {
+        "files": ["src/components/more/encryption/PassphraseDisplayPanel.tsx"],
+        "maxCrap": 35,
+        "reason": "Show/hide toggle ternary; coverage-blind CRAP on a presentational panel."
+      },
+      {
+        "files": ["src/hooks/useBackupAction.ts"],
+        "functions": ["handleBackup"],
+        "maxCrap": 75,
+        "reason": "Drive-vs-device destination branching plus session-expired vs generic auth-error classification -- necessary error handling, not a code smell."
+      },
+      {
+        "files": ["src/hooks/useBackupReminderSchedule.ts"],
+        "functions": ["lastBackupText"],
+        "maxCrap": 45,
+        "reason": "Day-count pluralization plus device/drive mode suffix; coverage-blind CRAP on a text formatter."
+      },
+      {
+        "files": ["src/hooks/useCategoryDeletion.ts"],
+        "maxCrap": 45,
+        "reason": "Move-vs-cascade delete branch plus the 'Others' category guard; necessary business logic, not accidental complexity."
+      },
+      {
+        "files": ["src/hooks/useCategoryFormSubmit.ts"],
+        "functions": ["onSubmit"],
+        "maxCrap": 60,
+        "reason": "Duplicate-name check plus create-vs-update branch; necessary form-submit logic."
+      },
+      {
+        "files": ["src/hooks/useEncryptedFileImport.ts"],
+        "functions": ["performFileSelect"],
+        "maxCrap": 35,
+        "reason": "File-check error / null-decrypt / resolvePlaintext-result branches; necessary import validation."
+      },
+      {
+        "files": ["src/hooks/useExpenseFormController.ts"],
+        "functions": ["submitExpense", "<arrow>"],
+        "maxCrap": 35,
+        "reason": "Create-vs-update branch and the default-category effect guard; both coverage-blind CRAP on small extracted units."
+      },
+      {
+        "files": ["src/hooks/useGoogleOAuthCallback.ts"],
+        "functions": ["runOAuthCallback"],
+        "maxCrap": 45,
+        "reason": "OAuth error/missing-code/success branching is the callback's entire job; not reducible without hiding the same branches elsewhere."
+      },
+      {
+        "files": ["src/lib/expenseAnalysis.ts"],
+        "functions": ["<arrow>"],
+        "maxCrap": 75,
+        "reason": "buildCategoryBreakdown's per-category mapper: unknown-category fallbacks plus divide-by-zero guard for percentage; necessary defensive logic."
+      },
+      {
+        "files": ["src/lib/importPreview.ts"],
+        "functions": ["buildImportPreview"],
+        "maxCrap": 75,
+        "reason": "JSON parse + shape validation + date-range derivation in a try/catch; necessary import-file guarding."
+      }
+    ]
+  },
+  "boundaries": {
+    "zones": [
+      { "name": "ui", "patterns": ["src/pages/**", "src/components/**"] },
+      { "name": "state", "patterns": ["src/contexts/**", "src/hooks/**"] },
+      { "name": "data", "patterns": ["src/db/**"] },
+      { "name": "shared", "patterns": ["src/lib/**", "src/types/**", "src/config/**"] }
+    ],
+    // "shared: allow []" (isolating src/lib from src/db) was dropped: the
+    // fresh scan found src/lib/backup.ts -> src/db/userPreferences.ts and
+    // src/lib/driveAuth.ts -> src/db/driveCredentials.ts, both legitimate
+    // service-layer usage of the db layer, not an accidental inversion.
+    "rules": [
+      { "from": "data", "allow": ["shared"] }
+    ]
+  },
+  "audit": {
+    "gate": "new-only"
+  }
+}

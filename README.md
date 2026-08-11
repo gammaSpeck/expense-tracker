@@ -94,6 +94,23 @@ bun run test:e2e:production  # @smoke subset against production
   local `vite preview` server is spun up automatically.
 - `E2E_BASE_URL` — override the resolved URL (e.g. a Netlify deploy-preview link).
 
+## 🧹 Code Quality
+
+Static analysis via [Fallow](https://docs.fallow.tools) — whole-project dead-code, duplication,
+complexity, and dependency checks that a per-file linter (oxlint) can't see.
+
+```bash
+bun run analyze           # everything fallow ships
+bun run analyze:dead      # unused files/exports/deps, unresolved imports, cycles, boundaries
+bun run analyze:health    # complexity + maintainability, ranked hotspots
+bun run analyze:security  # opt-in tainted-sink candidates (SSRF, open redirect, dangerous HTML, ...)
+bun run audit:pr          # PR-gate verdict, scoped to changed files (what CI runs)
+```
+
+`bun run audit:pr` reproduces the blocking CI gate locally before pushing. In an
+[omp](https://omp.sh) agent session, `.omp/hooks/pre/fallow-gate.ts` also blocks `git commit`
+/ `git push` on a failing audit verdict.
+
 ---
 
 ## 🛠️ Tech Stack

@@ -18,6 +18,10 @@ const sidebarNavItems = [
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
+function isNavItemActive(pathname: string, path: string): boolean {
+  return pathname === path || (path !== "/" && pathname.startsWith(path));
+}
+
 export function BottomNav() {
   const location = useLocation();
 
@@ -25,9 +29,7 @@ export function BottomNav() {
     <LazyMotion features={domAnimation}>
       <nav className="bottom-nav">
         {navItems.map((item) => {
-          const isActive =
-            location.pathname === item.path ||
-            (item.path !== "/" && location.pathname.startsWith(item.path));
+          const isActive = isNavItemActive(location.pathname, item.path);
           const Icon = item.icon;
 
           return (
@@ -83,9 +85,7 @@ export function SidebarNav() {
 
       <nav className="flex flex-col gap-1">
         {sidebarNavItems.map((item) => {
-          const isActive =
-            location.pathname === item.path ||
-            (item.path !== "/" && location.pathname.startsWith(item.path));
+          const isActive = isNavItemActive(location.pathname, item.path);
           const Icon = item.icon;
 
           return (

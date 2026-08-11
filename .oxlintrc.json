@@ -2,12 +2,12 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [],
   "categories": {
-    "correctness": "warn"
+    "correctness": "warn",
   },
   "env": {
-    "builtin": true
+    "builtin": true,
   },
-  "ignorePatterns": ["dist", "src/components/ui/**"],
+  "ignorePatterns": ["dist", "src/components/ui/**", ".omp/**"],
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
@@ -100,22 +100,22 @@
             "vars": "all",
             "varsIgnorePattern": "^_",
             "args": "after-used",
-            "argsIgnorePattern": "^_"
-          }
+            "argsIgnorePattern": "^_",
+          },
         ],
         "react/only-export-components": [
           "warn",
           {
-            "allowConstantExport": true
-          }
-        ]
+            "allowConstantExport": true,
+          },
+        ],
       },
       "plugins": ["typescript", "react"],
       "jsPlugins": ["eslint-plugin-unused-imports"],
       "env": {
         "es2020": true,
-        "browser": true
-      }
-    }
-  ]
+        "browser": true,
+      },
+    },
+  ],
 }

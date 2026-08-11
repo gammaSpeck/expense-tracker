@@ -6,11 +6,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
 import { DataLossDialog } from "@/components/DataLossDialog";
-import { lazy, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { initializeDatabase, requestPersistentStorage } from "@/db/expenseTrackerDb";
+import { lazy } from "react";
+import { initializeDatabase } from "@/db/expenseTrackerDb";
 import { userPreferences } from "@/db/userPreferences";
-import { capture } from "@/lib/telemetry";
+import { useAppStartup } from "@/hooks/useAppStartup";
 
 import HomePage from "./pages/HomePage";
 
@@ -29,33 +28,8 @@ const AnalysisPage = lazy(() => import("@/pages/AnalysisPage"));
 const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
 
 function AppContent() {
-  const [lossCount, setLossCount] = useState<number | null>(null);
-  const [lossDialogOpen, setLossDialogOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    void (async () => {
-      const persisted = await requestPersistentStorage();
-      const state = await initializeDatabase();
-      capture("app_opened", { persisted, startup: state.status });
-
-      if (!persisted) {
-        toast.warning("This browser may delete your data automatically. Back up regularly.", {
-          action: { label: "Back up now", onClick: () => (window.location.href = "/settings/data") },
-        });
-      }
-
-      if (state.status === "data-loss") {
-        setLossCount(state.lastSeenExpenseCount);
-        setLossDialogOpen(true);
-        capture("data_loss_detected", {
-          lastSeenExpenseCount: state.lastSeenExpenseCount,
-          installedAt: state.installedAt,
-          lastSeenAt: state.lastSeenAt,
-        });
-      }
-    })();
-  }, []);
+  const { lossCount, setLossCount, lossDialogOpen, setLossDialogOpen } = useAppStartup();
 
   return (
     <AppLayout>

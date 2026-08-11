@@ -1,6 +1,11 @@
 import { Theme } from "@/types/expense";
+import { pickEnum, pickString } from "@/lib/validation";
 
 export type BackupReminderSchedule = "never" | "daily" | "weekly" | "monthly";
+
+export function isReminderSchedule(value: unknown): value is BackupReminderSchedule {
+  return value === "never" || value === "daily" || value === "weekly" || value === "monthly";
+}
 
 export type BackupMode = "device" | "drive";
 
@@ -33,6 +38,24 @@ const DEFAULT_BACKUP_REMINDER_PREFERENCES: BackupReminderPreferences = {
   lastBackupMode: null,
   bannerLastShownDate: null,
 };
+
+const INSTALL_MARKER_VALIDATORS: [keyof InstallMarker, (parsed: Partial<InstallMarker>) => boolean][] = [
+  [
+    "installedAt",
+    (p) => typeof p.installedAt === "string" && !Number.isNaN(Date.parse(p.installedAt)),
+  ],
+  [
+    "lastSeenAt",
+    (p) => typeof p.lastSeenAt === "string" && !Number.isNaN(Date.parse(p.lastSeenAt)),
+  ],
+  [
+    "lastSeenExpenseCount",
+    (p) =>
+      typeof p.lastSeenExpenseCount === "number" &&
+      Number.isFinite(p.lastSeenExpenseCount) &&
+      p.lastSeenExpenseCount >= 0,
+  ],
+];
 
 class UserPreferences {
   private getStorage(): Storage | null {
@@ -71,14 +94,7 @@ class UserPreferences {
   }
 
   getTheme(fallback: Theme): Theme {
-    const value = this.getItem(STORAGE_KEYS.theme) as Theme | null;
-    if (!value) return fallback;
-
-    if (value === "light" || value === "dark" || value === "system") {
-      return value;
-    }
-
-    return fallback;
+    return pickEnum(this.getItem(STORAGE_KEYS.theme), ["light", "dark", "system"] as const, fallback);
   }
 
   setTheme(theme: Theme): void {
@@ -91,24 +107,18 @@ class UserPreferences {
 
     try {
       const parsed = JSON.parse(rawValue) as Partial<BackupReminderPreferences>;
-      const reminderSchedule = parsed.reminderSchedule;
-      const schedule =
-        reminderSchedule === "never" ||
-        reminderSchedule === "daily" ||
-        reminderSchedule === "weekly" ||
-        reminderSchedule === "monthly"
-          ? reminderSchedule
-          : DEFAULT_BACKUP_REMINDER_PREFERENCES.reminderSchedule;
+      const schedule = isReminderSchedule(parsed.reminderSchedule)
+        ? parsed.reminderSchedule
+        : DEFAULT_BACKUP_REMINDER_PREFERENCES.reminderSchedule;
 
       const rawMode = parsed.lastBackupMode;
       const lastBackupMode = rawMode === "device" || rawMode === "drive" ? rawMode : null;
 
       return {
         reminderSchedule: schedule,
-        lastBackupDate: typeof parsed.lastBackupDate === "string" ? parsed.lastBackupDate : null,
+        lastBackupDate: pickString(parsed.lastBackupDate, null),
         lastBackupMode,
-        bannerLastShownDate:
-          typeof parsed.bannerLastShownDate === "string" ? parsed.bannerLastShownDate : null,
+        bannerLastShownDate: pickString(parsed.bannerLastShownDate, null),
       };
     } catch {
       return DEFAULT_BACKUP_REMINDER_PREFERENCES;
@@ -138,19 +148,10 @@ class UserPreferences {
 
     try {
       const parsed = JSON.parse(rawValue) as Partial<InstallMarker> | null;
-      if (
-        !parsed ||
-        typeof parsed.installedAt !== "string" ||
-        typeof parsed.lastSeenAt !== "string" ||
-        Number.isNaN(Date.parse(parsed.installedAt)) ||
-        Number.isNaN(Date.parse(parsed.lastSeenAt)) ||
-        typeof parsed.lastSeenExpenseCount !== "number" ||
-        !Number.isFinite(parsed.lastSeenExpenseCount) ||
-        parsed.lastSeenExpenseCount < 0
-      ) {
-        return null;
-      }
-      return parsed as InstallMarker;
+      if (!parsed) return null;
+
+      const isValid = INSTALL_MARKER_VALIDATORS.every(([, isFieldValid]) => isFieldValid(parsed));
+      return isValid ? (parsed as InstallMarker) : null;
     } catch {
       return null;
     }
