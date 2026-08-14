@@ -1,27 +1,12 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
-import { LazyMotion, domAnimation, m } from "framer-motion";
-import { format } from "date-fns";
-import { getCurrentTime24 } from "@/lib/time";
-import { Plus, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ExpenseList } from "@/components/expenses/ExpenseCard";
+import { Plus } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useMonthSummary, useRecentExpenses, useCategories } from "@/hooks/useExpenseData";
-import { deleteExpense } from "@/db/expenseTrackerDb";
-import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Expense } from "@/types/expense";
+import { useExpenseActions } from "@/hooks/useExpenseActions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MonthlySummaryCard } from "@/components/MonthlySummaryCard";
+import { RecentTransactionsSection } from "@/components/RecentTransactionsSection";
+import { DeleteExpenseDialog } from "@/components/expenses/DeleteExpenseDialog";
 
 export function FloatingActionButton() {
   const navigate = useNavigate();
@@ -39,7 +24,6 @@ export function FloatingActionButton() {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const isMobile = useIsMobile();
 
   const { total, totalExcludingAdhoc, monthStart, monthEnd } = useMonthSummary();
@@ -47,119 +31,45 @@ export default function HomePage() {
   const categories = useCategories();
   const displayExpenses = useRecentExpenses(10);
 
-  const handleExpenseClick = (expense: Expense) => {
-    navigate(`/expense/${expense.id}`);
-  };
-
-  const handleDuplicate = (expense: Expense) => {
-    navigate("/add", {
-      state: {
-        duplicate: {
-          ...expense,
-          date: format(new Date(), "yyyy-MM-dd"),
-          time: getCurrentTime24(),
-        },
-      },
-    });
-  };
-
-  const handleEdit = (expense: Expense) => {
-    navigate(`/expense/${expense.id}/edit`);
-  };
-
-  const handleDelete = async () => {
-    if (!expenseToDelete) return;
-    try {
-      await deleteExpense(expenseToDelete.id);
-      toast.success("Expense deleted");
-    } catch {
-      toast.error("Failed to delete");
-    }
-    setExpenseToDelete(null);
-  };
+  const {
+    expenseToDelete,
+    setExpenseToDelete,
+    handleExpenseClick,
+    handleDuplicate,
+    handleEdit,
+    handleDelete,
+  } = useExpenseActions();
 
   return (
-    <LazyMotion features={domAnimation}>
-      <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
-        {/* Monthly Summary Card */}
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="summary-card"
-        >
-          <p className="text-sm opacity-80">This Month's Expenses</p>
-          <p className="text-3xl font-bold mt-1">
-            {currency.symbol}
-            {formatValue(total)}
-          </p>
-          {totalExcludingAdhoc !== total && (
-            <p className="text-sm opacity-70 mt-1">
-              Excluding Adhoc: {currency.symbol}
-              {formatValue(totalExcludingAdhoc)}
-            </p>
-          )}
-          <p className="text-xs opacity-60 mt-2">
-            {format(monthStart, "d MMM")} - {format(monthEnd, "d MMM yyyy")}
-          </p>
-        </m.div>
+    <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
+      <MonthlySummaryCard
+        total={total}
+        totalExcludingAdhoc={totalExcludingAdhoc}
+        monthStart={monthStart}
+        monthEnd={monthEnd}
+        currencySymbol={currency.symbol}
+        formatValue={formatValue}
+      />
 
-        {/* Recent Transactions */}
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4"
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Transactions</h2>
-            {displayExpenses.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/transactions")}
-                className="text-primary"
-              >
-                See All
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            )}
-          </div>
+      <RecentTransactionsSection
+        expenses={displayExpenses}
+        categories={categories}
+        onSeeAll={() => navigate("/transactions")}
+        onExpenseClick={handleExpenseClick}
+        onDuplicate={handleDuplicate}
+        onEdit={handleEdit}
+        onDelete={setExpenseToDelete}
+      />
 
-          <ExpenseList
-            expenses={displayExpenses}
-            categories={categories}
-            onExpenseClick={handleExpenseClick}
-            onDuplicate={handleDuplicate}
-            onEdit={handleEdit}
-            onDelete={(expense) => setExpenseToDelete(expense)}
-            emptyMessage={"No expenses yet. Add your first one!"}
-          />
-        </m.div>
+      {/* FAB */}
+      {isMobile && <FloatingActionButton />}
 
-        {/* FAB */}
-        {isMobile && <FloatingActionButton />}
-
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!expenseToDelete} onOpenChange={() => setExpenseToDelete(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this expense? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
-    </LazyMotion>
+      <DeleteExpenseDialog
+        mode="controlled"
+        open={!!expenseToDelete}
+        onOpenChange={() => setExpenseToDelete(null)}
+        onConfirm={handleDelete}
+      />
+    </div>
   );
 }

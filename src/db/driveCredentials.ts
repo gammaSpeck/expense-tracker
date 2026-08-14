@@ -29,7 +29,3 @@ export async function clearDriveCredentials(): Promise<void> {
 export function isTokenExpired(creds: DriveCredentials): boolean {
   return Date.now() >= creds.expiresAt - 60_000;
 }
-
-export async function isDriveConnected(): Promise<boolean> {
-  return (await getDriveCredentials()) !== null;
-}

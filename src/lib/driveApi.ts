@@ -1,3 +1,9 @@
+// fallow-ignore-file security-sink
+// SSRF candidates at the three `fetch(...)` calls below are false positives:
+// DRIVE_API / DRIVE_UPLOAD_API are hardcoded string constants, so the request
+// host is never attacker-controlled. The dynamic parts are either a
+// query-escaped + encodeURIComponent'd string, or a Drive file ID returned by
+// Google's own Drive API response (not user input).
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
 export const BACKUP_FOLDER_NAME = "ExTrack Backups";
@@ -104,6 +110,35 @@ async function findExistingFile(
  * If a file with the same name already exists in the folder, it is replaced
  * (PATCH) rather than creating a duplicate. Returns the file ID and webViewLink.
  */
+function buildMetadataBlob(filename: string, folderID?: string): Blob {
+  return new Blob(
+    [JSON.stringify({ name: filename, mimeType: "application/json", ...(folderID ? { parents: [folderID] } : {}) })],
+    { type: "application/json" },
+  );
+}
+
+function sendDriveUploadRequest(
+  body: FormData,
+  existingFileId: string | null,
+  accessToken: string,
+): Promise<Response> {
+  const headers = { Authorization: `Bearer ${accessToken}` };
+
+  // Update existing file — no `parents` in metadata for PATCH
+  if (existingFileId) {
+    return fetch(
+      `${DRIVE_UPLOAD_API}/files/${existingFileId}?uploadType=multipart&fields=id,webViewLink`,
+      { method: "PATCH", headers, body },
+    );
+  }
+
+  return fetch(`${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`, {
+    method: "POST",
+    headers,
+    body,
+  });
+}
+
 export async function uploadFileToDrive(
   blob: Blob,
   filename: string,
@@ -113,47 +148,10 @@ export async function uploadFileToDrive(
   const existingFileId = await findExistingFile(filename, folderID, accessToken);
 
   const body = new FormData();
-  body.append(
-    "metadata",
-    new Blob([JSON.stringify({ name: filename, mimeType: "application/json" })], {
-      type: "application/json",
-    }),
-  );
+  body.append("metadata", buildMetadataBlob(filename, existingFileId ? undefined : folderID));
   body.append("file", blob);
 
-  let res: Response;
-
-  if (existingFileId) {
-    // Update existing file — no `parents` in metadata for PATCH
-    res = await fetch(
-      `${DRIVE_UPLOAD_API}/files/${existingFileId}?uploadType=multipart&fields=id,webViewLink`,
-      {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body,
-      },
-    );
-  } else {
-    // Create new file
-    body.set(
-      "metadata",
-      new Blob(
-        [
-          JSON.stringify({
-            name: filename,
-            mimeType: "application/json",
-            parents: [folderID],
-          }),
-        ],
-        { type: "application/json" },
-      ),
-    );
-    res = await fetch(`${DRIVE_UPLOAD_API}/files?uploadType=multipart&fields=id,webViewLink`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body,
-    });
-  }
+  const res = await sendDriveUploadRequest(body, existingFileId, accessToken);
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

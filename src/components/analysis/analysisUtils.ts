@@ -1,5 +1,5 @@
 import { format, parseISO, startOfWeek, endOfWeek, differenceInDays, isSameMonth } from "date-fns";
-import type { TimePeriod, DateRange, DailySummary } from "@/types/expense";
+import type { CategorySummary, TimePeriod, DateRange, DailySummary } from "@/types/expense";
 
 export type TrendGranularity = "day" | "week" | "month";
 
@@ -91,4 +91,30 @@ export function aggregateTrendData(
   return Array.from(months.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, v]) => v);
+}
+
+export interface PieDatum {
+  name: string;
+  value: number;
+  color: string;
+  total: number;
+  percentage: string;
+}
+
+export function computePieData(categoryBreakdown: CategorySummary[]): {
+  nonZeroCategories: CategorySummary[];
+  pieData: PieDatum[];
+} {
+  const nonZeroCategories = categoryBreakdown.filter((cat) => cat.total > 0);
+  const totalForPie = nonZeroCategories.reduce((sum, cat) => sum + cat.total, 0);
+
+  const pieData = nonZeroCategories.map((cat) => ({
+    name: cat.categoryName,
+    value: cat.total,
+    color: cat.categoryColor,
+    total: totalForPie,
+    percentage: totalForPie > 0 ? ((cat.total / totalForPie) * 100).toFixed(1) : "0",
+  }));
+
+  return { nonZeroCategories, pieData };
 }

@@ -118,6 +118,8 @@ export function IconPicker({ value, onChange, color }: IconPickerProps) {
 
         return (
           <button
+            aria-label={iconName}
+            aria-pressed={isSelected}
             key={iconName}
             type="button"
             onClick={() => onChange(iconName)}

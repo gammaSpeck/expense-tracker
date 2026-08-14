@@ -1,0 +1,67 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pr-checks-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    if: >-
+      startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') ||
+      github.actor == 'dependabot[bot]'
+    uses: ./.github/workflows/e2e.yml
+    with:
+      environment: local
+
+  fallow:
+    name: Fallow analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - uses: fallow-rs/fallow@v3
+        id: fallow-audit
+        with:
+          command: audit
+          format: sarif
+          gate: new-only
+          comment: true
+          artifacts-dir: fallow-audit-out
+      - name: Tag audit SARIF runs with distinct categories
+        if: always()
+        run: |
+          jq '.runs |= [range(length) as $i | .[$i] + {automationDetails: {id: ("fallow-audit-" + ($i|tostring) + "/")}}]' \
+            fallow-audit-out/fallow-results.sarif > fallow-audit-out/fallow-results.tagged.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: fallow-audit-out/fallow-results.tagged.sarif
+      - uses: fallow-rs/fallow@v3
+        id: fallow-security
+        if: always()
+        with:
+          command: security
+          format: sarif
+          fail-on-issues: false
+          artifacts-dir: fallow-security-out
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: fallow-security-out/fallow-results.sarif
+          category: fallow-security
+      - name: Health score gate
+        if: always()
+        run: bunx fallow health --score --min-score 95

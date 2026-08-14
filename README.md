@@ -65,6 +65,52 @@ $ bun run dev # or npm run dev / pnpm dev
 # 4. Open http://localhost:4173 in your browser
 ```
 
+## 🧪 Testing
+
+E2E coverage via [Playwright](https://playwright.dev/), driving the real UI against a built
+preview server (local) or a live deployment (staging/production).
+
+**One-time setup:**
+
+```bash
+bun install
+bunx playwright install --with-deps chromium chrome webkit
+```
+
+Brave is a separate manual install — `brave-mobile-pwa` is skipped automatically when it's
+absent (no error, no config to touch).
+
+**Run it:**
+
+```bash
+bun run test:e2e             # full suite, local build (chromium-desktop + brave/chrome/webkit installed-PWA journeys)
+bun run test:e2e:staging     # @smoke subset against staging
+bun run test:e2e:production  # @smoke subset against production
+```
+
+**Environment variables:**
+
+- `E2E_ENV` — `local` (default) | `staging` | `production`. Selects the base URL and whether a
+  local `vite preview` server is spun up automatically.
+- `E2E_BASE_URL` — override the resolved URL (e.g. a Netlify deploy-preview link).
+
+## 🧹 Code Quality
+
+Static analysis via [Fallow](https://docs.fallow.tools) — whole-project dead-code, duplication,
+complexity, and dependency checks that a per-file linter (oxlint) can't see.
+
+```bash
+bun run analyze           # everything fallow ships
+bun run analyze:dead      # unused files/exports/deps, unresolved imports, cycles, boundaries
+bun run analyze:health    # complexity + maintainability, ranked hotspots
+bun run analyze:security  # opt-in tainted-sink candidates (SSRF, open redirect, dangerous HTML, ...)
+bun run audit:pr          # PR-gate verdict, scoped to changed files (what CI runs)
+```
+
+`bun run audit:pr` reproduces the blocking CI gate locally before pushing. In an
+[omp](https://omp.sh) agent session, `.omp/hooks/pre/fallow-gate.ts` also blocks `git commit`
+/ `git push` on a failing audit verdict.
+
 ---
 
 ## 🛠️ Tech Stack

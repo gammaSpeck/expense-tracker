@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.2...v1.6.0) (2026-08-11)
+
+
+### Features
+
+* **fallow:** implemented fallow and refactored whole codebase to be more maintainable ([#51](https://github.com/gammaSpeck/expense-tracker/issues/51)) ([8d5452c](https://github.com/gammaSpeck/expense-tracker/commit/8d5452c7a12b309b7d20fae5c44df362e2a9c6c0))
+* pontail audit fixes ([#48](https://github.com/gammaSpeck/expense-tracker/issues/48)) ([5ad0aae](https://github.com/gammaSpeck/expense-tracker/commit/5ad0aaee0c391ca271fc55bf7240e7499063b6e8))
+* **tests:** added e2ee tests ([#50](https://github.com/gammaSpeck/expense-tracker/issues/50)) ([0b8eb0f](https://github.com/gammaSpeck/expense-tracker/commit/0b8eb0f1c1e353c6eb23f054eecfbda57f973bb0))
+
+## [1.5.2](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.1...v1.5.2) (2026-08-09)
+
+
+### Bug Fixes
+
+* **data-loss:** fixes the auto data wipe out bug ([#41](https://github.com/gammaSpeck/expense-tracker/issues/41)) ([1cb0c99](https://github.com/gammaSpeck/expense-tracker/commit/1cb0c99929fb02b8cd1386461bd14b6fddb2b63b))
+
 ## [1.5.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.0...v1.5.1) (2026-03-22)
 
 

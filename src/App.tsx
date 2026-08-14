@@ -1,13 +1,15 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
-import { lazy, useEffect } from "react";
+import { DataLossDialog } from "@/components/DataLossDialog";
+import { lazy } from "react";
 import { initializeDatabase } from "@/db/expenseTrackerDb";
+import { userPreferences } from "@/db/userPreferences";
+import { useAppStartup } from "@/hooks/useAppStartup";
 
 import HomePage from "./pages/HomePage";
 
@@ -25,12 +27,9 @@ const CategoriesPage = lazy(() => import("@/pages/CategoriesPage"));
 const AnalysisPage = lazy(() => import("@/pages/AnalysisPage"));
 const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
 
-const queryClient = new QueryClient();
-
 function AppContent() {
-  useEffect(() => {
-    initializeDatabase();
-  }, []);
+  const navigate = useNavigate();
+  const { lossCount, setLossCount, lossDialogOpen, setLossDialogOpen } = useAppStartup();
 
   return (
     <AppLayout>
@@ -47,6 +46,27 @@ function AppContent() {
         <Route path="/settings/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {lossCount !== null && (
+        <DataLossDialog
+          open={lossDialogOpen}
+          lastSeenExpenseCount={lossCount}
+          onStartFresh={() => {
+            const freshNow = new Date().toISOString();
+            userPreferences.setInstallMarker({
+              installedAt: freshNow,
+              lastSeenAt: freshNow,
+              lastSeenExpenseCount: 0,
+            });
+            setLossDialogOpen(false);
+            setLossCount(null);
+            void initializeDatabase();
+          }}
+          onRestore={() => {
+            setLossDialogOpen(false);
+            navigate("/settings/data");
+          }}
+        />
+      )}
       <BackupReminderPrompt />
     </AppLayout>
   );
@@ -62,19 +82,17 @@ function RootRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CurrencyProvider>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Sonner position="top-right" duration={3000} />
-          <BrowserRouter>
-            <RootRoutes />
-          </BrowserRouter>
-          <ReloadPrompt />
-        </TooltipProvider>
-      </ThemeProvider>
-    </CurrencyProvider>
-  </QueryClientProvider>
+  <CurrencyProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Sonner position="top-right" duration={3000} />
+        <BrowserRouter>
+          <RootRoutes />
+        </BrowserRouter>
+        <ReloadPrompt />
+      </TooltipProvider>
+    </ThemeProvider>
+  </CurrencyProvider>
 );
 
 export default App;
