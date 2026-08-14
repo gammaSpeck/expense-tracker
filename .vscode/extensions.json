@@ -1,6 +1,8 @@
 {
   "recommendations": [
     // Oxc: provides both oxlint diagnostics and oxfmt formatting in VS Code.
-    "oxc.oxc-vscode"
+    "oxc.oxc-vscode",
+    // Fallow: inline dead-code/dupe/complexity diagnostics + Code Lens reference counts.
+    "fallow-rs.fallow-vscode"
   ]
 }

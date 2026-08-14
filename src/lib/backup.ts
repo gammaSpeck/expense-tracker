@@ -5,8 +5,10 @@ import {
   type BackupReminderSchedule,
   MONTHLY_REMINDER_DAY,
   WEEKLY_REMINDER_DAY,
+  isReminderSchedule,
   userPreferences,
 } from "@/db/userPreferences";
+import type { Expense, Category } from "@/types/expense";
 
 // ---------------------------------------------------------------------------
 // Encryption store — reuses the same IndexedDB database as driveCredentials
@@ -27,14 +29,17 @@ interface ExtrackEnvelope {
   ciphertext: string;
 }
 
-function b64uEncode(buf: Uint8Array<ArrayBuffer>): string {
-  return btoa(String.fromCharCode(...buf))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+const B64_CHUNK = 0x8000; // 32 KiB of args per call — far under any engine's argument limit
+
+export function b64uEncode(buf: Uint8Array<ArrayBuffer>): string {
+  let bin = "";
+  for (let i = 0; i < buf.length; i += B64_CHUNK) {
+    bin += String.fromCharCode(...buf.subarray(i, i + B64_CHUNK));
+  }
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
+export function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
   const b64 = str.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(b64);
   return Uint8Array.from(bin, (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;
@@ -72,6 +77,23 @@ export async function storePassphrase(passphrase: string): Promise<void> {
 
 export async function clearPassphrase(): Promise<void> {
   await del(PASSPHRASE_KEY, encStore);
+}
+
+// ---------------------------------------------------------------------------
+// Backup envelope
+// ---------------------------------------------------------------------------
+
+export function buildBackupEnvelope(data: { expenses: Expense[]; categories: Category[] }): string {
+  return JSON.stringify(
+    {
+      exportDate: new Date().toISOString(),
+      version: "1.0",
+      expenses: data.expenses,
+      categories: data.categories,
+    },
+    null,
+    2,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -158,12 +180,28 @@ export function isEncryptedFile(content: string): boolean {
   }
 }
 
-function toDateKey(value: Date): string {
-  return format(value, "yyyy-MM-dd");
+export async function decryptWithStoredPassphrase(text: string): Promise<string | null> {
+  const stored = await getStoredPassphrase();
+  if (!stored) return null;
+  try {
+    return await decryptData(text, stored);
+  } catch {
+    return null;
+  }
 }
 
-function isReminderSchedule(value: unknown): value is BackupReminderSchedule {
-  return value === "never" || value === "daily" || value === "weekly" || value === "monthly";
+export async function createEncryptedBackupFile(data: {
+  expenses: Expense[];
+  categories: Category[];
+}): Promise<{ filename: string; encrypted: string }> {
+  const dateToken = format(new Date(), "yyyy-MM-dd");
+  const filename = `extrack-backup-${dateToken}.extrack`;
+  const encrypted = await encryptData(buildBackupEnvelope(data));
+  return { filename, encrypted };
+}
+
+function toDateKey(value: Date): string {
+  return format(value, "yyyy-MM-dd");
 }
 
 export function getBackupReminderPreferences(): BackupReminderPreferences {
@@ -179,6 +217,12 @@ export function getBackupReminderPreferences(): BackupReminderPreferences {
   };
 }
 
+const OVERDUE_DAYS: Record<"daily" | "weekly" | "monthly", number> = {
+  daily: 1,
+  weekly: 7,
+  monthly: 30,
+};
+
 export function shouldShowBackupReminderBanner(
   preferences: BackupReminderPreferences,
   now: Date = new Date(),
@@ -193,23 +237,9 @@ export function shouldShowBackupReminderBanner(
 
   if (daysSinceLastBackup === null) return true;
 
-  const isOverdue =
-    (preferences.reminderSchedule === "daily" && daysSinceLastBackup >= 1) ||
-    (preferences.reminderSchedule === "weekly" && daysSinceLastBackup >= 7) ||
-    (preferences.reminderSchedule === "monthly" && daysSinceLastBackup >= 30);
+  if (daysSinceLastBackup < OVERDUE_DAYS[preferences.reminderSchedule]) return false;
 
-  if (!isOverdue) return false;
-
-  switch (preferences.reminderSchedule) {
-    case "daily":
-      return true;
-    case "weekly":
-      return now.getDay() === WEEKLY_REMINDER_DAY;
-    case "monthly":
-      return now.getDate() === MONTHLY_REMINDER_DAY;
-    default:
-      return false;
-  }
+  return isTodayReminderDay(preferences.reminderSchedule, now);
 }
 
 export function isTodayReminderDay(

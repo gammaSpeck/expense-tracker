@@ -1,14 +1,10 @@
 import { BottomNav, SidebarNav } from "./Navigation";
 
-import { useIsMobile } from "@/hooks/use-mobile";
-
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const isMobile = useIsMobile();
-
   return (
     <div className="min-h-screen bg-background flex">
       <SidebarNav />
@@ -25,8 +21,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* Main content */}
         <main className="flex-1 pb-20 lg:pb-6">{children}</main>
 
-        {/* Bottom navigation - mobile only */}
-        {isMobile && <BottomNav />}
+        {/* Bottom navigation - hidden at lg via CSS */}
+        <BottomNav />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import Dexie, { Table } from "dexie";
 import { Expense, Category, TagMetadata } from "@/types/expense";
-import { v4 as uuidv4 } from "uuid";
+import { userPreferences } from "@/db/userPreferences";
 
 // Category colors palette
 export const CATEGORY_COLORS = [
@@ -84,21 +84,63 @@ class ExpenseDatabase extends Dexie {
 
 export const db = new ExpenseDatabase();
 
-// Initialize database with default categories
-export async function initializeDatabase(): Promise<void> {
-  const categoryCount = await db.categories.count();
+export async function requestPersistentStorage(): Promise<boolean> {
+  if (!navigator.storage?.persist) return false;
+  if (await navigator.storage.persisted()) return true;
+  return navigator.storage.persist();
+}
 
+// Preserves installedAt, bumps lastSeenAt, and records the current expense
+// count — the signal initializeDatabase() compares against to detect a wipe.
+export function touchInstallMarker(expenseCount: number): void {
+  const marker = userPreferences.getInstallMarker();
+  const now = new Date().toISOString();
+  userPreferences.setInstallMarker({
+    installedAt: marker?.installedAt ?? now,
+    lastSeenAt: now,
+    lastSeenExpenseCount: expenseCount,
+  });
+}
+
+// Initialize database with default categories
+export type StartupState =
+  | { status: "ready" }
+  | { status: "seeded" }
+  | { status: "data-loss"; lastSeenExpenseCount: number; installedAt: string; lastSeenAt: string };
+
+export async function initializeDatabase(): Promise<StartupState> {
+  const [expenseCount, categoryCount] = await Promise.all([
+    db.expenses.count(),
+    db.categories.count(),
+  ]);
+  const marker = userPreferences.getInstallMarker();
+
+  // Prior install recorded expenses and the table is now empty: do not seed over the evidence.
+  if (marker && marker.lastSeenExpenseCount > 0 && expenseCount === 0) {
+    return {
+      status: "data-loss",
+      lastSeenExpenseCount: marker.lastSeenExpenseCount,
+      installedAt: marker.installedAt,
+      lastSeenAt: marker.lastSeenAt,
+    };
+  }
+
+  const now = new Date().toISOString();
+  let seeded = false;
   if (categoryCount === 0) {
-    const now = new Date().toISOString();
     const categories: Category[] = DEFAULT_CATEGORIES.map((cat) => ({
       ...cat,
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       createdAt: now,
     }));
 
     await db.categories.bulkAdd(categories);
-    console.log("Default categories initialized");
+    seeded = true;
   }
+
+  touchInstallMarker(expenseCount);
+
+  return { status: seeded ? "seeded" : "ready" };
 }
 
 // Expense CRUD operations
@@ -106,7 +148,7 @@ export async function addExpense(
   expense: Omit<Expense, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
   const now = new Date().toISOString();
-  const id = uuidv4();
+  const id = crypto.randomUUID();
 
   const newExpense: Expense = {
     ...expense,
@@ -116,6 +158,8 @@ export async function addExpense(
   };
 
   await db.expenses.add(newExpense);
+
+  touchInstallMarker(await db.expenses.count());
 
   // Update tag metadata
   for (const tag of expense.tags) {
@@ -142,10 +186,7 @@ export async function updateExpense(
 
 export async function deleteExpense(id: string): Promise<void> {
   await db.expenses.delete(id);
-}
-
-export async function getExpense(id: string): Promise<Expense | undefined> {
-  return db.expenses.get(id);
+  touchInstallMarker(await db.expenses.count());
 }
 
 // Returns all expenses ordered by date and time (descending)
@@ -154,13 +195,9 @@ export async function getAllExpenses(): Promise<Expense[]> {
   return db.expenses.orderBy("[date+time]").reverse().toArray();
 }
 
-export async function getExpensesByCategory(categoryId: string): Promise<Expense[]> {
-  return db.expenses.where("category").equals(categoryId).toArray();
-}
-
 // Category CRUD operations
 export async function addCategory(category: Omit<Category, "id" | "createdAt">): Promise<string> {
-  const id = uuidv4();
+  const id = crypto.randomUUID();
   const now = new Date().toISOString();
 
   await db.categories.add({
@@ -198,10 +235,6 @@ export async function deleteCategory(id: string, moveToCategory?: string): Promi
   }
 
   await db.categories.delete(id);
-}
-
-export async function getCategory(id: string): Promise<Category | undefined> {
-  return db.categories.get(id);
 }
 
 export async function getAllCategories(): Promise<Category[]> {
@@ -290,18 +323,6 @@ export async function renameTag(oldTag: string, newTag: string): Promise<void> {
   }
 }
 
-// Get expenses count per category
-export async function getCategoryExpenseCounts(): Promise<Record<string, number>> {
-  const expenses = await db.expenses.toArray();
-  const counts: Record<string, number> = {};
-
-  for (const expense of expenses) {
-    counts[expense.category] = (counts[expense.category] || 0) + 1;
-  }
-
-  return counts;
-}
-
 // Export all data
 export async function exportAllData(): Promise<{
   expenses: Expense[];
@@ -346,4 +367,6 @@ export async function importData(data: {
 
     await db.tagMetadata.bulkAdd(tagMetadata);
   });
+
+  touchInstallMarker(data.expenses.length);
 }
