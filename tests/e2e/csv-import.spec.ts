@@ -13,7 +13,7 @@ test.describe("csv-import", () => {
     );
 
     await expect(page.getByText("Detected: MoneyManager (Realbyte)")).toBeVisible();
-    await page.getByRole("button", { name: "MoneyManager (Realbyte)" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
     await expect(page.getByText("2024-06-01 10:00")).toBeVisible();
 
     await page.getByRole("button", { name: "Next" }).click();
@@ -50,7 +50,7 @@ test.describe("csv-import", () => {
     );
 
     await expect(page.getByText("Detected: Money Manager & Expense tracker (Amit Mohan)")).toBeVisible();
-    await page.getByRole("button", { name: "Money Manager & Expense tracker (Amit Mohan)" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Next" }).click();
@@ -88,7 +88,7 @@ test.describe("csv-import", () => {
     );
 
     await expect(page.getByText("Detected: MoneyManager (Realbyte)")).toBeVisible();
-    await page.getByRole("button", { name: "MoneyManager (Realbyte)" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Next" }).click();
@@ -117,7 +117,7 @@ test.describe("csv-import", () => {
     );
 
     await expect(page.getByText("Detected: MoneyManager (Realbyte)")).toBeVisible();
-    await page.getByRole("button", { name: "MoneyManager (Realbyte)" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByText("Advanced Rules").click();
@@ -133,7 +133,7 @@ test.describe("csv-import", () => {
     );
 
     await expect(page.getByText("Detected: MoneyManager (Realbyte)")).toBeVisible();
-    await page.getByRole("button", { name: "MoneyManager (Realbyte)" }).click();
+    await page.getByRole("button", { name: "Next" }).click();
     await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByText("Advanced Rules").click();

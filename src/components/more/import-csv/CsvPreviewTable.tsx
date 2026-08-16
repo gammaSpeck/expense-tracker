@@ -13,15 +13,15 @@ interface CsvPreviewTableProps {
 export function CsvPreviewTable({ rows }: CsvPreviewTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="w-full text-xs">
+      <table className="min-w-[640px] w-full text-xs">
         <thead>
           <tr className="text-left text-muted-foreground">
-            <th className="pr-2 py-1">Date</th>
-            <th className="pr-2 py-1">Time</th>
-            <th className="pr-2 py-1">Amount</th>
-            <th className="pr-2 py-1">Category</th>
-            <th className="pr-2 py-1">Description</th>
-            <th className="pr-2 py-1">Tags</th>
+            <th className="pr-2 py-1 whitespace-nowrap">Date</th>
+            <th className="pr-2 py-1 whitespace-nowrap">Time</th>
+            <th className="pr-2 py-1 whitespace-nowrap">Amount</th>
+            <th className="pr-2 py-1 whitespace-nowrap min-w-[120px]">Category</th>
+            <th className="pr-2 py-1 min-w-[200px]">Description</th>
+            <th className="pr-2 py-1 whitespace-nowrap min-w-[140px]">Tags</th>
           </tr>
         </thead>
         <tbody>
@@ -34,12 +34,12 @@ export function CsvPreviewTable({ rows }: CsvPreviewTableProps) {
           ) : (
             rows.map(({ draft, categoryName }, i) => (
               <tr key={i} data-testid="csv-preview-row" className="border-t border-border/50">
-                <td className="pr-2 py-1">{draft.date}</td>
-                <td className="pr-2 py-1">{draft.time}</td>
-                <td className="pr-2 py-1">{draft.value}</td>
-                <td className="pr-2 py-1">{categoryName}</td>
-                <td className="pr-2 py-1 max-w-[120px] truncate">{draft.description ?? "—"}</td>
-                <td className="pr-2 py-1">{draft.tags.length > 0 ? draft.tags.join(", ") : "—"}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">{draft.date}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">{draft.time}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">{draft.value}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">{categoryName}</td>
+                <td className="pr-2 py-1 max-w-[240px] truncate">{draft.description ?? "—"}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">{draft.tags.length > 0 ? draft.tags.join(", ") : "—"}</td>
               </tr>
             ))
           )}

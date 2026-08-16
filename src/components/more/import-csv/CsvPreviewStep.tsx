@@ -6,7 +6,7 @@ import { CsvPreviewTable, type PreviewRow } from "@/components/more/import-csv/C
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CategoryRule, DraftExpense } from "@/types/csvImport";
 
-const PREVIEW_ROW_COUNT = 50;
+const PREVIEW_ROW_COUNT = 20;
 const NO_DRAFTS: DraftExpense[] = [];
 
 function lookupName(nameById: Map<string, string>, id: string): string {

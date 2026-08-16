@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, CheckCircle2 } from "lucide-react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SOURCE_PRESETS, findPreset } from "@/lib/csvImportPresets";
 import { CsvFileSummary } from "@/components/more/import-csv/CsvFileSummary";
@@ -22,12 +22,31 @@ function DropzoneCopy({ parsed }: { parsed: { fileName: string } | null }) {
   );
 }
 
+function AutoDetectHint({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+      <span>We auto-detect exports from:</span>
+      {SOURCE_PRESETS.map((preset) => (
+        <span
+          key={preset.id}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
+        >
+          <img src={preset.icon} alt="" className="h-3.5 w-3.5 rounded-sm" />
+          {preset.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 interface CsvUploadStepProps {
   csv: CsvImportState;
 }
 
 export function CsvUploadStep({ csv }: CsvUploadStepProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const detectedPresetId = csv.detectedPresetId;
 
   function onFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -64,41 +83,26 @@ export function CsvUploadStep({ csv }: CsvUploadStepProps) {
         <DropzoneCopy parsed={csv.parsed} />
       </label>
 
-      <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
-        <p className="text-sm font-medium">Import from a specific app</p>
-        <p className="text-xs text-muted-foreground">
-          {csv.detectedPresetId
-            ? "We detected a match below — confirm it, or choose a different source."
-            : "Choose the app this file came from, or map columns manually below."}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {SOURCE_PRESETS.map((preset) => {
-            const isDetected = preset.id === csv.detectedPresetId;
-            return (
-              <Button
-                key={preset.id}
-                type="button"
-                variant={isDetected ? "default" : "outline"}
-                size="sm"
-                disabled={!csv.parsed}
-                onClick={() => {
-                  csv.applyPreset(preset.id);
-                  csv.goToStep("mapping");
-                }}
-              >
-                <img src={preset.icon} alt="" className="h-4 w-4 rounded-sm" />
-                {preset.label}
-                {isDetected && <CheckCircle2 className="h-3.5 w-3.5" />}
-              </Button>
-            );
-          })}
-          <Button type="button" variant="ghost" size="sm" disabled={!csv.parsed} onClick={() => csv.goToStep("mapping")}>
-            Set up manually
-          </Button>
-        </div>
-      </div>
+      <AutoDetectHint visible={!csv.parsed} />
 
-      {csv.parsed && <CsvFileSummary parsed={csv.parsed} detectedPreset={findPreset(csv.detectedPresetId)} />}
+      {csv.parsed && <CsvFileSummary parsed={csv.parsed} detectedPreset={findPreset(detectedPresetId)} />}
+
+      <div className="flex justify-between">
+        <Button type="button" variant="ghost" disabled={!csv.parsed} onClick={() => csv.goToStep("mapping")}>
+          Set up manually
+        </Button>
+        {detectedPresetId && (
+          <Button
+            type="button"
+            onClick={() => {
+              csv.applyPreset(detectedPresetId);
+              csv.goToStep("mapping");
+            }}
+          >
+            Next
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
