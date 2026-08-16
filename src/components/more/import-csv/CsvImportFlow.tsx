@@ -27,6 +27,18 @@ const STEP_BODY: Record<ActiveStep, (csv: CsvImportState) => JSX.Element> = {
   preview: (csv) => <CsvPreviewStep csv={csv} />,
 };
 
+/** The upload step renders its own file summary, so the shell suppresses it there. */
+function CsvFlowFileSummary({ csv }: { csv: CsvImportState }) {
+  if (csv.step === "upload" || !csv.parsed) return null;
+  return (
+    <CsvFileSummary
+      parsed={csv.parsed}
+      detectedPreset={findPreset(csv.detectedPresetId)}
+      onChangeSource={() => csv.goToStep("upload")}
+    />
+  );
+}
+
 interface CsvImportFlowProps {
   csv: CsvImportState;
 }
@@ -47,13 +59,7 @@ export function CsvImportFlow({ csv }: CsvImportFlowProps) {
     <LazyMotion features={domAnimation}>
       <m.div key={csv.step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         {STEP_LABEL[csv.step] && <p className="text-xs text-muted-foreground">{STEP_LABEL[csv.step]}</p>}
-        {csv.step !== "upload" && csv.parsed && (
-          <CsvFileSummary
-            parsed={csv.parsed}
-            detectedPreset={findPreset(csv.detectedPresetId)}
-            onChangeSource={() => csv.goToStep("upload")}
-          />
-        )}
+        <CsvFlowFileSummary csv={csv} />
         {STEP_BODY[csv.step](csv)}
       </m.div>
     </LazyMotion>

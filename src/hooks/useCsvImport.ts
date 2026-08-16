@@ -89,11 +89,8 @@ export function useCsvImport(): CsvImportState {
   }, [categories, defaultCategoryId]);
 
   const plan = useMemo(
-    () =>
-      parsed
-        ? buildCsvImportPlan(parsed, { mapping, categoryRules, defaultCategoryId, ignoreRules })
-        : null,
-    [parsed, mapping, categoryRules, defaultCategoryId, ignoreRules],
+    () => (parsed ? buildCsvImportPlan(parsed, { mapping, ignoreRules }) : null),
+    [parsed, mapping, ignoreRules],
   );
 
   function reset() {

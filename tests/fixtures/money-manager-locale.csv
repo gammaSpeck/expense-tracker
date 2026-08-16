@@ -1,0 +1,10 @@
+Date,Account,Category,Subcategory,Note,INR,Income/Expense,Description,Amount,Currency,Account
+01/03/2025 08:00:00,HDFC,Food,Eating out,Plain,60,Expense,Plain decimal,60.0,INR,60
+02/03/2025 08:00:00,HDFC,Food,Eating out,US,1234.56,Expense,US grouping,"1,234.56",INR,1234.56
+03/03/2025 08:00:00,HDFC,Food,Eating out,EU,1234.56,Expense,EU grouping,"1.234,56",INR,1234.56
+04/03/2025 08:00:00,HDFC,Food,Eating out,Space,1234.56,Expense,Space grouping,"1 234,56",INR,1234.56
+05/03/2025 08:00:00,HDFC,Food,Eating out,Symbol,2500,Expense,Currency symbol,"₹2,500",INR,2500
+06/03/2025 08:00:00,HDFC,Food,Eating out,Negative,45.5,Expense,Negative sign,-45.50,INR,45.5
+07/03/2025 08:00:00,HDFC,Food,Eating out,Zero,0,Expense,Zero amount,0,INR,0
+08/03/2025 08:00:00,HDFC,Food,Eating out,Junk,abc,Expense,Unparseable,abc,INR,abc
+09/03/2025 08:00:00,HDFC,Food,Eating out,Empty,,Expense,Empty amount,,INR,

@@ -14,24 +14,27 @@ import type { Category } from "@/types/expense";
 const USE_DEFAULT = "__default__";
 const CREATE = "__create__";
 
-function uniqueColumnValues(rows: string[][], columnIndex: number | null): string[] {
-  if (columnIndex === null) return [];
-  const values = rows.map((row) => (row[columnIndex] ?? "").trim()).filter(Boolean);
-  return [...new Set(values)];
-}
-
 interface ColumnValueCount {
   value: string;
   count: number;
 }
 
-function columnValueCounts(rows: string[][], columnIndex: number): ColumnValueCount[] {
+function columnValueCounts(rows: string[][], columnIndex: number | null): ColumnValueCount[] {
+  if (columnIndex === null) return [];
   const values = rows.map((row) => (row[columnIndex] ?? "").trim()).filter(Boolean);
   const counts = new Map<string, number>();
   for (const value of values) {
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   return [...counts.entries()].map(([value, count]) => ({ value, count }));
+}
+
+function uniqueColumnValues(rows: string[][], columnIndex: number | null): string[] {
+  return columnValueCounts(rows, columnIndex).map((c) => c.value);
+}
+
+function columnLabel(headers: string[], columnIndex: number | null, fallback: string): string {
+  return columnIndex === null ? fallback : headers[columnIndex];
 }
 
 function CategoryOptionLabel({ category }: { category: Category }) {
@@ -115,8 +118,8 @@ export function CsvCategoryStep({ csv }: CsvCategoryStepProps) {
   const headers = csv.parsed.headers;
   const rows = csv.parsed.rows;
   const sourceValues = uniqueColumnValues(rows, csv.mapping.category);
-  const dateColLabel = csv.mapping.dateTime === null ? "Date" : headers[csv.mapping.dateTime];
-  const amountColLabel = csv.mapping.amount === null ? "Amount" : headers[csv.mapping.amount];
+  const dateColLabel = columnLabel(headers, csv.mapping.dateTime, "Date");
+  const amountColLabel = columnLabel(headers, csv.mapping.amount, "Amount");
 
   function setRule(sourceValue: string, rule: CategoryRule | undefined) {
     const next = { ...categoryRules };

@@ -79,6 +79,7 @@
       },
       {
         "files": ["src/hooks/useCategoryDeletion.ts"],
+        "functions": ["handleDelete", "handleDeleteClick"],
         "maxCrap": 45,
         "reason": "Move-vs-cascade delete branch plus the 'Others' category guard; necessary business logic, not accidental complexity."
       },
@@ -125,40 +126,10 @@
         "reason": "D6's skip-vs-error split (empty cell -> silent skip, unparseable -> data error) for both amount and date; necessary row-classification logic, not accidental complexity."
       },
       {
-        "files": ["src/lib/csvImportPlan.ts"],
-        "functions": ["parseAmount"],
-        "maxCrap": 45,
-        "reason": "Locale-ambiguous thousands/decimal separator detection, verified against 15 real-world cases from the two migration source files; necessary business logic, not accidental complexity."
-      },
-      {
         "files": ["src/components/more/import-csv/CsvPreviewStep.tsx"],
         "functions": ["CsvPreviewStep"],
         "maxCrap": 100,
         "reason": "Summary-card grid, error-list disclosure, empty-state branch, and search-input wiring in the CSV import preview; coverage-blind CRAP on presentational composition."
-      },
-      {
-        "files": ["src/components/more/import-csv/CsvCategoryStep.tsx"],
-        "functions": ["CsvCategoryStep"],
-        "maxCrap": 50,
-        "reason": "Per-value category-rule select rendering plus the advanced-rules disclosure and ignore-rule editor; coverage-blind CRAP on presentational composition."
-      },
-      {
-        "files": ["src/components/more/import-csv/CsvMappingStep.tsx"],
-        "functions": ["CsvMappingStep"],
-        "maxCrap": 35,
-        "reason": "Per-field sample chip, inline validation message, and tag-adder chip rendering; coverage-blind CRAP, not real complexity."
-      },
-      {
-        "files": ["src/components/more/import-csv/CsvUploadStep.tsx"],
-        "functions": ["CsvUploadStep"],
-        "maxCrap": 35,
-        "reason": "Dropzone drag state, replace-vs-first-upload copy, and per-preset detected/disabled button rendering; coverage-blind CRAP on presentational composition."
-      },
-      {
-        "files": ["src/components/more/import-csv/CsvImportFlow.tsx"],
-        "functions": ["CsvImportFlow"],
-        "maxCrap": 35,
-        "reason": "Step-label lookup plus conditional file-summary and done-branch rendering; coverage-blind CRAP on a thin routing shell."
       },
       {
         "files": ["src/hooks/useCsvImport.ts"],

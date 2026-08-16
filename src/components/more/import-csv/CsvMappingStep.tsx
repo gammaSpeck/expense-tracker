@@ -72,6 +72,18 @@ function FieldError({ message }: { message: string | undefined }) {
   );
 }
 
+function DateParsePreview({ dateResult }: { dateResult: { date: string; time: string } | null }) {
+  return (
+    <span
+      className={`inline-block text-xs rounded px-2 py-0.5 ${
+        dateResult ? "bg-muted text-muted-foreground" : "bg-destructive/10 text-destructive"
+      }`}
+    >
+      {dateResult ? `${dateResult.date} ${dateResult.time}` : "Could not parse"}
+    </span>
+  );
+}
+
 interface CsvMappingStepProps {
   csv: CsvImportState;
 }
@@ -130,13 +142,7 @@ export function CsvMappingStep({ csv }: CsvMappingStepProps) {
             onChange={(e) => updateMapping({ dateFormat: e.target.value })}
             placeholder="dd/MM/yyyy HH:mm:ss"
           />
-          <span
-            className={`inline-block text-xs rounded px-2 py-0.5 ${
-              dateResult ? "bg-muted text-muted-foreground" : "bg-destructive/10 text-destructive"
-            }`}
-          >
-            {dateResult ? `${dateResult.date} ${dateResult.time}` : "Could not parse"}
-          </span>
+          <DateParsePreview dateResult={dateResult} />
           <FieldError message={errors.dateTime} />
           <FieldError message={errors.dateFormat} />
         </div>

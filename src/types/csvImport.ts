@@ -19,8 +19,6 @@ export interface IgnoreRule {
 
 export interface CsvImportConfig {
   mapping: CsvColumnMapping;
-  categoryRules: Record<string, CategoryRule>;
-  defaultCategoryId: string;
   ignoreRules: IgnoreRule[];
 }
 

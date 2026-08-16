@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import type { ParsedCsv } from "@/types/csvImport";
 
-export const MAX_CSV_ROWS = 200_000;
+const MAX_CSV_ROWS = 200_000;
 
 // "Account","Account" -> "Account","Account (2)" so the mapping dropdown stays unambiguous.
 function dedupeHeaders(raw: string[]): string[] {

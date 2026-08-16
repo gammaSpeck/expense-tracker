@@ -5,11 +5,11 @@ import { SOURCE_PRESETS, findPreset } from "@/lib/csvImportPresets";
 import { CsvFileSummary } from "@/components/more/import-csv/CsvFileSummary";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 
-function DropzoneCopy({ fileName }: { fileName: string | null }) {
-  if (fileName) {
+function DropzoneCopy({ parsed }: { parsed: { fileName: string } | null }) {
+  if (parsed) {
     return (
       <>
-        <p className="text-sm font-medium">Drop a different CSV file to replace {fileName}</p>
+        <p className="text-sm font-medium">Drop a different CSV file to replace {parsed.fileName}</p>
         <p className="text-xs text-muted-foreground mt-1">This clears the current mapping and re-detects the source</p>
       </>
     );
@@ -61,7 +61,7 @@ export function CsvUploadStep({ csv }: CsvUploadStepProps) {
           onChange={onFileSelect}
         />
         <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-        <DropzoneCopy fileName={csv.parsed ? csv.parsed.fileName : null} />
+        <DropzoneCopy parsed={csv.parsed} />
       </label>
 
       <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">

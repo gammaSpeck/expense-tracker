@@ -14,15 +14,17 @@ function isIgnored(row: string[], rules: IgnoreRule[]): boolean {
 
 // A separator followed by 1-2 digits is the decimal point; anything else is a
 // thousands separator. Handles 1,234.56 and 1.234,56 without guessing a locale.
-function parseAmount(raw: string): number | null {
-  const s = raw.replace(/[^\d.,-]/g, "");
+function normalizeAmount(s: string): string {
   const lastSep = Math.max(s.lastIndexOf("."), s.lastIndexOf(","));
   const decimals = lastSep === -1 ? 0 : s.length - lastSep - 1;
-  const normalized =
-    decimals >= 1 && decimals <= 2
-      ? s.slice(0, lastSep).replace(/[.,]/g, "") + "." + s.slice(lastSep + 1)
-      : s.replace(/[.,]/g, "");
-  const n = Math.abs(Number(normalized));
+  const isDecimalPoint = decimals >= 1 && decimals <= 2;
+  return isDecimalPoint
+    ? s.slice(0, lastSep).replace(/[.,]/g, "") + "." + s.slice(lastSep + 1)
+    : s.replace(/[.,]/g, "");
+}
+
+function parseAmount(raw: string): number | null {
+  const n = Math.abs(Number(normalizeAmount(raw.replace(/[^\d.,-]/g, ""))));
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
