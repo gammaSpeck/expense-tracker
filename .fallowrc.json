@@ -126,28 +126,10 @@
         "reason": "D6's skip-vs-error split (empty cell -> silent skip, unparseable -> data error) for both amount and date; necessary row-classification logic, not accidental complexity."
       },
       {
-        "files": ["src/components/more/import-csv/CsvCategoryStep.tsx"],
-        "functions": ["IgnoreRuleValueField"],
-        "maxCrap": 35,
-        "reason": "Excluded-column guard plus the high-cardinality overflow guard, each falling back to plain text entry; necessary safety logic, not accidental complexity."
-      },
-      {
-        "files": ["src/components/more/import-csv/CsvPreviewStep.tsx"],
-        "functions": ["CsvPreviewStep"],
-        "maxCrap": 100,
-        "reason": "Summary-card grid, error-list disclosure, empty-state branch, and search-input wiring in the CSV import preview; coverage-blind CRAP on presentational composition."
-      },
-      {
         "files": ["src/hooks/useCsvImport.ts"],
-        "functions": ["handleFileSelect"],
+        "functions": ["validateStepTransition"],
         "maxCrap": 35,
-        "reason": "Re-select-resets-state guard plus parse-error / detected-preset / undetected branches; necessary import-flow logic."
-      },
-      {
-        "files": ["src/hooks/useCsvImport.ts"],
-        "functions": ["goToStep"],
-        "maxCrap": 35,
-        "reason": "Per-target mapping/default-category validation gate before advancing the wizard; necessary step-transition logic."
+        "reason": "Per-target mapping/default-category validation gate before advancing the wizard; necessary step-transition logic (extracted from goToStep so the hook body stays under the unit-size ceiling)."
       },
       {
         "files": ["src/db/expenseTrackerDb.ts"],

@@ -67,7 +67,66 @@ function presetIgnoreRules(preset: SourcePreset, parsed: ParsedCsv | null): Igno
   return values.filter((value) => presentValues.has(value)).map((value) => ({ columnIndex, value }));
 }
 
-export function useCsvImport(): CsvImportState {
+function buildPresetCategoryRules(preset: SourcePreset, categories: Category[]): Record<string, CategoryRule> {
+  const rules: Record<string, CategoryRule> = {};
+  for (const [sourceValue, categoryName] of Object.entries(preset.categoryNames)) {
+    const existing = categories.find((c) => c.name === categoryName);
+    rules[sourceValue] = existing
+      ? { kind: "existing", categoryId: existing.id }
+      : { kind: "create", name: categoryName };
+  }
+  return rules;
+}
+
+function validateStepTransition(
+  target: CsvImportStep,
+  mapping: CsvColumnMapping,
+  defaultCategoryId: string,
+): Partial<Record<CsvMappingErrorKey, string>> | null {
+  if (target === "categories") {
+    const errors = mappingValidationErrors(mapping);
+    if (Object.keys(errors).length > 0) return errors;
+  }
+  if (target === "preview" && defaultCategoryId === "") {
+    return { defaultCategory: "Default category is required" };
+  }
+  return null;
+}
+
+async function parseAndDetect(
+  file: File,
+): Promise<{ result: ParsedCsv; presetId: string | null } | null> {
+  try {
+    const result = await parseCsvFile(file);
+    const preset = detectPreset(result.headers);
+    return { result, presetId: preset ? preset.id : null };
+  } catch (err) {
+    toast.error(err instanceof Error ? err.message : "Could not read this file as CSV");
+    captureError("csv_import_failed", err, { stage: "parse" });
+    return null;
+  }
+}
+
+async function performImport(
+  plan: CsvImportPlan,
+  categoryRules: Record<string, CategoryRule>,
+  defaultCategoryId: string,
+): Promise<number | null> {
+  try {
+    const count = await importCsvExpenses(plan.drafts, categoryRules, defaultCategoryId);
+    capture("csv_import_succeeded", { expenseCount: count });
+    toast.success(`Imported ${count.toLocaleString()} expenses`);
+    return count;
+  } catch (err) {
+    toast.error("Import failed");
+    captureError("csv_import_failed", err, { stage: "write" });
+    return null;
+  }
+}
+
+/** All wizard state plus the derived plan; no mutation logic beyond the "default category"
+ *  auto-fill effect. Action functions live in useCsvImport, which composes this. */
+function useCsvImportFormState() {
   const categories = useCategories() ?? [];
   const [step, setStep] = useState<CsvImportStep>("nudge");
   const [parsed, setParsed] = useState<ParsedCsv | null>(null);
@@ -94,103 +153,112 @@ export function useCsvImport(): CsvImportState {
     [parsed, mapping, ignoreRules],
   );
 
+  return {
+    categories,
+    step, setStep,
+    parsed, setParsed,
+    mapping, setMapping,
+    categoryRules, setCategoryRules,
+    defaultCategoryId, setDefaultCategoryId,
+    ignoreRules, setIgnoreRules,
+    isImporting, setIsImporting, isImportingRef,
+    importedCount, setImportedCount,
+    mappingErrors, setMappingErrors,
+    detectedPresetId, setDetectedPresetId,
+    plan,
+  };
+}
+
+function resetImportState(state: ReturnType<typeof useCsvImportFormState>) {
+  state.setStep("upload");
+  state.setParsed(null);
+  state.setMapping(EMPTY_MAPPING);
+  state.setCategoryRules({});
+  state.setDefaultCategoryId("");
+  state.setIgnoreRules([]);
+  state.setImportedCount(0);
+  state.setMappingErrors({});
+  state.setDetectedPresetId(null);
+}
+
+function toCsvImportState(
+  state: ReturnType<typeof useCsvImportFormState>,
+  actions: {
+    handleFileSelect: (file: File) => Promise<void>;
+    applyPreset: (presetId: string) => void;
+    goToStep: (target: CsvImportStep) => void;
+    runImport: () => Promise<void>;
+    reset: () => void;
+  },
+): CsvImportState {
+  return {
+    step: state.step,
+    parsed: state.parsed,
+    mapping: state.mapping,
+    setMapping: state.setMapping,
+    categoryRules: state.categoryRules,
+    setCategoryRules: state.setCategoryRules,
+    defaultCategoryId: state.defaultCategoryId,
+    setDefaultCategoryId: state.setDefaultCategoryId,
+    ignoreRules: state.ignoreRules,
+    setIgnoreRules: state.setIgnoreRules,
+    isImporting: state.isImporting,
+    importedCount: state.importedCount,
+    mappingErrors: state.mappingErrors,
+    detectedPresetId: state.detectedPresetId,
+    categories: state.categories,
+    plan: state.plan,
+    ...actions,
+  };
+}
+
+export function useCsvImport(): CsvImportState {
+  const state = useCsvImportFormState();
+  const { categories, parsed, mapping, categoryRules, defaultCategoryId, plan, isImportingRef } = state;
+
   function reset() {
-    setStep("upload");
-    setParsed(null);
-    setMapping(EMPTY_MAPPING);
-    setCategoryRules({});
-    setDefaultCategoryId("");
-    setIgnoreRules([]);
-    setImportedCount(0);
-    setMappingErrors({});
-    setDetectedPresetId(null);
+    resetImportState(state);
   }
 
   function applyPreset(presetId: string) {
     const preset = SOURCE_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
-
-    setMapping(preset.mapping);
-    const rules: Record<string, CategoryRule> = {};
-    for (const [sourceValue, categoryName] of Object.entries(preset.categoryNames)) {
-      const existing = categories.find((c) => c.name === categoryName);
-      rules[sourceValue] = existing ? { kind: "existing", categoryId: existing.id } : { kind: "create", name: categoryName };
-    }
-    setCategoryRules(rules);
-    setIgnoreRules(presetIgnoreRules(preset, parsed));
+    state.setMapping(preset.mapping);
+    state.setCategoryRules(buildPresetCategoryRules(preset, categories));
+    state.setIgnoreRules(presetIgnoreRules(preset, parsed));
   }
 
   async function handleFileSelect(file: File) {
     if (parsed) reset();
-
-    try {
-      const result = await parseCsvFile(file);
-      setParsed(result);
-      const preset = detectPreset(result.headers);
-      setDetectedPresetId(preset ? preset.id : null);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not read this file as CSV");
-      captureError("csv_import_failed", err, { stage: "parse" });
-    }
+    const detected = await parseAndDetect(file);
+    if (!detected) return;
+    state.setParsed(detected.result);
+    state.setDetectedPresetId(detected.presetId);
   }
 
   function goToStep(target: CsvImportStep) {
-    if (target === "categories") {
-      const errors = mappingValidationErrors(mapping);
-      if (Object.keys(errors).length > 0) {
-        setMappingErrors(errors);
-        return;
-      }
-    }
-    if (target === "preview" && defaultCategoryId === "") {
-      setMappingErrors({ defaultCategory: "Default category is required" });
+    const errors = validateStepTransition(target, mapping, defaultCategoryId);
+    if (errors) {
+      state.setMappingErrors(errors);
       return;
     }
-    setMappingErrors({});
-    setStep(target);
+    state.setMappingErrors({});
+    state.setStep(target);
   }
 
   async function runImport() {
     if (!plan || plan.drafts.length === 0) return;
     if (isImportingRef.current) return;
     isImportingRef.current = true;
-    setIsImporting(true);
-    try {
-      const count = await importCsvExpenses(plan.drafts, categoryRules, defaultCategoryId);
-      setImportedCount(count);
-      setStep("done");
-      capture("csv_import_succeeded", { expenseCount: count });
-      toast.success(`Imported ${count.toLocaleString()} expenses`);
-    } catch (err) {
-      toast.error("Import failed");
-      captureError("csv_import_failed", err, { stage: "write" });
-    } finally {
-      isImportingRef.current = false;
-      setIsImporting(false);
+    state.setIsImporting(true);
+    const count = await performImport(plan, categoryRules, defaultCategoryId);
+    if (count !== null) {
+      state.setImportedCount(count);
+      state.setStep("done");
     }
+    isImportingRef.current = false;
+    state.setIsImporting(false);
   }
 
-  return {
-    step,
-    parsed,
-    mapping,
-    setMapping,
-    categoryRules,
-    setCategoryRules,
-    defaultCategoryId,
-    setDefaultCategoryId,
-    ignoreRules,
-    setIgnoreRules,
-    isImporting,
-    importedCount,
-    mappingErrors,
-    detectedPresetId,
-    categories,
-    plan,
-    handleFileSelect,
-    applyPreset,
-    goToStep,
-    runImport,
-    reset,
-  };
+  return toCsvImportState(state, { handleFileSelect, applyPreset, goToStep, runImport, reset });
 }

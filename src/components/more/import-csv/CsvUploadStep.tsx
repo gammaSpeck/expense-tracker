@@ -40,6 +40,51 @@ function AutoDetectHint({ visible }: { visible: boolean }) {
   );
 }
 
+function Dropzone({
+  isDragging,
+  onDragStateChange,
+  onFileSelect,
+  parsed,
+}: {
+  isDragging: boolean;
+  onDragStateChange: (dragging: boolean) => void;
+  onFileSelect: (file: File) => void;
+  parsed: { fileName: string } | null;
+}) {
+  return (
+    <label
+      className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors block ${
+        isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+      }`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onDragStateChange(true);
+      }}
+      onDragLeave={() => onDragStateChange(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDragStateChange(false);
+        const file = e.dataTransfer.files[0];
+        if (file) onFileSelect(file);
+      }}
+    >
+      <input
+        type="file"
+        accept=".csv"
+        className="hidden"
+        data-testid="csv-import-file-input"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onFileSelect(file);
+          e.target.value = "";
+        }}
+      />
+      <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
+      <DropzoneCopy parsed={parsed} />
+    </label>
+  );
+}
+
 interface CsvUploadStepProps {
   csv: CsvImportState;
 }
@@ -48,40 +93,14 @@ export function CsvUploadStep({ csv }: CsvUploadStepProps) {
   const [isDragging, setIsDragging] = useState(false);
   const detectedPresetId = csv.detectedPresetId;
 
-  function onFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) void csv.handleFileSelect(file);
-    e.target.value = "";
-  }
-
   return (
     <div className="space-y-4">
-      <label
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors block ${
-          isDragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragging(false);
-          const file = e.dataTransfer.files[0];
-          if (file) void csv.handleFileSelect(file);
-        }}
-      >
-        <input
-          type="file"
-          accept=".csv"
-          className="hidden"
-          data-testid="csv-import-file-input"
-          onChange={onFileSelect}
-        />
-        <Upload className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-        <DropzoneCopy parsed={csv.parsed} />
-      </label>
+      <Dropzone
+        isDragging={isDragging}
+        onDragStateChange={setIsDragging}
+        onFileSelect={(file) => void csv.handleFileSelect(file)}
+        parsed={csv.parsed}
+      />
 
       <AutoDetectHint visible={!csv.parsed} />
 

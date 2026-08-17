@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { parseDateTime } from "@/lib/csvImportPlan";
-import type { CsvImportState } from "@/hooks/useCsvImport";
+import type { CsvImportState, CsvMappingErrorKey } from "@/hooks/useCsvImport";
 import type { CsvColumnMapping } from "@/types/csvImport";
 
 const NOT_MAPPED = "__not_mapped__";
@@ -91,21 +91,194 @@ function DateParsePreview({ dateResult }: { dateResult: { date: string; time: st
   );
 }
 
+/** Amount/Category/Description share this shape: a label, a single column picker, an error. */
+function MappedColumnField({
+  label,
+  required,
+  sample,
+  headers,
+  value,
+  onChange,
+  error,
+  allowNone,
+}: {
+  label: string;
+  required?: boolean;
+  sample?: string;
+  headers: string[];
+  value: number | null;
+  onChange: (index: number | null) => void;
+  error?: string;
+  allowNone?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <FieldLabel label={label} required={required} sample={sample} />
+      <ColumnSelect headers={headers} value={value} onChange={onChange} allowNone={allowNone} />
+      <FieldError message={error} />
+    </div>
+  );
+}
+
+function DateTimeField({
+  headers,
+  mapping,
+  dateResult,
+  errors,
+  updateMapping,
+}: {
+  headers: string[];
+  mapping: CsvColumnMapping;
+  dateResult: { date: string; time: string } | null;
+  errors: { dateTime?: string; dateFormat?: string };
+  updateMapping: (patch: Partial<CsvColumnMapping>) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <FieldLabel label="Date & time" required />
+      <div className="flex gap-2">
+        <ColumnSelect
+          headers={headers}
+          value={mapping.dateTime}
+          onChange={(dateTime) => updateMapping({ dateTime })}
+        />
+        <ColumnSelect
+          headers={headers}
+          value={mapping.dateTimeExtra}
+          onChange={(dateTimeExtra) => updateMapping({ dateTimeExtra })}
+          allowNone
+        />
+      </div>
+      <Input
+        value={mapping.dateFormat}
+        onChange={(e) => updateMapping({ dateFormat: e.target.value })}
+        placeholder="dd/MM/yyyy HH:mm:ss"
+      />
+      <DateParsePreview dateResult={dateResult} />
+      <FieldError message={errors.dateTime} />
+      <FieldError message={errors.dateFormat} />
+    </div>
+  );
+}
+
+function TagsField({
+  headers,
+  tags,
+  updateMapping,
+}: {
+  headers: string[];
+  tags: number[];
+  updateMapping: (patch: Partial<CsvColumnMapping>) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm font-medium">Tags</p>
+      <Select key={tags.length} onValueChange={(v) => updateMapping({ tags: [...tags, Number(v)] })}>
+        <SelectTrigger>
+          <SelectValue placeholder="Add tag column..." />
+        </SelectTrigger>
+        <SelectContent>
+          {headers
+            .map((header, index) => ({ header, index }))
+            .filter(({ index }) => !tags.includes(index))
+            .map(({ header, index }) => (
+              <SelectItem key={header} value={String(index)}>
+                {header}
+              </SelectItem>
+            ))}
+        </SelectContent>
+      </Select>
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {tags.map((tagIndex, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Remove tag column ${headers[tagIndex]}`}
+              className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
+              onClick={() => updateMapping({ tags: tags.filter((_, idx) => idx !== i) })}
+            >
+              {headers[tagIndex]} ×
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AttachCsvFirstCard({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
+      <p className="text-sm text-muted-foreground">Attach a CSV file first.</p>
+      <Button type="button" variant="outline" size="sm" onClick={onBack}>
+        Back
+      </Button>
+    </div>
+  );
+}
+
+function MappingFieldsCard({
+  headers,
+  firstRow,
+  mapping,
+  dateResult,
+  errors,
+  updateMapping,
+}: {
+  headers: string[];
+  firstRow: string[];
+  mapping: CsvColumnMapping;
+  dateResult: { date: string; time: string } | null;
+  errors: Partial<Record<CsvMappingErrorKey, string>>;
+  updateMapping: (patch: Partial<CsvColumnMapping>) => void;
+}) {
+  return (
+    <div className="p-4 rounded-xl bg-card border border-border/50 space-y-4">
+      <MappedColumnField
+        label="Amount"
+        required
+        sample={cellPreview(firstRow, mapping.amount)}
+        headers={headers}
+        value={mapping.amount}
+        onChange={(amount) => updateMapping({ amount })}
+        error={errors.amount}
+      />
+      <DateTimeField
+        headers={headers}
+        mapping={mapping}
+        dateResult={dateResult}
+        errors={errors}
+        updateMapping={updateMapping}
+      />
+      <MappedColumnField
+        label="Category"
+        required
+        sample={cellPreview(firstRow, mapping.category)}
+        headers={headers}
+        value={mapping.category}
+        onChange={(category) => updateMapping({ category })}
+        error={errors.category}
+      />
+      <MappedColumnField
+        label="Description"
+        sample={cellPreview(firstRow, mapping.description)}
+        headers={headers}
+        value={mapping.description}
+        onChange={(description) => updateMapping({ description })}
+        allowNone
+      />
+      <TagsField headers={headers} tags={mapping.tags} updateMapping={updateMapping} />
+    </div>
+  );
+}
+
 interface CsvMappingStepProps {
   csv: CsvImportState;
 }
 
 export function CsvMappingStep({ csv }: CsvMappingStepProps) {
-  if (!csv.parsed) {
-    return (
-      <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
-        <p className="text-sm text-muted-foreground">Attach a CSV file first.</p>
-        <Button type="button" variant="outline" size="sm" onClick={() => csv.reset()}>
-          Back
-        </Button>
-      </div>
-    );
-  }
+  if (!csv.parsed) return <AttachCsvFirstCard onBack={() => csv.reset()} />;
 
   const { headers, rows } = csv.parsed;
   const firstRow = rows[0];
@@ -122,101 +295,14 @@ export function CsvMappingStep({ csv }: CsvMappingStepProps) {
       <p className="text-xs text-muted-foreground">
         Map your CSV columns to ExTrack fields. Preview shows the first row.
       </p>
-      <div className="p-4 rounded-xl bg-card border border-border/50 space-y-4">
-        <div className="space-y-1">
-          <FieldLabel label="Amount" required sample={cellPreview(firstRow, mapping.amount)} />
-          <ColumnSelect
-            headers={headers}
-            value={mapping.amount}
-            onChange={(amount) => updateMapping({ amount })}
-          />
-          <FieldError message={errors.amount} />
-        </div>
-
-        <div className="space-y-1">
-          <FieldLabel label="Date & time" required />
-          <div className="flex gap-2">
-            <ColumnSelect
-              headers={headers}
-              value={mapping.dateTime}
-              onChange={(dateTime) => updateMapping({ dateTime })}
-            />
-            <ColumnSelect
-              headers={headers}
-              value={mapping.dateTimeExtra}
-              onChange={(dateTimeExtra) => updateMapping({ dateTimeExtra })}
-              allowNone
-            />
-          </div>
-          <Input
-            value={mapping.dateFormat}
-            onChange={(e) => updateMapping({ dateFormat: e.target.value })}
-            placeholder="dd/MM/yyyy HH:mm:ss"
-          />
-          <DateParsePreview dateResult={dateResult} />
-          <FieldError message={errors.dateTime} />
-          <FieldError message={errors.dateFormat} />
-        </div>
-
-        <div className="space-y-1">
-          <FieldLabel label="Category" required sample={cellPreview(firstRow, mapping.category)} />
-          <ColumnSelect
-            headers={headers}
-            value={mapping.category}
-            onChange={(category) => updateMapping({ category })}
-          />
-          <FieldError message={errors.category} />
-        </div>
-
-        <div className="space-y-1">
-          <FieldLabel label="Description" sample={cellPreview(firstRow, mapping.description)} />
-          <ColumnSelect
-            headers={headers}
-            value={mapping.description}
-            onChange={(description) => updateMapping({ description })}
-            allowNone
-          />
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Tags</p>
-          <Select
-            key={mapping.tags.length}
-            onValueChange={(v) => updateMapping({ tags: [...mapping.tags, Number(v)] })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Add tag column..." />
-            </SelectTrigger>
-            <SelectContent>
-              {headers
-                .map((header, index) => ({ header, index }))
-                .filter(({ index }) => !mapping.tags.includes(index))
-                .map(({ header, index }) => (
-                  <SelectItem key={header} value={String(index)}>
-                    {header}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-          {mapping.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {mapping.tags.map((tagIndex, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`Remove tag column ${headers[tagIndex]}`}
-                  className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
-                  onClick={() =>
-                    updateMapping({ tags: mapping.tags.filter((_, idx) => idx !== i) })
-                  }
-                >
-                  {headers[tagIndex]} ×
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <MappingFieldsCard
+        headers={headers}
+        firstRow={firstRow}
+        mapping={mapping}
+        dateResult={dateResult}
+        errors={errors}
+        updateMapping={updateMapping}
+      />
 
       <div className="flex justify-between">
         <Button type="button" variant="ghost" onClick={() => csv.goToStep("upload")}>
