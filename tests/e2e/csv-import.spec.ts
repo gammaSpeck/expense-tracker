@@ -137,6 +137,7 @@ test.describe("csv-import", () => {
     await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByText("Advanced Rules").click();
+    await expect(page.getByText("Configure which rows to skip during import")).toBeVisible();
     await expect(page.getByRole("button", { name: "Remove ignore rule" })).toHaveCount(0);
   });
 

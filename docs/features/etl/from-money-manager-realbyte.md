@@ -1,6 +1,6 @@
 # Migrating from MoneyManager (Realbyte)
 
-ExTrack's CSV import wizard (**Settings → Data Management → Migrate from another expense app**)
+ExTrack's CSV import wizard (**Settings → Data Management → Import from CSV**)
 recognises a MoneyManager export automatically — this page only covers the export step the
 wizard can't do for you.
 
@@ -17,7 +17,7 @@ wizard can't do for you.
 
 MoneyManager's export header row is:
 
-```
+```csv
 Date,Account,Category,Subcategory,Note,INR,Income/Expense,Description,Amount,Currency,Account
 ```
 

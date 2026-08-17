@@ -111,28 +111,36 @@ export async function readExpenses(page: Page): Promise<ReadExpense[]> {
     openReq.onerror = () => reject(openReq.error);
     openReq.onsuccess = () => {
       const db = openReq.result;
-      const tx = db.transaction(["expenses", "categories"], "readonly");
-      const catReq = tx.objectStore("categories").getAll();
-      catReq.onerror = () => reject(catReq.error);
-      catReq.onsuccess = () => {
-        const idToName = new Map((catReq.result as CategoryRow[]).map((c) => [c.id, c.name]));
-        const expReq = tx.objectStore("expenses").getAll();
-        expReq.onerror = () => reject(expReq.error);
-        expReq.onsuccess = () => {
-          db.close();
-          resolve(
-            expReq.result.map((e) => ({
-              value: e.value,
-              categoryName: idToName.get(e.category) ?? "",
-              description: e.description,
-              tags: e.tags,
-              date: e.date,
-              time: e.time,
-              isAdhoc: e.isAdhoc,
-            })),
-          );
-        };
+      const fail = (error: unknown) => {
+        db.close();
+        reject(error);
       };
+      try {
+        const tx = db.transaction(["expenses", "categories"], "readonly");
+        const catReq = tx.objectStore("categories").getAll();
+        catReq.onerror = () => fail(catReq.error);
+        catReq.onsuccess = () => {
+          const idToName = new Map((catReq.result as CategoryRow[]).map((c) => [c.id, c.name]));
+          const expReq = tx.objectStore("expenses").getAll();
+          expReq.onerror = () => fail(expReq.error);
+          expReq.onsuccess = () => {
+            db.close();
+            resolve(
+              expReq.result.map((e) => ({
+                value: e.value,
+                categoryName: idToName.get(e.category) ?? "",
+                description: e.description,
+                tags: e.tags,
+                date: e.date,
+                time: e.time,
+                isAdhoc: e.isAdhoc,
+              })),
+            );
+          };
+        };
+      } catch (error) {
+        fail(error);
+      }
     };
     return promise;
   });

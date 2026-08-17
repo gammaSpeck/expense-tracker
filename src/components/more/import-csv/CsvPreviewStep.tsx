@@ -26,13 +26,22 @@ function resolveCategoryName(
 }
 
 function rowFields(draft: DraftExpense, categoryName: string): string[] {
-  return [draft.date, draft.time, String(draft.value), categoryName, draft.description ?? "", ...draft.tags];
+  return [
+    draft.date,
+    draft.time,
+    String(draft.value),
+    categoryName,
+    draft.description ?? "",
+    ...draft.tags,
+  ];
 }
 
 function filterPreviewRows(rows: PreviewRow[], query: string): PreviewRow[] {
   const q = query.trim().toLowerCase();
   if (!q) return rows;
-  return rows.filter(({ draft, categoryName }) => rowFields(draft, categoryName).some((v) => v.toLowerCase().includes(q)));
+  return rows.filter(({ draft, categoryName }) =>
+    rowFields(draft, categoryName).some((v) => v.toLowerCase().includes(q)),
+  );
 }
 
 function SummaryCard({
@@ -46,7 +55,12 @@ function SummaryCard({
   testId: string;
   variant?: "primary" | "warning";
 }) {
-  const color = variant === "primary" ? "text-primary" : variant === "warning" ? "text-yellow-500" : "text-foreground";
+  const color =
+    variant === "primary"
+      ? "text-primary"
+      : variant === "warning"
+        ? "text-yellow-500"
+        : "text-foreground";
   return (
     <div className="p-3 rounded-xl bg-card border border-border/50 text-center">
       <p className={`text-2xl font-bold ${color}`} data-testid={testId}>
@@ -69,7 +83,12 @@ export function CsvPreviewStep({ csv }: CsvPreviewStepProps) {
     () =>
       (plan?.drafts ?? NO_DRAFTS).map((draft) => ({
         draft,
-        categoryName: resolveCategoryName(draft.categoryKey, categoryRules, nameById, defaultCategoryId),
+        categoryName: resolveCategoryName(
+          draft.categoryKey,
+          categoryRules,
+          nameById,
+          defaultCategoryId,
+        ),
       })),
     [plan, categoryRules, nameById, defaultCategoryId],
   );
@@ -82,8 +101,17 @@ export function CsvPreviewStep({ csv }: CsvPreviewStepProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <SummaryCard label="Total rows" value={plan.totalRows} testId="csv-stat-total" />
-        <SummaryCard label="To import" value={plan.drafts.length} testId="csv-stat-importing" variant="primary" />
-        <SummaryCard label="Skipped (rules)" value={plan.skippedByRules} testId="csv-stat-skipped" />
+        <SummaryCard
+          label="To import"
+          value={plan.drafts.length}
+          testId="csv-stat-importing"
+          variant="primary"
+        />
+        <SummaryCard
+          label="Skipped"
+          value={plan.skippedByRules + plan.skippedEmptyField}
+          testId="csv-stat-skipped"
+        />
         <SummaryCard
           label="Data errors"
           value={plan.errors.length}
@@ -93,13 +121,17 @@ export function CsvPreviewStep({ csv }: CsvPreviewStepProps) {
       </div>
 
       {plan.errors.length > 0 && (
-        <details className="group p-4 rounded-xl bg-card border border-border/50" open={plan.errors.length <= 3}>
+        <details
+          className="group p-4 rounded-xl bg-card border border-border/50"
+          open={plan.errors.length <= 3}
+        >
           <summary className="flex items-center gap-2 text-sm font-medium cursor-pointer">
             <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
             <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
             {plan.errors.length} error{plan.errors.length !== 1 ? "s" : ""}
           </summary>
-          <div className="pt-2 space-y-1 max-h-[200px] overflow-y-auto text-xs">
+          {/* Scroll cap tuned to ~6 error rows; no design-token step lands near 200px. */}
+          <div className="pt-2 space-y-1 max-h-50 overflow-y-auto text-xs">
             {plan.errors.map((error, i) => (
               <p key={i} className="text-muted-foreground">
                 Row {error.rowNumber} — {error.field}: could not parse &quot;{error.rawValue}&quot;
@@ -123,9 +155,9 @@ export function CsvPreviewStep({ csv }: CsvPreviewStepProps) {
 
           <CsvPreviewTable rows={filteredRows.slice(0, PREVIEW_ROW_COUNT)} />
 
-          {plan.drafts.length > PREVIEW_ROW_COUNT && (
+          {filteredRows.length > PREVIEW_ROW_COUNT && (
             <p className="text-xs text-muted-foreground text-center">
-              Showing first {PREVIEW_ROW_COUNT} of {plan.drafts.length.toLocaleString()} rows
+              Showing first {PREVIEW_ROW_COUNT} of {filteredRows.length.toLocaleString()} rows
             </p>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useExpenseData";
 import { parseCsvFile } from "@/lib/csvImport";
@@ -76,6 +76,7 @@ export function useCsvImport(): CsvImportState {
   const [defaultCategoryId, setDefaultCategoryId] = useState("");
   const [ignoreRules, setIgnoreRules] = useState<IgnoreRule[]>([]);
   const [isImporting, setIsImporting] = useState(false);
+  const isImportingRef = useRef(false);
   const [importedCount, setImportedCount] = useState(0);
   const [mappingErrors, setMappingErrors] = useState<Partial<Record<CsvMappingErrorKey, string>>>({});
   const [detectedPresetId, setDetectedPresetId] = useState<string | null>(null);
@@ -151,6 +152,8 @@ export function useCsvImport(): CsvImportState {
 
   async function runImport() {
     if (!plan || plan.drafts.length === 0) return;
+    if (isImportingRef.current) return;
+    isImportingRef.current = true;
     setIsImporting(true);
     try {
       const count = await importCsvExpenses(plan.drafts, categoryRules, defaultCategoryId);
@@ -162,6 +165,7 @@ export function useCsvImport(): CsvImportState {
       toast.error("Import failed");
       captureError("csv_import_failed", err, { stage: "write" });
     } finally {
+      isImportingRef.current = false;
       setIsImporting(false);
     }
   }

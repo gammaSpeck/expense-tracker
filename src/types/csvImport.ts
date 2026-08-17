@@ -45,6 +45,9 @@ export interface RowError {
 export interface CsvImportPlan {
   totalRows: number;
   drafts: DraftExpense[];
+  // Rows excluded by a user-configured ignore rule (isIgnored match).
   skippedByRules: number;
+  // Rows excluded because the required amount or date cell was empty — not a rule match.
+  skippedEmptyField: number;
   errors: RowError[];
 }

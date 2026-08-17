@@ -126,6 +126,12 @@
         "reason": "D6's skip-vs-error split (empty cell -> silent skip, unparseable -> data error) for both amount and date; necessary row-classification logic, not accidental complexity."
       },
       {
+        "files": ["src/components/more/import-csv/CsvCategoryStep.tsx"],
+        "functions": ["IgnoreRuleValueField"],
+        "maxCrap": 35,
+        "reason": "Excluded-column guard plus the high-cardinality overflow guard, each falling back to plain text entry; necessary safety logic, not accidental complexity."
+      },
+      {
         "files": ["src/components/more/import-csv/CsvPreviewStep.tsx"],
         "functions": ["CsvPreviewStep"],
         "maxCrap": 100,
@@ -148,6 +154,18 @@
         "functions": ["resolveCategoryId"],
         "maxCrap": 35,
         "reason": "No-rule/existing-rule/create-with-name-dedupe branching (D10 category creation); necessary business logic, matches the useCategoryFormSubmit precedent above."
+      },
+      {
+        "files": ["src/hooks/useCsvImport.ts"],
+        "functions": ["runImport"],
+        "maxCrap": 35,
+        "reason": "Double-submit lock guard plus the existing empty-plan/import-failure branches; necessary data-integrity logic (prevents duplicate expenses from a fast double click)."
+      },
+      {
+        "files": ["src/lib/csvImport.ts"],
+        "functions": ["complete"],
+        "maxCrap": 35,
+        "reason": "Papa Parse result-diagnostics guard plus the existing empty-file/row-count checks; necessary input validation (rejects malformed CSV instead of silently importing broken rows)."
       }
     ]
   },

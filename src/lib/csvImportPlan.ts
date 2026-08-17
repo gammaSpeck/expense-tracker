@@ -30,9 +30,15 @@ function parseAmount(raw: string): number | null {
 
 export function parseDateTime(row: string[], mapping: CsvColumnMapping): { date: string; time: string } | null {
   const joined = [cell(row, mapping.dateTime), cell(row, mapping.dateTimeExtra)].filter(Boolean).join(" ");
-  const parsed = parse(joined, mapping.dateFormat, REFERENCE_DATE);
-  if (!isValid(parsed)) return null;
-  return { date: format(parsed, "yyyy-MM-dd"), time: format(parsed, "HH:mm") };
+  try {
+    const parsed = parse(joined, mapping.dateFormat, REFERENCE_DATE);
+    if (!isValid(parsed)) return null;
+    return { date: format(parsed, "yyyy-MM-dd"), time: format(parsed, "HH:mm") };
+  } catch {
+    // date-fns throws RangeError on a malformed/unescaped format string (free-form user
+    // input) instead of returning an invalid Date; treat it the same as "did not parse".
+    return null;
+  }
 }
 
 function collectTags(row: string[], indexes: number[]): string[] {
@@ -45,7 +51,8 @@ function collectTags(row: string[], indexes: number[]): string[] {
 }
 
 type RowResult =
-  | { kind: "skip" }
+  | { kind: "skip-rule" }
+  | { kind: "skip-empty" }
   | { kind: "error"; error: RowError }
   | { kind: "draft"; draft: DraftExpense };
 
@@ -55,15 +62,15 @@ function resolveRow(
   mapping: CsvColumnMapping,
   ignoreRules: IgnoreRule[],
 ): RowResult {
-  if (isIgnored(row, ignoreRules)) return { kind: "skip" };
+  if (isIgnored(row, ignoreRules)) return { kind: "skip-rule" };
 
   const rawAmount = cell(row, mapping.amount);
-  if (rawAmount === "") return { kind: "skip" };
+  if (rawAmount === "") return { kind: "skip-empty" };
   const value = parseAmount(rawAmount);
   if (value === null) return { kind: "error", error: { rowNumber, field: "amount", rawValue: rawAmount } };
 
   const rawDate = cell(row, mapping.dateTime);
-  if (rawDate === "") return { kind: "skip" };
+  if (rawDate === "") return { kind: "skip-empty" };
   const dateTime = parseDateTime(row, mapping);
   if (dateTime === null) return { kind: "error", error: { rowNumber, field: "date", rawValue: rawDate } };
 
@@ -83,11 +90,18 @@ function resolveRow(
 
 export function buildCsvImportPlan(parsed: ParsedCsv, config: CsvImportConfig): CsvImportPlan {
   const { mapping, ignoreRules } = config;
-  const plan: CsvImportPlan = { totalRows: parsed.rows.length, drafts: [], skippedByRules: 0, errors: [] };
+  const plan: CsvImportPlan = {
+    totalRows: parsed.rows.length,
+    drafts: [],
+    skippedByRules: 0,
+    skippedEmptyField: 0,
+    errors: [],
+  };
 
   parsed.rows.forEach((row, i) => {
     const result = resolveRow(row, i + 1, mapping, ignoreRules);
-    if (result.kind === "skip") plan.skippedByRules++;
+    if (result.kind === "skip-rule") plan.skippedByRules++;
+    else if (result.kind === "skip-empty") plan.skippedEmptyField++;
     else if (result.kind === "error") plan.errors.push(result.error);
     else plan.drafts.push(result.draft);
   });

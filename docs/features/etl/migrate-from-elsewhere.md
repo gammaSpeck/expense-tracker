@@ -93,69 +93,67 @@ So that I can bring my historical expense data into ExTrack without losing it.
 
 > **Terminology note:** "Column Mapping" (Step 3) maps a _source CSV column_ to an _ExTrack field_ — it is a structural, one-time setup. "Category Value Rules" (Step 4) maps specific _values found inside_ the source Category column to _ExTrack category records_. These are two distinct, non-conflicting operations.
 
-- [ ] AC25: After column mapping, the app extracts all **unique values** from the single CSV column mapped to the Category field and displays them as a list
-- [ ] AC26: For each unique value, the user can assign an ExTrack category via a dropdown (showing each category's color dot and name)
-- [ ] AC27: Any value with no explicit rule applied falls through to the **default category**
-- [ ] AC28: User must select a default category before proceeding — it is pre-filled with "Others" if that category exists
-- [ ] AC29: If a row's Category cell is empty, it is not skipped — it is routed to the default category silently
-- [ ] AC30: Subcategory columns from the source CSV are not used in category value rules and can be ignored
+- [ ] AC26: After column mapping, the app extracts all **unique values** from the single CSV column mapped to the Category field and displays them as a list
+- [ ] AC27: For each unique value, the user can assign an ExTrack category via a dropdown (showing each category's color dot and name)
+- [ ] AC28: Any value with no explicit rule applied falls through to the **default category**
+- [ ] AC29: User must select a default category before proceeding — it is pre-filled with "Others" if that category exists
+- [ ] AC30: If a row's Category cell is empty, it is not skipped — it is routed to the default category silently
+- [ ] AC31: Subcategory columns from the source CSV are not used in category value rules and can be ignored
 
 #### Ignore Row Rules
 
-- [ ] AC31: The **Advanced Rules** section in the Category Value Rules step is collapsible and collapsed by default
-- [ ] AC32: The section contains **system rules** — pre-set, locked, read-only rules the user cannot remove. They are displayed with a lock icon and a brief explanation. The system rules are:
+- [ ] AC32: The **Advanced Rules** section in the Category Value Rules step is collapsible and collapsed by default
+- [ ] AC33: The section contains **system rules** — pre-set, locked, read-only rules the user cannot remove. They are displayed with a lock icon and a brief explanation. The system rules are:
   - **"Skip row if Date cell is empty"** — applies to the CSV column mapped to Date
-  - **"Skip row if Amount cell is empty or non-numeric"** — applies to the CSV column mapped to Amount
-- [ ] AC33: Below the system rules, the user can add one or more **custom Ignore Row Rules** of the form: `[CSV Column] == [value]`
+  - **"Skip row if Amount cell is empty"** — applies to the CSV column mapped to Amount
+- [ ] AC34: Below the system rules, the user can add one or more **custom Ignore Row Rules** of the form: `[CSV Column] == [value]`
   - The user selects a CSV column from a dropdown
   - The user enters a plain text value to match (case-sensitive string equality against the raw cell value)
   - Each custom rule has a remove (×) control
-- [ ] AC34: Rows where **any** rule matches — system or custom — are skipped during import. They do not appear as data errors; they are counted separately.
-- [ ] AC35: The import summary (preview step) shows skipped-by-rules count separately from skipped-due-to-data-errors count
+- [ ] AC35: Rows where **any** rule matches — system or custom — are skipped during import. They do not appear as data errors; they are counted separately.
+- [ ] AC36: The import summary (preview step) shows skipped-by-rules count separately from skipped-due-to-data-errors count
 
 #### Import Preview & Confirmation
 
-- [ ] AC36: A summary screen is shown before final import:
+- [ ] AC37: A summary screen is shown before final import:
   - Total rows in file
   - Rows that will be imported (valid)
   - Rows skipped by ignore rules (system + custom)
   - Rows skipped due to data errors (with row number and failing field listed)
-- [ ] AC37: Below the summary counts, a **Transformed Data Preview table** shows 5–10 valid rows as they will be written to the DB — i.e. after all column mappings, regex extractions, category value rules, and tag deduplication have been applied. Columns shown: Date, Time, Amount, Category (ExTrack name), Description, Tags.
-- [ ] AC38: A **search box** above the preview table lets the user filter visible rows by typing any value (searches across all displayed columns). The search only filters what is shown in the preview — it does not affect which rows are imported.
-- [ ] AC39: Search results update as the user types (no submit needed). If no rows match the search term, show "No matching rows in preview".
-- [ ] AC40: The preview table is read-only — rows cannot be edited in-flow.
-- [ ] AC41: User can choose to proceed with valid rows only, or cancel entirely — there is no partial retry
-- [ ] AC42: On confirmation, all valid rows are written to the `expenses` table via `bulkAdd`
-- [ ] AC43: **Duplicate rows are not detected.** Each valid CSV row creates a new, distinct expense entity with a new system-generated ID. This is intentional — deduplication is out of scope for v1.
-- [ ] AC44: On success, a confirmation message shows the count of expenses imported
-- [ ] AC45: The user is not automatically navigated away — they can choose to go to Transactions or stay
+- [ ] AC38: Below the summary counts, a **Transformed Data Preview table** shows 5–10 valid rows as they will be written to the DB — i.e. after all column mappings, regex extractions, category value rules, and tag deduplication have been applied. Columns shown: Date, Time, Amount, Category (ExTrack name), Description, Tags.
+- [ ] AC39: A **search box** above the preview table lets the user filter visible rows by typing any value (searches across all displayed columns). The search only filters what is shown in the preview — it does not affect which rows are imported.
+- [ ] AC40: Search results update as the user types (no submit needed). If no rows match the search term, show "No matching rows in preview".
+- [ ] AC41: The preview table is read-only — rows cannot be edited in-flow.
+- [ ] AC42: User can choose to proceed with valid rows only, or cancel entirely — there is no partial retry
+- [ ] AC43: On confirmation, all valid rows are written to the `expenses` table via `bulkAdd`
+- [ ] AC44: **Duplicate rows are not detected.** Each valid CSV row creates a new, distinct expense entity with a new system-generated ID. This is intentional — deduplication is out of scope for v1.
+- [ ] AC45: On success, a confirmation message shows the count of expenses imported
+- [ ] AC46: The user is not automatically navigated away — they can choose to go to Transactions or stay
 
 ---
 
 ### User Flow
 
-1. User navigates to **Data Management → Import Data**
-2. User taps "Import from CSV"
-3. **Step 1 — Backup Nudge**: App shows last backup time and a "Back up now" shortcut. User can dismiss and continue.
-4. **Step 2 — Upload**: User selects a `.csv` file via file picker. App parses it with papaparse. File metadata card is shown: row count, file size, discovered columns. User confirms and proceeds.
-5. **Step 3 — Column Mapping**:
+1. User navigates to **Settings → Data Management → Import from CSV**
+2. **Backup Nudge** (pre-wizard): App shows last backup time and a "Back up now" shortcut. User can dismiss and continue.
+3. **Upload** (pre-wizard): User selects a `.csv` file via file picker. App parses it in-browser. A file metadata card is shown: row count, file size, discovered columns. A recognized source shows as a detected label with a "Next" button that applies it; otherwise the user clicks "Set up manually".
+4. **Step 1 of 3 — Column Mapping**:
    - User maps CSV columns to ExTrack fields (structural mapping: source column → dest field)
-   - Date and Time rows show a regex extractor input with live extracted preview
    - Tags row allows multiple CSV columns to be selected
    - Required fields (Amount, Date, Category) must be filled before proceeding
-6. User clicks "Next" → validation runs on required fields
-7. **Step 4 — Category Value Rules**:
+5. User clicks "Next" → validation runs on required fields
+6. **Step 2 of 3 — Category Value Rules**:
    - Unique values from the mapped Category column are extracted and listed
    - User assigns each value to an ExTrack category (value mapping: source value → dest category record)
    - User sets the default category fall-through (pre-filled: "Others"); empty category cells are quietly routed here
    - **Advanced Rules** section (collapsed): shows locked system rules + user can add custom `column == value` ignore rules
-8. User clicks "Next" → **Step 5 — Import Preview**:
-   - Counts: total / to import / skipped by rules / skipped due to errors
+7. User clicks "Next" → **Step 3 of 3 — Import Preview**:
+   - Counts: total / to import / skipped / errors
    - Error rows listed with row number and failing field
-9. User clicks "Import" → data is written to DB → CSV data cleared from memory
-10. **Done screen**: Success message with imported count, link to Transactions
+8. User clicks "Import" → data is written to DB → CSV data cleared from memory
+9. **Done screen**: Success message with imported count, link to Transactions
 
-_Step indicator: Step X of 4 (Backup nudge + upload are pre-wizard; Done is a result screen)_
+_Step indicator: "Step X of 3" on Column Mapping, Category Value Rules, and Import Preview only — Backup Nudge and Upload are unlabeled pre-wizard screens; Done is a result screen._
 
 ---
 
@@ -169,14 +167,14 @@ _Step indicator: Step X of 4 (Backup nudge + upload are pre-wizard; Done is a re
 | `value` column has non-numeric data in a row           | Row flagged as a data error — skippable in preview                                 |
 | Date regex extractor finds no match in a row           | Row flagged as a data error — raw cell value shown to help debug                   |
 | Date cell is empty in a row                            | Row is silently skipped by system rule (not a data error)                          |
-| Amount cell is empty or non-numeric in a row           | Row is silently skipped by system rule (not a data error)                          |
+| Amount cell is empty in a row                          | Row is silently skipped by system rule (not a data error)                          |
 | Category cell is empty in a row                        | Row is NOT skipped — routed to default category                                    |
 | Required fields (Amount, Date, Category) left unmapped | Inline validation error on "Next" — cannot proceed                                 |
 | No default category selected                           | Block on "Next" in Category Mapping — must be set                                  |
 | 0 valid rows after all filters applied                 | "No valid rows to import" — import button is disabled                              |
 | Ignore rule matches all rows                           | Preview shows 0 rows to import with explanation — import blocked                   |
 | User uploads a second CSV                              | All mapping state is reset and wizard restarts from upload step                    |
-| Import partially fails mid-write                       | Show partial success count; do not silently fail                                   |
+| Import fails mid-write                                 | Entire transaction rolls back atomically (expenses, categories, tag metadata) — user sees "Import failed", never a partial-success count |
 | User exits wizard mid-flow                             | CSV data is cleared from memory; no partial data is written                        |
 
 ---

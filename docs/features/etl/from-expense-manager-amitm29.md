@@ -1,6 +1,6 @@
 # Migrating from Money Manager & Expense Tracker (Amit Mohan)
 
-ExTrack's CSV import wizard (**Settings → Data Management → Migrate from another expense app**)
+ExTrack's CSV import wizard (**Settings → Data Management → Import from CSV**)
 recognises an export from this app automatically — this page only covers the export step the
 wizard can't do for you.
 
@@ -16,7 +16,7 @@ wizard can't do for you.
 
 This app's export header row is:
 
-```
+```csv
 Date,Category,Amount,Note,Type,Payment mode,To payment mode,Tags
 ```
 

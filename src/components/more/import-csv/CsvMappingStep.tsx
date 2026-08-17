@@ -1,7 +1,13 @@
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { parseDateTime } from "@/lib/csvImportPlan";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CsvColumnMapping } from "@/types/csvImport";
@@ -55,7 +61,8 @@ function FieldLabel({ label, required, sample }: FieldLabelProps) {
         {required && <span className="text-destructive ml-0.5">*</span>}
       </p>
       {sample && (
-        <span className="text-xs font-mono text-muted-foreground bg-muted rounded px-2 py-0.5 max-w-[150px] truncate">
+        // Sample chip cap sits beside the label without wrapping; no matching token.
+        <span className="text-xs font-mono text-muted-foreground bg-muted rounded px-2 py-0.5 max-w-37.5 truncate">
           {sample}
         </span>
       )}
@@ -118,7 +125,11 @@ export function CsvMappingStep({ csv }: CsvMappingStepProps) {
       <div className="p-4 rounded-xl bg-card border border-border/50 space-y-4">
         <div className="space-y-1">
           <FieldLabel label="Amount" required sample={cellPreview(firstRow, mapping.amount)} />
-          <ColumnSelect headers={headers} value={mapping.amount} onChange={(amount) => updateMapping({ amount })} />
+          <ColumnSelect
+            headers={headers}
+            value={mapping.amount}
+            onChange={(amount) => updateMapping({ amount })}
+          />
           <FieldError message={errors.amount} />
         </div>
 
@@ -195,7 +206,9 @@ export function CsvMappingStep({ csv }: CsvMappingStepProps) {
                   type="button"
                   aria-label={`Remove tag column ${headers[tagIndex]}`}
                   className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
-                  onClick={() => updateMapping({ tags: mapping.tags.filter((_, idx) => idx !== i) })}
+                  onClick={() =>
+                    updateMapping({ tags: mapping.tags.filter((_, idx) => idx !== i) })
+                  }
                 >
                   {headers[tagIndex]} ×
                 </button>
@@ -206,7 +219,7 @@ export function CsvMappingStep({ csv }: CsvMappingStepProps) {
       </div>
 
       <div className="flex justify-between">
-        <Button type="button" variant="ghost" onClick={() => csv.reset()}>
+        <Button type="button" variant="ghost" onClick={() => csv.goToStep("upload")}>
           Back
         </Button>
         <Button type="button" onClick={() => csv.goToStep("categories")}>

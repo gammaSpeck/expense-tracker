@@ -442,6 +442,9 @@ export async function importCsvExpenses(
 ): Promise<number> {
   const now = new Date().toISOString();
   await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    if (!(await db.categories.get(defaultCategoryId))) {
+      throw new Error("The selected default category no longer exists. Reopen the wizard and choose another.");
+    }
     const keyToId = await buildCategoryKeyMap(drafts, categoryRules, defaultCategoryId);
     await db.expenses.bulkAdd(
       drafts.map((d) => ({

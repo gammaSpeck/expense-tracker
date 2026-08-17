@@ -13,15 +13,16 @@ interface CsvPreviewTableProps {
 export function CsvPreviewTable({ rows }: CsvPreviewTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-[640px] w-full text-xs">
+      {/* Floor width forces horizontal scroll instead of squishing six columns. */}
+      <table className="min-w-160 w-full text-xs">
         <thead>
           <tr className="text-left text-muted-foreground">
             <th className="pr-2 py-1 whitespace-nowrap">Date</th>
             <th className="pr-2 py-1 whitespace-nowrap">Time</th>
             <th className="pr-2 py-1 whitespace-nowrap">Amount</th>
-            <th className="pr-2 py-1 whitespace-nowrap min-w-[120px]">Category</th>
-            <th className="pr-2 py-1 min-w-[200px]">Description</th>
-            <th className="pr-2 py-1 whitespace-nowrap min-w-[140px]">Tags</th>
+            <th className="pr-2 py-1 whitespace-nowrap min-w-30">Category</th>
+            <th className="pr-2 py-1 min-w-50">Description</th>
+            <th className="pr-2 py-1 whitespace-nowrap min-w-35">Tags</th>
           </tr>
         </thead>
         <tbody>
@@ -38,8 +39,10 @@ export function CsvPreviewTable({ rows }: CsvPreviewTableProps) {
                 <td className="pr-2 py-1 whitespace-nowrap">{draft.time}</td>
                 <td className="pr-2 py-1 whitespace-nowrap">{draft.value}</td>
                 <td className="pr-2 py-1 whitespace-nowrap">{categoryName}</td>
-                <td className="pr-2 py-1 max-w-[240px] truncate">{draft.description ?? "—"}</td>
-                <td className="pr-2 py-1 whitespace-nowrap">{draft.tags.length > 0 ? draft.tags.join(", ") : "—"}</td>
+                <td className="pr-2 py-1 max-w-60 truncate">{draft.description ?? "—"}</td>
+                <td className="pr-2 py-1 whitespace-nowrap">
+                  {draft.tags.length > 0 ? draft.tags.join(", ") : "—"}
+                </td>
               </tr>
             ))
           )}

@@ -2,9 +2,21 @@ import { useState } from "react";
 import { ChevronDown, Lock, Plus, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Command, CommandInput, CommandList, CommandEmpty, CommandItem } from "@/components/ui/command";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandItem,
+} from "@/components/ui/command";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { ColumnSelect } from "@/components/more/import-csv/CsvMappingStep";
 import type { CsvImportState } from "@/hooks/useCsvImport";
@@ -13,6 +25,10 @@ import type { Category } from "@/types/expense";
 
 const USE_DEFAULT = "__default__";
 const CREATE = "__create__";
+// Above this many distinct values, per-value pickers (one Select/CommandItem each) stop
+// rendering eagerly — hundreds of DOM controls for a high-cardinality column would block
+// the wizard on large files. Bulk default-category assignment / manual typing takes over.
+const MAX_PICKER_VALUES = 200;
 
 interface ColumnValueCount {
   value: string;
@@ -56,14 +72,35 @@ interface IgnoreRuleValueFieldProps {
 
 /** Free-text for numeric/date columns (too many distinct values for a picker); a searchable
  *  dropdown of the column's actual unique values everywhere else. */
-function IgnoreRuleValueField({ rows, columnIndex, excludedColumns, value, onChange }: IgnoreRuleValueFieldProps) {
+function IgnoreRuleValueField({
+  rows,
+  columnIndex,
+  excludedColumns,
+  value,
+  onChange,
+}: IgnoreRuleValueFieldProps) {
   const [open, setOpen] = useState(false);
 
   if (excludedColumns.includes(columnIndex)) {
-    return <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Value to ignore" />;
+    return (
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Value to ignore"
+      />
+    );
   }
 
   const options = columnValueCounts(rows, columnIndex);
+  if (options.length > MAX_PICKER_VALUES) {
+    return (
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Type the exact value to ignore"
+      />
+    );
+  }
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -71,11 +108,13 @@ function IgnoreRuleValueField({ rows, columnIndex, excludedColumns, value, onCha
           type="button"
           className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <span className={value ? "truncate" : "text-muted-foreground"}>{value || "Value to ignore"}</span>
+          <span className={value ? "truncate" : "text-muted-foreground"}>
+            {value || "Value to ignore"}
+          </span>
           <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[240px] p-0">
+      <PopoverContent className="w-60 p-0">
         <Command>
           <CommandInput placeholder="Search values..." />
           <CommandList>
@@ -97,6 +136,68 @@ function IgnoreRuleValueField({ rows, columnIndex, excludedColumns, value, onCha
         </Command>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function CategoryValueList({
+  sourceValues,
+  categoryRules,
+  categories,
+  setRule,
+}: {
+  sourceValues: string[];
+  categoryRules: Record<string, CategoryRule>;
+  categories: Category[];
+  setRule: (sourceValue: string, rule: CategoryRule | undefined) => void;
+}) {
+  if (sourceValues.length > MAX_PICKER_VALUES) {
+    return (
+      <p className="text-xs text-muted-foreground italic">
+        This column has {sourceValues.length.toLocaleString()} distinct values — too many to map
+        individually. All rows use the default category below; add specific overrides after import
+        if needed.
+      </p>
+    );
+  }
+  return (
+    // Scroll cap tuned to ~5 rows; no design-token step lands near 300px.
+    <div className="space-y-2 max-h-75 overflow-y-auto pr-1">
+      {sourceValues.map((value) => {
+        const rule = categoryRules[value];
+        const selectValue = !rule
+          ? USE_DEFAULT
+          : rule.kind === "existing"
+            ? `existing:${rule.categoryId}`
+            : CREATE;
+        return (
+          <div key={value} className="flex items-center gap-2">
+            <span className="text-sm truncate min-w-0 flex-1">{value}</span>
+            <span className="text-muted-foreground text-xs">→</span>
+            <Select
+              value={selectValue}
+              onValueChange={(v) => {
+                if (v === USE_DEFAULT) setRule(value, undefined);
+                else if (v === CREATE) setRule(value, { kind: "create", name: value });
+                else setRule(value, { kind: "existing", categoryId: v.slice("existing:".length) });
+              }}
+            >
+              <SelectTrigger className="w-56 shrink-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={USE_DEFAULT}>Use default category</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={`existing:${category.id}`}>
+                    <CategoryOptionLabel category={category} />
+                  </SelectItem>
+                ))}
+                <SelectItem value={CREATE}>{`+ Create "${value}"`}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -136,43 +237,20 @@ export function CsvCategoryStep({ csv }: CsvCategoryStepProps) {
     <div className="space-y-4">
       <div className="p-4 rounded-xl bg-card border border-border/50 space-y-3">
         <h3 className="text-sm font-semibold">Category Mapping</h3>
-        <p className="text-xs text-muted-foreground">Map each unique CSV category value to an ExTrack category.</p>
+        <p className="text-xs text-muted-foreground">
+          Map each unique CSV category value to an ExTrack category.
+        </p>
         {sourceValues.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic">Map the Category column on the previous step first.</p>
+          <p className="text-xs text-muted-foreground italic">
+            Map the Category column on the previous step first.
+          </p>
         ) : (
-          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-            {sourceValues.map((value) => {
-              const rule = categoryRules[value];
-              const selectValue = !rule ? USE_DEFAULT : rule.kind === "existing" ? `existing:${rule.categoryId}` : CREATE;
-              return (
-                <div key={value} className="flex items-center gap-2">
-                  <span className="text-sm truncate min-w-0 flex-1">{value}</span>
-                  <span className="text-muted-foreground text-xs">→</span>
-                  <Select
-                    value={selectValue}
-                    onValueChange={(v) => {
-                      if (v === USE_DEFAULT) setRule(value, undefined);
-                      else if (v === CREATE) setRule(value, { kind: "create", name: value });
-                      else setRule(value, { kind: "existing", categoryId: v.slice("existing:".length) });
-                    }}
-                  >
-                    <SelectTrigger className="w-56 shrink-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={USE_DEFAULT}>Use default category</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={`existing:${category.id}`}>
-                          <CategoryOptionLabel category={category} />
-                        </SelectItem>
-                      ))}
-                      <SelectItem value={CREATE}>{`+ Create "${value}"`}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              );
-            })}
-          </div>
+          <CategoryValueList
+            sourceValues={sourceValues}
+            categoryRules={categoryRules}
+            categories={categories}
+            setRule={setRule}
+          />
         )}
       </div>
 
@@ -216,8 +294,8 @@ export function CsvCategoryStep({ csv }: CsvCategoryStepProps) {
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-xs text-muted-foreground">
               <Lock className="h-3.5 w-3.5 shrink-0" />
               <span>
-                Rows where &quot;{amountColLabel}&quot; or &quot;{dateColLabel}&quot; cannot be parsed are reported as
-                data errors, not skipped
+                Rows where &quot;{amountColLabel}&quot; or &quot;{dateColLabel}&quot; cannot be
+                parsed are reported as data errors, not skipped
               </span>
             </div>
           </div>
@@ -232,7 +310,11 @@ export function CsvCategoryStep({ csv }: CsvCategoryStepProps) {
               <IgnoreRuleValueField
                 rows={rows}
                 columnIndex={rule.columnIndex}
-                excludedColumns={[csv.mapping.amount, csv.mapping.dateTime, csv.mapping.dateTimeExtra]}
+                excludedColumns={[
+                  csv.mapping.amount,
+                  csv.mapping.dateTime,
+                  csv.mapping.dateTimeExtra,
+                ]}
                 value={rule.value}
                 onChange={(value) => updateIgnoreRule(i, { value })}
               />
