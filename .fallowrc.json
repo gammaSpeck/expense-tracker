@@ -148,6 +148,12 @@
         "functions": ["complete"],
         "maxCrap": 35,
         "reason": "Papa Parse result-diagnostics guard plus the existing empty-file/row-count checks; necessary input validation (rejects malformed CSV instead of silently importing broken rows)."
+      },
+      {
+        "files": ["src/pages/TransactionsPage.tsx"],
+        "functions": ["TransactionsPage"],
+        "maxCrap": 45,
+        "reason": "Page composition wiring search/pagination/delete hooks plus the empty-state and infinite-scroll-sentinel ternaries; coverage-blind CRAP, not accidental complexity."
       }
     ]
   },

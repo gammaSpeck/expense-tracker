@@ -7,6 +7,9 @@ import { TransactionSearchBar } from "@/components/expenses/TransactionSearchBar
 import { DeleteExpenseDialog } from "@/components/expenses/DeleteExpenseDialog";
 import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
 import { useExpenseActions } from "@/hooks/useExpenseActions";
+import { useIncrementalReveal } from "@/hooks/useIncrementalReveal";
+
+const PAGE_SIZE = 100;
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -17,6 +20,11 @@ export default function TransactionsPage() {
 
   const categories = useCategories();
   const expenses = useFilteredExpenses({ search });
+  const { visible: visibleExpenses, hasMore, sentinelRef } = useIncrementalReveal(
+    expenses,
+    PAGE_SIZE,
+    search,
+  );
 
   const {
     expenseToDelete,
@@ -42,7 +50,7 @@ export default function TransactionsPage() {
       {/* Transaction List */}
       <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
         <ExpenseList
-          expenses={expenses}
+          expenses={visibleExpenses}
           categories={categories}
           onExpenseClick={handleExpenseClick}
           onDuplicate={handleDuplicate}
@@ -51,6 +59,7 @@ export default function TransactionsPage() {
           grouped
           emptyMessage={search ? "No matching transactions" : "No transactions yet"}
         />
+        {hasMore && <div ref={sentinelRef} data-testid="load-more-sentinel" className="h-1" />}
       </div>
 
       <DeleteExpenseDialog
