@@ -1,10 +1,6 @@
 import Papa from "papaparse";
+import { MAX_CSV_ROWS, MAX_CSV_FILE_BYTES } from "@/config/limits";
 import type { ParsedCsv } from "@/types/csvImport";
-
-const MAX_CSV_ROWS = 200_000;
-// Generous enough for a legitimate 200,000-row file with long fields, small enough to bound
-// the in-memory parsed array Papa Parse builds before `complete` fires (no streaming).
-const MAX_CSV_FILE_BYTES = 50 * 1024 * 1024;
 
 // "Account","Account" -> "Account","Account (2)" so the mapping dropdown stays unambiguous.
 function dedupeHeaders(raw: string[]): string[] {

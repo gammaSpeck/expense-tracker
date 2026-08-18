@@ -8,8 +8,7 @@ import { DeleteExpenseDialog } from "@/components/expenses/DeleteExpenseDialog";
 import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
 import { useExpenseActions } from "@/hooks/useExpenseActions";
 import { useIncrementalReveal } from "@/hooks/useIncrementalReveal";
-
-const PAGE_SIZE = 100;
+import { TRANSACTIONS_PAGE_SIZE } from "@/config/limits";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ export default function TransactionsPage() {
   const expenses = useFilteredExpenses({ search });
   const { visible: visibleExpenses, hasMore, sentinelRef } = useIncrementalReveal(
     expenses,
-    PAGE_SIZE,
+    TRANSACTIONS_PAGE_SIZE,
     search,
   );
 

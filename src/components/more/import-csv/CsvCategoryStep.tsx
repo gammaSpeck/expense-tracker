@@ -19,16 +19,13 @@ import {
 } from "@/components/ui/command";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { ColumnSelect } from "@/components/more/import-csv/CsvMappingStep";
+import { MAX_CSV_PICKER_VALUES } from "@/config/limits";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CategoryRule, IgnoreRule } from "@/types/csvImport";
 import type { Category } from "@/types/expense";
 
 const USE_DEFAULT = "__default__";
 const CREATE = "__create__";
-// Above this many distinct values, per-value pickers (one Select/CommandItem each) stop
-// rendering eagerly — hundreds of DOM controls for a high-cardinality column would block
-// the wizard on large files. Bulk default-category assignment / manual typing takes over.
-const MAX_PICKER_VALUES = 200;
 
 interface ColumnValueCount {
   value: string;
@@ -140,7 +137,7 @@ function IgnoreRuleValueField({
   }
 
   const options = columnValueCounts(rows, columnIndex);
-  if (options.length > MAX_PICKER_VALUES) {
+  if (options.length > MAX_CSV_PICKER_VALUES) {
     return (
       <Input
         value={value}
@@ -209,7 +206,7 @@ function CategoryValueList({
   categories: Category[];
   setRule: (sourceValue: string, rule: CategoryRule | undefined) => void;
 }) {
-  if (sourceValues.length > MAX_PICKER_VALUES) {
+  if (sourceValues.length > MAX_CSV_PICKER_VALUES) {
     return (
       <p className="text-xs text-muted-foreground italic">
         This column has {sourceValues.length.toLocaleString()} distinct values — too many to map

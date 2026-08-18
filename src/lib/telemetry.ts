@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { config } from "@/config";
+import { MAX_TELEMETRY_MESSAGE_LENGTH } from "@/config/limits";
 
 const enabled = config.posthog.key.length > 0;
 
@@ -24,7 +25,6 @@ export function capture(event: string, properties?: Record<string, unknown>): vo
 // Message is capped, not allowlisted: full stable error-code taxonomy is a
 // bigger design change (loses exact diagnostic text like the RangeError this
 // feature exists to catch) — deferred pending a product decision.
-const MAX_MESSAGE_LENGTH = 300;
 
 export function captureError(
   event: string,
@@ -36,6 +36,9 @@ export function captureError(
   posthog.capture(event, {
     ...properties,
     name: err instanceof Error ? err.name : "unknown",
-    message: message.length > MAX_MESSAGE_LENGTH ? `${message.slice(0, MAX_MESSAGE_LENGTH)}…` : message,
+    message:
+      message.length > MAX_TELEMETRY_MESSAGE_LENGTH
+        ? `${message.slice(0, MAX_TELEMETRY_MESSAGE_LENGTH)}…`
+        : message,
   });
 }

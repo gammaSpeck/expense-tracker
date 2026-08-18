@@ -3,10 +3,10 @@ import { AlertTriangle, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvPreviewTable, type PreviewRow } from "@/components/more/import-csv/CsvPreviewTable";
+import { CSV_PREVIEW_ROW_COUNT } from "@/config/limits";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CategoryRule, CsvImportPlan, DraftExpense } from "@/types/csvImport";
 
-const PREVIEW_ROW_COUNT = 20;
 const NO_DRAFTS: DraftExpense[] = [];
 
 function lookupName(nameById: Map<string, string>, id: string): string {
@@ -150,11 +150,11 @@ function PreviewSection({
         />
       </div>
 
-      <CsvPreviewTable rows={filteredRows.slice(0, PREVIEW_ROW_COUNT)} />
+      <CsvPreviewTable rows={filteredRows.slice(0, CSV_PREVIEW_ROW_COUNT)} />
 
-      {filteredRows.length > PREVIEW_ROW_COUNT && (
+      {filteredRows.length > CSV_PREVIEW_ROW_COUNT && (
         <p className="text-xs text-muted-foreground text-center">
-          Showing first {PREVIEW_ROW_COUNT} of {filteredRows.length.toLocaleString()} rows
+          Showing first {CSV_PREVIEW_ROW_COUNT} of {filteredRows.length.toLocaleString()} rows
         </p>
       )}
     </div>
