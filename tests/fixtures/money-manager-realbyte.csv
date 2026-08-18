@@ -1,0 +1,7 @@
+Date,Account,Category,Subcategory,Note,INR,Income/Expense,Description,Amount,Currency,Account
+01/06/2024 10:00:00,HDFC Savings Account,Food,Eating out,Breakfast,60,Expense,"Lunch, Dinner",60.0,INR,60
+02/06/2024 11:00:00,HDFC Savings Account,Household,Appliances,Amazon,1234.56,Expense,Groceries,"1,234.56",INR,1234.56
+03/06/2024 12:00:00,HDFC Savings Account,Food,Eating out,Snack,,Expense,Empty Amount Row,,INR,
+04/06/2024 13:00:00,HDFC Savings Account,Food,Eating out,Snack,abc,Expense,Bad Amount Row,abc,INR,abc
+05/06/2024 14:00:00,HDFC Savings Account,Salary,Monthly,Pay,50000,Income,Salary Credit,50000.0,INR,50000
+06/06/2024 15:00:00,HDFC Savings Account,"Bills ",Utility,Electricity,500,Expense,Electricity Bill,500.0,INR,500

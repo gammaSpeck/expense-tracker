@@ -9,7 +9,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-background flex">
       <SidebarNav />
 
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
         {/* Header */}
         <header className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-background/80 backdrop-blur-xl border-b border-border/50 lg:hidden">
           <h1 className="text-lg font-bold gradient-text">Expense Tracker</h1>

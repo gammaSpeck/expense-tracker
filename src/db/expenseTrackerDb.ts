@@ -1,5 +1,6 @@
 import Dexie, { Table } from "dexie";
 import { Expense, Category, TagMetadata } from "@/types/expense";
+import type { DraftExpense, CategoryRule } from "@/types/csvImport";
 import { userPreferences } from "@/db/userPreferences";
 
 // Category colors palette
@@ -369,4 +370,99 @@ export async function importData(data: {
   });
 
   touchInstallMarker(data.expenses.length);
+}
+
+// Resolves the category id for one draft's categoryKey: an explicit rule wins (creating
+// the category on first use of a "create" rule), otherwise the default category.
+async function resolveCategoryId(
+  key: string,
+  rule: CategoryRule | undefined,
+  defaultCategoryId: string,
+  createdCount: number,
+): Promise<{ id: string; created: boolean }> {
+  if (!key || !rule) return { id: defaultCategoryId, created: false };
+  if (rule.kind === "existing") return { id: rule.categoryId, created: false };
+
+  const existingByName = await db.categories.where("name").equals(rule.name).first();
+  if (existingByName) return { id: existingByName.id, created: false };
+
+  const totalExisting = await db.categories.count();
+  const id = crypto.randomUUID();
+  await db.categories.add({
+    id,
+    name: rule.name,
+    icon: "MoreHorizontal",
+    color: CATEGORY_COLORS[(totalExisting + createdCount) % CATEGORY_COLORS.length],
+    createdAt: new Date().toISOString(),
+  });
+  return { id, created: true };
+}
+
+async function buildCategoryKeyMap(
+  drafts: DraftExpense[],
+  categoryRules: Record<string, CategoryRule>,
+  defaultCategoryId: string,
+): Promise<Map<string, string>> {
+  const keyToId = new Map<string, string>();
+  let createdCount = 0;
+  for (const key of new Set(drafts.map((d) => d.categoryKey))) {
+    const { id, created } = await resolveCategoryId(key, categoryRules[key], defaultCategoryId, createdCount);
+    keyToId.set(key, id);
+    if (created) createdCount++;
+  }
+  return keyToId;
+}
+
+function countTags(drafts: DraftExpense[]): Map<string, number> {
+  const tagCounts = new Map<string, number>();
+  for (const draft of drafts) {
+    for (const tag of draft.tags) {
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+  }
+  return tagCounts;
+}
+
+async function writeTagMetadata(tagCounts: Map<string, number>, now: string): Promise<void> {
+  for (const [tag, increment] of tagCounts) {
+    const existing = await db.tagMetadata.get(tag);
+    await db.tagMetadata.put({ tag, count: (existing?.count ?? 0) + increment, lastUsed: now });
+  }
+}
+
+// Imports parsed CSV drafts inside one transaction: creates categories referenced by
+// "create" rules (deduped by name — `categories` is indexed `id, &name`, so a duplicate
+// name throws and aborts the whole import), bulk-writes the expenses, and rebuilds
+// tagMetadata (bulkAdd bypasses addExpense, and useTags() reads this table directly).
+// Any throw aborts atomically, so a partial write is unreachable — no "partial success" path.
+export async function importCsvExpenses(
+  drafts: DraftExpense[],
+  categoryRules: Record<string, CategoryRule>,
+  defaultCategoryId: string,
+): Promise<number> {
+  const now = new Date().toISOString();
+  await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
+    if (!(await db.categories.get(defaultCategoryId))) {
+      throw new Error("The selected default category no longer exists. Reopen the wizard and choose another.");
+    }
+    const keyToId = await buildCategoryKeyMap(drafts, categoryRules, defaultCategoryId);
+    await db.expenses.bulkAdd(
+      drafts.map((d) => ({
+        id: crypto.randomUUID(),
+        value: d.value,
+        category: keyToId.get(d.categoryKey) ?? defaultCategoryId,
+        description: d.description,
+        tags: d.tags,
+        date: d.date,
+        time: d.time,
+        isAdhoc: d.isAdhoc,
+        createdAt: now,
+        updatedAt: now,
+      })),
+    );
+    await writeTagMetadata(countTags(drafts), now);
+  });
+
+  touchInstallMarker(await db.expenses.count());
+  return drafts.length;
 }

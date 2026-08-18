@@ -79,6 +79,7 @@
       },
       {
         "files": ["src/hooks/useCategoryDeletion.ts"],
+        "functions": ["handleDelete", "handleDeleteClick"],
         "maxCrap": 45,
         "reason": "Move-vs-cascade delete branch plus the 'Others' category guard; necessary business logic, not accidental complexity."
       },
@@ -117,6 +118,48 @@
         "functions": ["buildImportPreview"],
         "maxCrap": 75,
         "reason": "JSON parse + shape validation + date-range derivation in a try/catch; necessary import-file guarding."
+      },
+      {
+        "files": ["src/lib/csvImportPlan.ts"],
+        "functions": ["resolveRow"],
+        "maxCrap": 60,
+        "reason": "D6's skip-vs-error split (empty cell -> silent skip, unparseable -> data error) for both amount and date; necessary row-classification logic, not accidental complexity."
+      },
+      {
+        "files": ["src/hooks/useCsvImport.ts"],
+        "functions": ["useCsvImportFormState"],
+        "maxCognitive": 20,
+        "reason": "Flat aggregation of independent useState/useRef declarations for the wizard's state -- fallow's per-hook cognitive weight, not nesting or branching (there is none)."
+      },
+      {
+        "files": ["src/hooks/useCsvImport.ts"],
+        "functions": ["validateStepTransition"],
+        "maxCrap": 35,
+        "reason": "Per-target mapping/default-category validation gate before advancing the wizard; necessary step-transition logic (extracted from goToStep so the hook body stays under the unit-size ceiling)."
+      },
+      {
+        "files": ["src/db/expenseTrackerDb.ts"],
+        "functions": ["resolveCategoryId"],
+        "maxCrap": 35,
+        "reason": "No-rule/existing-rule/create-with-name-dedupe branching (D10 category creation); necessary business logic, matches the useCategoryFormSubmit precedent above."
+      },
+      {
+        "files": ["src/hooks/useCsvImport.ts"],
+        "functions": ["runImport"],
+        "maxCrap": 35,
+        "reason": "Double-submit lock guard plus the existing empty-plan/import-failure branches; necessary data-integrity logic (prevents duplicate expenses from a fast double click)."
+      },
+      {
+        "files": ["src/lib/csvImport.ts"],
+        "functions": ["complete"],
+        "maxCrap": 35,
+        "reason": "Papa Parse result-diagnostics guard plus the existing empty-file/row-count checks; necessary input validation (rejects malformed CSV instead of silently importing broken rows)."
+      },
+      {
+        "files": ["src/pages/TransactionsPage.tsx"],
+        "functions": ["TransactionsPage"],
+        "maxCrap": 45,
+        "reason": "Page composition wiring search/pagination/delete hooks plus the empty-state and infinite-scroll-sentinel ternaries; coverage-blind CRAP, not accidental complexity."
       }
     ]
   },

@@ -34,3 +34,16 @@ export const twelveToday = (): SeedExpense[] =>
     date: daysAgo(0),
     time: `${String(8 + i).padStart(2, "0")}:00`,
   }));
+
+/** `n` rows, one per day counting back from today, newest first -- matches DB ordering, so
+ *  "Row 000" is always the first page and "Row {n-1}" the last. Used for the transactions
+ *  infinite-scroll pagination spec. */
+export const manyRows = (n: number): SeedExpense[] =>
+  Array.from({ length: n }, (_, i) => ({
+    value: 10 + i,
+    categoryName: "Others",
+    description: `Row ${String(i).padStart(3, "0")}`,
+    tags: [],
+    date: daysAgo(i),
+    time: "12:00",
+  }));

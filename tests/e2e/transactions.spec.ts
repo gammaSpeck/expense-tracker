@@ -2,7 +2,7 @@ import { format, parseISO } from "date-fns";
 import { test, expect } from "../support/fixtures";
 import { gotoApp, daysAgo } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { mixed5 } from "../support/data";
+import { mixed5, manyRows } from "../support/data";
 
 test.describe("transactions", () => {
   test("mixed5 shows grouped headers and the correct count", async ({ page }) => {
@@ -59,5 +59,21 @@ test.describe("transactions", () => {
   test("empty state with zero expenses", async ({ page }) => {
     await gotoApp(page, "/transactions");
     await expect(page.getByText("No transactions yet")).toBeVisible();
+  });
+
+  test("infinite scroll reveals 100 rows first, then more on scroll", async ({ page }) => {
+    await gotoApp(page, "/transactions");
+    await seedExpenses(page, manyRows(150));
+
+    await expect(page.getByText("Showing 150 transactions")).toBeVisible();
+    await expect(page.getByTestId("expense-card")).toHaveCount(100);
+    await expect(page.getByText("Row 000")).toBeVisible();
+    await expect(page.getByText("Row 149")).not.toBeAttached();
+
+    await page.getByTestId("load-more-sentinel").scrollIntoViewIfNeeded();
+
+    await expect(page.getByTestId("expense-card")).toHaveCount(150);
+    await expect(page.getByText("Row 149")).toBeVisible();
+    await expect(page.getByTestId("load-more-sentinel")).not.toBeAttached();
   });
 });
