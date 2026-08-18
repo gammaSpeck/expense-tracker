@@ -136,6 +136,10 @@ function useCsvImportFormState() {
   const [ignoreRules, setIgnoreRules] = useState<IgnoreRule[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const isImportingRef = useRef(false);
+  // Bumped on every handleFileSelect call and on reset(); a parseAndDetect result is only
+  // applied if its captured token still matches, so a slow first pick can't overwrite a
+  // faster second pick's already-applied result.
+  const fileSelectionRef = useRef(0);
   const [importedCount, setImportedCount] = useState(0);
   const [mappingErrors, setMappingErrors] = useState<Partial<Record<CsvMappingErrorKey, string>>>({});
   const [detectedPresetId, setDetectedPresetId] = useState<string | null>(null);
@@ -162,6 +166,7 @@ function useCsvImportFormState() {
     defaultCategoryId, setDefaultCategoryId,
     ignoreRules, setIgnoreRules,
     isImporting, setIsImporting, isImportingRef,
+    fileSelectionRef,
     importedCount, setImportedCount,
     mappingErrors, setMappingErrors,
     detectedPresetId, setDetectedPresetId,
@@ -170,6 +175,7 @@ function useCsvImportFormState() {
 }
 
 function resetImportState(state: ReturnType<typeof useCsvImportFormState>) {
+  state.fileSelectionRef.current += 1;
   state.setStep("upload");
   state.setParsed(null);
   state.setMapping(EMPTY_MAPPING);
@@ -230,8 +236,9 @@ export function useCsvImport(): CsvImportState {
 
   async function handleFileSelect(file: File) {
     if (parsed) reset();
+    const selection = ++state.fileSelectionRef.current;
     const detected = await parseAndDetect(file);
-    if (!detected) return;
+    if (!detected || selection !== state.fileSelectionRef.current) return;
     state.setParsed(detected.result);
     state.setDetectedPresetId(detected.presetId);
   }

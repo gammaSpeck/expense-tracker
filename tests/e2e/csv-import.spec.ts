@@ -157,4 +157,57 @@ test.describe("csv-import", () => {
     await expect(page.getByText("Column Mapping — Step 1 of 3")).toBeVisible();
     await expect(page.getByText("Select the Amount column.")).toBeVisible();
   });
+
+  test("selecting a second file before the first finishes parsing keeps the second file's result", async ({
+    page,
+  }) => {
+    // Real FileReader timing on small in-memory fixtures is unreliable to race against --
+    // delay the "first" file's read deterministically so it resolves after the second file's,
+    // regardless of machine speed. This only fakes *ordering*; both files still parse for real.
+    await page.addInitScript(() => {
+      const NativeFileReader = window.FileReader;
+      class DelayedFileReader extends NativeFileReader {
+        readAsText(blob: Blob, encoding?: string) {
+          if ((blob as File).name === "first.csv") {
+            setTimeout(() => super.readAsText(blob, encoding), 50);
+          } else {
+            super.readAsText(blob, encoding);
+          }
+        }
+      }
+      window.FileReader = DelayedFileReader;
+    });
+
+    await gotoApp(page, "/settings/data");
+    await page.getByTestId("csv-import-entry").click();
+    await page.getByRole("button", { name: "Skip, continue" }).click();
+
+    const first = "Date,Time,Amount,Category,Note\n2024-01-01,10:00,1,Food,first file marker\n";
+    const second = "Date,Time,Amount,Category,Note\n2024-06-01,10:00,42,Food,second file marker\n";
+
+    // Dispatch both native `change` events synchronously in one `page.evaluate` -- two
+    // separate `setInputFiles()` calls each round-trip through CDP, which would let the
+    // first selection's async work finish before the second one even starts.
+    await page.evaluate(
+      ([firstCsv, secondCsv]) => {
+        const input = document.querySelector<HTMLInputElement>('[data-testid="csv-import-file-input"]')!;
+        const selectFile = (name: string, content: string) => {
+          const dt = new DataTransfer();
+          dt.items.add(new File([content], name, { type: "text/csv" }));
+          input.files = dt.files;
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+        selectFile("first.csv", firstCsv);
+        selectFile("second.csv", secondCsv);
+      },
+      [first, second],
+    );
+
+    await expect(page.getByText(/replace second\.csv/)).toBeVisible();
+    // Let the deliberately-delayed first-file parse finish in the background; it must not
+    // overwrite second.csv's already-applied result once it resolves late.
+    await page.waitForTimeout(500);
+    await expect(page.getByText(/replace second\.csv/)).toBeVisible();
+    await expect(page.getByText(/replace first\.csv/)).toHaveCount(0);
+  });
 });

@@ -127,6 +127,12 @@
       },
       {
         "files": ["src/hooks/useCsvImport.ts"],
+        "functions": ["useCsvImportFormState"],
+        "maxCognitive": 20,
+        "reason": "Flat aggregation of independent useState/useRef declarations for the wizard's state -- fallow's per-hook cognitive weight, not nesting or branching (there is none)."
+      },
+      {
+        "files": ["src/hooks/useCsvImport.ts"],
         "functions": ["validateStepTransition"],
         "maxCrap": 35,
         "reason": "Per-target mapping/default-category validation gate before advancing the wizard; necessary step-transition logic (extracted from goToStep so the hook body stays under the unit-size ceiling)."
