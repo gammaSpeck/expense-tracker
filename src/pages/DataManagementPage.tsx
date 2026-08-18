@@ -6,7 +6,6 @@ import { BackupCard } from "@/components/more/BackupCard";
 import { ImportExportCard } from "@/components/more/ImportExportCard";
 import { FactoryReset } from "@/components/more/FactoryReset";
 import { EncryptionSettings } from "@/components/more/EncryptionSettings";
-import { CsvImportWizard } from "@/components/more/CsvImportWizard";
 
 export default function DataManagementPage() {
   const navigate = useNavigate();
