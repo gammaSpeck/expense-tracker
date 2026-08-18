@@ -1,0 +1,7 @@
+Date,Category,Amount,Note,Type,Payment mode,To payment mode,Tags
+2025-01-01 09:00,Food and Dining,100.00,Breakfast,Expense,Cash,,
+2025-01-02 10:15,Transport,50.00,Bus fare,Expense,Cash,,
+2025-01-03 11:30,Bills and Utilities,1500.00,Electricity,Expense,Cash,,
+2025-01-04 12:45,Misc,200.00,"Gift, wrapped",Expense,Cash,,#gift
+2025-01-05 14:00,Medical,300.00,Pharmacy,Expense,Cash,,
+2025-01-06 16:20,Home,450.00,Furniture,Expense,Cash,,

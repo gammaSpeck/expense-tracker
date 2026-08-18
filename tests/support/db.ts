@@ -92,3 +92,56 @@ export async function seedExpenses(page: Page, items: SeedExpense[]): Promise<vo
 
   await page.reload();
 }
+
+export type ReadExpense = {
+  value: number;
+  categoryName: string;
+  description?: string;
+  tags: string[];
+  date: string;
+  time: string;
+  isAdhoc: boolean;
+};
+
+/** Reads `expenses` out of IndexedDB with each row's category id resolved to its name. */
+export async function readExpenses(page: Page): Promise<ReadExpense[]> {
+  return page.evaluate(() => {
+    const { promise, resolve, reject } = Promise.withResolvers<ReadExpense[]>();
+    const openReq = indexedDB.open("ExpenseTrackerDB");
+    openReq.onerror = () => reject(openReq.error);
+    openReq.onsuccess = () => {
+      const db = openReq.result;
+      const fail = (error: unknown) => {
+        db.close();
+        reject(error);
+      };
+      try {
+        const tx = db.transaction(["expenses", "categories"], "readonly");
+        const catReq = tx.objectStore("categories").getAll();
+        catReq.onerror = () => fail(catReq.error);
+        catReq.onsuccess = () => {
+          const idToName = new Map((catReq.result as CategoryRow[]).map((c) => [c.id, c.name]));
+          const expReq = tx.objectStore("expenses").getAll();
+          expReq.onerror = () => fail(expReq.error);
+          expReq.onsuccess = () => {
+            db.close();
+            resolve(
+              expReq.result.map((e) => ({
+                value: e.value,
+                categoryName: idToName.get(e.category) ?? "",
+                description: e.description,
+                tags: e.tags,
+                date: e.date,
+                time: e.time,
+                isAdhoc: e.isAdhoc,
+              })),
+            );
+          };
+        };
+      } catch (error) {
+        fail(error);
+      }
+    };
+    return promise;
+  });
+}
