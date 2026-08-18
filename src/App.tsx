@@ -26,7 +26,6 @@ const AddExpensePage = lazy(() => import("@/pages/AddExpensePage"));
 const CategoriesPage = lazy(() => import("@/pages/CategoriesPage"));
 const AnalysisPage = lazy(() => import("@/pages/AnalysisPage"));
 const EditExpensePage = lazy(() => import("@/pages/EditExpensePage"));
-const ImportExternalCsvPage = lazy(() => import("@/pages/ImportExternalCsvPage"));
 const CsvImportPage = lazy(() => import("@/pages/CsvImportPage"));
 
 function AppContent() {
@@ -47,7 +46,6 @@ function AppContent() {
         <Route path="/settings/data" element={<DataManagementPage />} />
         <Route path="/settings/data/import-csv" element={<CsvImportPage />} />
         <Route path="/settings/about" element={<AboutPage />} />
-        <Route path="/import-external-csv" element={<ImportExternalCsvPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {lossCount !== null && (
