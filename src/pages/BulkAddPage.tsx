@@ -536,7 +536,9 @@ const DESCRIPTION_SUGGESTION_LIMIT = 8;
 function filterDescriptions(all: string[], query: string): string[] {
   const trimmed = query.trim().toLowerCase();
   if (trimmed.length < DESCRIPTION_SUGGESTION_MIN_LENGTH) return [];
-  return all.filter((d) => d.toLowerCase().includes(trimmed)).slice(0, DESCRIPTION_SUGGESTION_LIMIT);
+  return all
+    .filter((d) => d.toLowerCase().includes(trimmed))
+    .slice(0, DESCRIPTION_SUGGESTION_LIMIT);
 }
 
 function RowDescriptionSuggestions({
@@ -572,7 +574,12 @@ interface RowDescriptionFieldProps {
   onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 }
 
-function RowDescriptionField({ value, allDescriptions, onChange, onKeyDown }: RowDescriptionFieldProps) {
+function RowDescriptionField({
+  value,
+  allDescriptions,
+  onChange,
+  onKeyDown,
+}: RowDescriptionFieldProps) {
   const [focused, setFocused] = useState(false);
   const suggestions = filterDescriptions(allDescriptions, value);
 
@@ -652,7 +659,7 @@ function RowCard({
         onChange={(v) => onUpdate({ description: v })}
         onKeyDown={(e) => commitOnEnter(e, onCommit)}
       />
-      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+      <div className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
         <RowTagsToggle row={row} onUpdate={onUpdate} />
         <RowTimeToggle block={block} row={row} today={today} onUpdate={onUpdate} />
         <RowAdhocToggle row={row} onUpdate={onUpdate} />
@@ -753,7 +760,12 @@ function BlockHeader({
   onRemoveBlock,
 }: BlockHeaderProps) {
   return (
-    <div className={cn("flex items-center gap-2 p-3 bg-muted/30 flex-wrap", blockHeaderRadius(block.collapsed))}>
+    <div
+      className={cn(
+        "flex items-center gap-2 p-3 bg-muted/30 flex-wrap",
+        blockHeaderRadius(block.collapsed),
+      )}
+    >
       <button
         type="button"
         aria-label={block.collapsed ? "Expand day" : "Collapse day"}
@@ -930,7 +942,7 @@ function BulkFooter({
   disabled: boolean;
 }) {
   return (
-    <div className="fixed bottom-0 inset-x-0 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3 z-40">
+    <div className="fixed bottom-20 inset-x-0 lg:bottom-0 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3 z-60">
       <span className="text-sm text-muted-foreground">
         {entryCount} {entryCount === 1 ? "entry" : "entries"} · {formatValue(grandTotal)}
       </span>
@@ -1055,7 +1067,7 @@ export default function BulkAddPage() {
   };
 
   return (
-    <div className="px-4 py-6 pb-28 max-w-2xl mx-auto space-y-4">
+    <div className="px-4 py-6 pb-44 lg:pb-28 max-w-2xl mx-auto space-y-4">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
