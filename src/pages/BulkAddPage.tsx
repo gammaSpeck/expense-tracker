@@ -725,6 +725,10 @@ function BlockDateControl({ block, today, yesterday, onSetDate }: BlockDateContr
   );
 }
 
+function blockHeaderRadius(collapsed: boolean): string {
+  return collapsed ? "rounded-xl" : "rounded-t-xl";
+}
+
 interface BlockHeaderProps {
   block: BulkDraftBlock;
   today: string;
@@ -749,7 +753,7 @@ function BlockHeader({
   onRemoveBlock,
 }: BlockHeaderProps) {
   return (
-    <div className="flex items-center gap-2 p-3 bg-muted/30 flex-wrap">
+    <div className={cn("flex items-center gap-2 p-3 bg-muted/30 flex-wrap", blockHeaderRadius(block.collapsed))}>
       <button
         type="button"
         aria-label={block.collapsed ? "Expand day" : "Collapse day"}
@@ -850,7 +854,7 @@ function BlockCard({
   const { count, total } = blockTotals(bodyProps.block);
 
   return (
-    <div data-testid="bulk-block" className="rounded-xl border border-border overflow-hidden">
+    <div data-testid="bulk-block" className="rounded-xl border border-border">
       <BlockHeader
         block={bodyProps.block}
         today={bodyProps.today}
