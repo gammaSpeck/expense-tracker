@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useMonthSummary, useRecentExpenses, useCategories } from "@/hooks/useExpenseData";
 import { useExpenseActions } from "@/hooks/useExpenseActions";
@@ -8,7 +8,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { MonthlySummaryCard } from "@/components/MonthlySummaryCard";
 import { RecentTransactionsSection } from "@/components/RecentTransactionsSection";
 import { DeleteExpenseDialog } from "@/components/expenses/DeleteExpenseDialog";
-import { userPreferences } from "@/db/userPreferences";
 
 const LONG_PRESS_MS = 400; // under iOS's ~500ms text-selection callout timing
 const MOVE_CANCEL_PX = 10;
@@ -65,26 +64,9 @@ export function FloatingActionButton() {
   );
 }
 
-function BulkCoachMark({ onDismiss }: { onDismiss: () => void }) {
-  return (
-    <div className="fixed bottom-36 left-1/2 -translate-x-1/2 z-50 bg-popover text-popover-foreground text-xs px-3 py-2 rounded-lg shadow-lg border border-border flex items-center gap-2 whitespace-nowrap">
-      Hold to add several at once
-      <button
-        type="button"
-        aria-label="Dismiss"
-        onClick={onDismiss}
-        className="text-muted-foreground hover:text-foreground"
-      >
-        <X className="h-3 w-3" />
-      </button>
-    </div>
-  );
-}
-
 export default function HomePage() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [coachDismissed, setCoachDismissed] = useState(userPreferences.getBulkCoachSeen());
 
   const { total, totalExcludingAdhoc, monthStart, monthEnd } = useMonthSummary();
   const { currency, formatValue } = useCurrency();
@@ -123,14 +105,6 @@ export default function HomePage() {
 
       {/* FAB */}
       {isMobile && <FloatingActionButton />}
-      {isMobile && !coachDismissed && (
-        <BulkCoachMark
-          onDismiss={() => {
-            userPreferences.setBulkCoachSeen();
-            setCoachDismissed(true);
-          }}
-        />
-      )}
 
       <DeleteExpenseDialog
         mode="controlled"

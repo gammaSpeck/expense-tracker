@@ -129,16 +129,5 @@ test.describe("bulk-add", () => {
       await page.getByLabel("Add expense").click();
       await expect(page).toHaveURL(/\/add$/);
     });
-
-    test("the FAB coach mark shows once and never returns", async ({ page }) => {
-      await gotoApp(page, "/");
-      await expect(page.getByText("Hold to add several at once")).toBeVisible();
-
-      await page.getByRole("button", { name: "Dismiss" }).click();
-      await expect(page.getByText("Hold to add several at once")).toHaveCount(0);
-
-      await page.reload();
-      await expect(page.getByText("Hold to add several at once")).toHaveCount(0);
-    });
   });
 });

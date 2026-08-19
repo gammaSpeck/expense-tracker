@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import type { Dispatch, KeyboardEvent, SetStateAction } from "react";
 import { useNavigate, Link } from "react-router";
 import { format, subDays } from "date-fns";
-import { ArrowLeft, ChevronDown, Clock, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectTrigger } from "@/components/ui/select";
-import { CategorySelectValue, CategoryOptionItems } from "@/components/categories/CategorySelectOptions";
+import {
+  CategorySelectValue,
+  CategoryOptionItems,
+} from "@/components/categories/CategorySelectOptions";
 import { TagChipList } from "@/components/expenses/TagChipList";
 import { useCategories } from "@/hooks/useExpenseData";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getCurrentTime24 } from "@/lib/time";
-import { getDateGroupLabel } from "@/lib/expenseDates";
 import { addExpensesBulk } from "@/db/expenseTrackerDb";
 import { getBulkDraft, saveBulkDraft, clearBulkDraft } from "@/db/bulkDraft";
 import type { BulkDraft, BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
@@ -41,7 +43,15 @@ function blockHasContent(block: BulkDraftBlock): boolean {
 }
 
 function makeRow(category: string): BulkDraftRow {
-  return { id: crypto.randomUUID(), value: "", category, description: "", tags: [], time: null, isAdhoc: false };
+  return {
+    id: crypto.randomUUID(),
+    value: "",
+    category,
+    description: "",
+    tags: [],
+    time: null,
+    isAdhoc: false,
+  };
 }
 
 function makeBlock(date: string, category: string): BulkDraftBlock {
@@ -50,7 +60,10 @@ function makeBlock(date: string, category: string): BulkDraftBlock {
 
 function blockTotals(block: BulkDraftBlock): { count: number; total: number } {
   const nonBlank = block.rows.filter((r) => !isRowBlank(r));
-  return { count: nonBlank.length, total: nonBlank.reduce((sum, r) => sum + (Number(r.value) || 0), 0) };
+  return {
+    count: nonBlank.length,
+    total: nonBlank.reduce((sum, r) => sum + (Number(r.value) || 0), 0),
+  };
 }
 
 function pageTotals(blocks: BulkDraftBlock[]): { count: number; total: number } {
@@ -141,7 +154,9 @@ function partitionRows(blocks: BulkDraftBlock[], today: string): PartitionResult
   return { toWrite, invalidRows };
 }
 
-function firstInvalidEntry(invalidRows: Map<string, InvalidRow>): { rowId: string; blockId: string } | null {
+function firstInvalidEntry(
+  invalidRows: Map<string, InvalidRow>,
+): { rowId: string; blockId: string } | null {
   const first = invalidRows.entries().next();
   return first.done ? null : { rowId: first.value[0], blockId: first.value[1].blockId };
 }
@@ -157,7 +172,11 @@ function draftHasContent(draft: BulkDraft): boolean {
 // blocks[] reducers — each takes the prior state and returns the next, so every handler in
 // the component is a one-line `setBlocks(bs => ...)` call.
 
-function updateRow(rows: BulkDraftRow[], rowId: string, patch: Partial<BulkDraftRow>): BulkDraftRow[] {
+function updateRow(
+  rows: BulkDraftRow[],
+  rowId: string,
+  patch: Partial<BulkDraftRow>,
+): BulkDraftRow[] {
   return rows.map((r) => (r.id !== rowId ? r : { ...r, ...patch }));
 }
 
@@ -167,10 +186,16 @@ function updateBlockRow(
   rowId: string,
   patch: Partial<BulkDraftRow>,
 ): BulkDraftBlock[] {
-  return blocks.map((b) => (b.id !== blockId ? b : { ...b, rows: updateRow(b.rows, rowId, patch) }));
+  return blocks.map((b) =>
+    b.id !== blockId ? b : { ...b, rows: updateRow(b.rows, rowId, patch) },
+  );
 }
 
-function addRowToBlock(blocks: BulkDraftBlock[], blockId: string, row: BulkDraftRow): BulkDraftBlock[] {
+function addRowToBlock(
+  blocks: BulkDraftBlock[],
+  blockId: string,
+  row: BulkDraftRow,
+): BulkDraftBlock[] {
   return blocks.map((b) => (b.id === blockId ? { ...b, rows: [...b.rows, row] } : b));
 }
 
@@ -229,14 +254,23 @@ function pickDefaultCategoryId(categories: Category[]): string {
   return "";
 }
 
-function applyDefaultCategory(categoryId: string, setBlocks: Dispatch<SetStateAction<BulkDraftBlock[]>>): void {
+function applyDefaultCategory(
+  categoryId: string,
+  setBlocks: Dispatch<SetStateAction<BulkDraftBlock[]>>,
+): void {
   if (!categoryId) return;
   setBlocks((bs) => fillPlaceholderCategory(bs, categoryId));
 }
 
-function useDefaultCategoryId(categories: Category[], setBlocks: Dispatch<SetStateAction<BulkDraftBlock[]>>): string {
+function useDefaultCategoryId(
+  categories: Category[],
+  setBlocks: Dispatch<SetStateAction<BulkDraftBlock[]>>,
+): string {
   const defaultCategoryId = pickDefaultCategoryId(categories);
-  useEffect(() => applyDefaultCategory(defaultCategoryId, setBlocks), [defaultCategoryId, setBlocks]);
+  useEffect(
+    () => applyDefaultCategory(defaultCategoryId, setBlocks),
+    [defaultCategoryId, setBlocks],
+  );
   return defaultCategoryId;
 }
 
@@ -344,8 +378,13 @@ function RowAmountCategory({
             <CategoryOptionItems categories={categories} />
           </SelectContent>
         </Select>
-        <button type="button" aria-label="Remove row" onClick={onRemove} className="p-2 text-muted-foreground hover:text-foreground">
-          <X className="h-4 w-4" />
+        <button
+          type="button"
+          aria-label="Remove row"
+          onClick={onRemove}
+          className="p-2 text-muted-foreground hover:text-foreground"
+        >
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
       <RowFieldError message={errors?.amount} />
@@ -354,7 +393,13 @@ function RowAmountCategory({
   );
 }
 
-function RowTagsToggle({ row, onUpdate }: { row: BulkDraftRow; onUpdate: (patch: Partial<BulkDraftRow>) => void }) {
+function RowTagsToggle({
+  row,
+  onUpdate,
+}: {
+  row: BulkDraftRow;
+  onUpdate: (patch: Partial<BulkDraftRow>) => void;
+}) {
   const [tagsOpen, setTagsOpen] = useState(row.tags.length > 0);
   const [tagInput, setTagInput] = useState("");
 
@@ -397,6 +442,17 @@ function defaultRowTime(block: BulkDraftBlock, today: string): string {
   return block.date === today ? getCurrentTime24() : "12:00";
 }
 
+function openTimePicker(input: HTMLInputElement | null): void {
+  if (!input) return;
+  input.focus();
+  try {
+    input.showPicker?.();
+  } catch {
+    // showPicker can throw outside a user gesture in some browsers — focus is enough of a
+    // fallback that the user can still open it manually.
+  }
+}
+
 function TimeToggleButton({ open, onClick }: { open: boolean; onClick: () => void }) {
   return (
     <button type="button" aria-label={open ? "Hide time" : "Set time"} onClick={onClick}>
@@ -405,33 +461,70 @@ function TimeToggleButton({ open, onClick }: { open: boolean; onClick: () => voi
   );
 }
 
-function RowTimeInput({ open, value, onChange }: { open: boolean; value: string; onChange: (v: string) => void }) {
+function RowTimeInput({
+  open,
+  value,
+  onChange,
+  registerRef,
+}: {
+  open: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  registerRef: (el: HTMLInputElement | null) => void;
+}) {
   if (!open) return null;
   return (
-    <Input type="time" aria-label="Time" className="h-7 w-24 text-xs" value={value} onChange={(e) => onChange(e.target.value)} />
+    <Input
+      ref={registerRef}
+      type="time"
+      aria-label="Time"
+      className="h-7 w-24 text-xs"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 
 function RowTimeToggle({ block, row, today, onUpdate }: RowTimeToggleProps) {
   const [timeOpen, setTimeOpen] = useState(row.time !== null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleToggle = () => {
+    const opening = !timeOpen;
+    setTimeOpen(opening);
+    if (opening) requestAnimationFrame(() => openTimePicker(inputRef.current));
+  };
 
   return (
     <>
-      <TimeToggleButton open={timeOpen} onClick={() => setTimeOpen((v) => !v)} />
+      <TimeToggleButton open={timeOpen} onClick={handleToggle} />
       <RowTimeInput
         open={timeOpen}
         value={row.time ?? defaultRowTime(block, today)}
         onChange={(v) => onUpdate({ time: v })}
+        registerRef={(el) => {
+          inputRef.current = el;
+        }}
       />
     </>
   );
 }
 
-function RowAdhocToggle({ row, onUpdate }: { row: BulkDraftRow; onUpdate: (patch: Partial<BulkDraftRow>) => void }) {
+function RowAdhocToggle({
+  row,
+  onUpdate,
+}: {
+  row: BulkDraftRow;
+  onUpdate: (patch: Partial<BulkDraftRow>) => void;
+}) {
   return (
     <label className="flex items-center gap-1.5 ml-auto">
-      one-off
-      <Switch aria-label="One-off" checked={row.isAdhoc} onCheckedChange={(v) => onUpdate({ isAdhoc: v })} />
+      adhoc
+      <Switch
+        aria-label="adhoc"
+        checked={row.isAdhoc}
+        onCheckedChange={(v) => onUpdate({ isAdhoc: v })}
+      />
     </label>
   );
 }
@@ -486,7 +579,10 @@ function RowCard({
         onChange={(e) => onUpdate({ description: e.target.value })}
         onKeyDown={(e) => commitOnEnter(e, onCommit)}
       />
-      <TagChipList tags={row.tags} onRemoveTag={(t) => onUpdate({ tags: row.tags.filter((x) => x !== t) })} />
+      <TagChipList
+        tags={row.tags}
+        onRemoveTag={(t) => onUpdate({ tags: row.tags.filter((x) => x !== t) })}
+      />
       <RowFieldError message={errors?.tags} />
       <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
         <RowTagsToggle row={row} onUpdate={onUpdate} />
@@ -497,7 +593,15 @@ function RowCard({
   );
 }
 
-function DateChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function DateChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -512,18 +616,47 @@ function DateChip({ label, active, onClick }: { label: string; active: boolean; 
   );
 }
 
-interface BlockDateChipsProps {
+interface BlockHeaderProps {
   block: BulkDraftBlock;
   today: string;
   yesterday: string;
+  count: number;
+  total: number;
+  formatValue: (value: number) => string;
+  onToggleCollapse: () => void;
   onSetDate: (date: string) => void;
+  onRemoveBlock: () => void;
 }
 
-function BlockDateChips({ block, today, yesterday, onSetDate }: BlockDateChipsProps) {
+function BlockHeader({
+  block,
+  today,
+  yesterday,
+  count,
+  total,
+  formatValue,
+  onToggleCollapse,
+  onSetDate,
+  onRemoveBlock,
+}: BlockHeaderProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 p-3 bg-muted/30 flex-wrap">
+      <button
+        type="button"
+        aria-label={block.collapsed ? "Expand day" : "Collapse day"}
+        onClick={onToggleCollapse}
+        className="shrink-0 text-muted-foreground hover:text-foreground"
+      >
+        <ChevronDown
+          className={cn("h-4 w-4 transition-transform", block.collapsed && "-rotate-90")}
+        />
+      </button>
       <DateChip label="Today" active={block.date === today} onClick={() => onSetDate(today)} />
-      <DateChip label="Yesterday" active={block.date === yesterday} onClick={() => onSetDate(yesterday)} />
+      <DateChip
+        label="Yesterday"
+        active={block.date === yesterday}
+        onClick={() => onSetDate(yesterday)}
+      />
       <input
         type="date"
         aria-label="Custom date"
@@ -531,33 +664,16 @@ function BlockDateChips({ block, today, yesterday, onSetDate }: BlockDateChipsPr
         onChange={(e) => onSetDate(e.target.value)}
         className="h-7 text-xs border border-input rounded-md px-2 bg-background"
       />
-    </div>
-  );
-}
-
-interface BlockHeaderProps {
-  block: BulkDraftBlock;
-  count: number;
-  total: number;
-  formatValue: (value: number) => string;
-  onToggleCollapse: () => void;
-  onRemoveBlock: () => void;
-}
-
-function BlockHeader({ block, count, total, formatValue, onToggleCollapse, onRemoveBlock }: BlockHeaderProps) {
-  return (
-    <div className="flex items-center justify-between p-3 bg-muted/30">
-      <button type="button" className="flex items-center gap-2 font-medium text-sm" onClick={onToggleCollapse}>
-        <ChevronDown className={cn("h-4 w-4 transition-transform", block.collapsed && "-rotate-90")} />
-        {getDateGroupLabel(block.date)} · {count} {count === 1 ? "entry" : "entries"} · {formatValue(total)}
-      </button>
+      <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
+        {count} {count === 1 ? "entry" : "entries"} · {formatValue(total)}
+      </span>
       <button
         type="button"
         aria-label="Remove day"
         onClick={onRemoveBlock}
-        className="p-1 text-muted-foreground hover:text-foreground"
+        className="p-1 text-muted-foreground hover:text-foreground shrink-0"
       >
-        <X className="h-4 w-4" />
+        <Trash2 className="h-4 w-4" />
       </button>
     </div>
   );
@@ -566,11 +682,9 @@ function BlockHeader({ block, count, total, formatValue, onToggleCollapse, onRem
 interface BlockBodyProps {
   block: BulkDraftBlock;
   today: string;
-  yesterday: string;
   categories: Category[];
   currencySymbol: string;
   errors: Map<string, RowFieldErrors>;
-  onSetDate: (date: string) => void;
   onAddRow: () => void;
   onUpdateRow: (rowId: string, patch: Partial<BulkDraftRow>) => void;
   onRemoveRow: (rowId: string) => void;
@@ -581,11 +695,9 @@ interface BlockBodyProps {
 function BlockBody({
   block,
   today,
-  yesterday,
   categories,
   currencySymbol,
   errors,
-  onSetDate,
   onAddRow,
   onUpdateRow,
   onRemoveRow,
@@ -596,7 +708,6 @@ function BlockBody({
 
   return (
     <div className="p-3 space-y-3">
-      <BlockDateChips block={block} today={today} yesterday={yesterday} onSetDate={onSetDate} />
       {block.rows.map((row) => (
         <RowCard
           key={row.id}
@@ -621,22 +732,34 @@ function BlockBody({
 }
 
 interface BlockCardProps extends BlockBodyProps {
+  yesterday: string;
   formatValue: (value: number) => string;
   onToggleCollapse: () => void;
+  onSetDate: (date: string) => void;
   onRemoveBlock: () => void;
 }
 
-function BlockCard({ formatValue, onToggleCollapse, onRemoveBlock, ...bodyProps }: BlockCardProps) {
+function BlockCard({
+  yesterday,
+  formatValue,
+  onToggleCollapse,
+  onSetDate,
+  onRemoveBlock,
+  ...bodyProps
+}: BlockCardProps) {
   const { count, total } = blockTotals(bodyProps.block);
 
   return (
     <div data-testid="bulk-block" className="rounded-xl border border-border overflow-hidden">
       <BlockHeader
         block={bodyProps.block}
+        today={bodyProps.today}
+        yesterday={yesterday}
         count={count}
         total={total}
         formatValue={formatValue}
         onToggleCollapse={onToggleCollapse}
+        onSetDate={onSetDate}
         onRemoveBlock={onRemoveBlock}
       />
       <BlockBody {...bodyProps} />
@@ -762,7 +885,9 @@ export default function BulkAddPage() {
   };
 
   const handleRemoveRow = (blockId: string, rowId: string) => {
-    setBlocks((bs) => removeRowFromBlock(bs, blockId, rowId, lastCategoryRef.current || defaultCategoryId));
+    setBlocks((bs) =>
+      removeRowFromBlock(bs, blockId, rowId, lastCategoryRef.current || defaultCategoryId),
+    );
   };
 
   const handleAddBlock = () => {
@@ -778,8 +903,10 @@ export default function BulkAddPage() {
     setBlocks((bs) => removeBlock(bs, blockId));
   };
 
-  const handleToggleCollapse = (blockId: string) => setBlocks((bs) => toggleBlockCollapse(bs, blockId));
-  const handleSetDate = (blockId: string, date: string) => setBlocks((bs) => setBlockDate(bs, blockId, date));
+  const handleToggleCollapse = (blockId: string) =>
+    setBlocks((bs) => toggleBlockCollapse(bs, blockId));
+  const handleSetDate = (blockId: string, date: string) =>
+    setBlocks((bs) => setBlockDate(bs, blockId, date));
 
   const handleBack = () => {
     if (isDirty && !window.confirm("Discard your unsaved entries?")) return;
@@ -821,13 +948,23 @@ export default function BulkAddPage() {
   return (
     <div className="px-4 py-6 pb-28 max-w-2xl mx-auto space-y-4">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" aria-label="Go back" onClick={handleBack} className="h-9 w-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Go back"
+          onClick={handleBack}
+          className="h-9 w-9"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-semibold">Add many</h1>
       </div>
 
-      <DraftResumeBanner pendingDraft={pendingDraft} onResume={resumeDraft} onDiscard={discardDraft} />
+      <DraftResumeBanner
+        pendingDraft={pendingDraft}
+        onResume={resumeDraft}
+        onDiscard={discardDraft}
+      />
 
       {blocks.map((block) => (
         <BlockCard
