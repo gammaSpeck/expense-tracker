@@ -611,6 +611,7 @@ function RowDescriptionField({
 interface RowCardProps {
   block: BulkDraftBlock;
   row: BulkDraftRow;
+  index: number;
   today: string;
   categories: Category[];
   currencySymbol: string;
@@ -626,6 +627,7 @@ interface RowCardProps {
 function RowCard({
   block,
   row,
+  index,
   today,
   categories,
   currencySymbol,
@@ -641,7 +643,7 @@ function RowCard({
     <div
       data-testid="bulk-row"
       ref={registerRowRef}
-      className="space-y-1.5 pb-3 border-b border-border last:border-0 last:pb-0"
+      className={cn("space-y-1.5 -mx-3 px-3 py-3", index % 2 === 1 && "bg-muted/40")}
     >
       <RowAmountCategory
         row={row}
@@ -823,11 +825,12 @@ function BlockBody({
 
   return (
     <div className="p-3 space-y-3">
-      {block.rows.map((row) => (
+      {block.rows.map((row, index) => (
         <RowCard
           key={row.id}
           block={block}
           row={row}
+          index={index}
           today={today}
           categories={categories}
           currencySymbol={currencySymbol}
@@ -942,7 +945,7 @@ function BulkFooter({
   disabled: boolean;
 }) {
   return (
-    <div className="fixed bottom-20 inset-x-0 lg:bottom-0 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3 z-60">
+    <div className="fixed bottom-16 inset-x-0 lg:bottom-0 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3 z-60">
       <span className="text-sm text-muted-foreground">
         {entryCount} {entryCount === 1 ? "entry" : "entries"} · {formatValue(grandTotal)}
       </span>
