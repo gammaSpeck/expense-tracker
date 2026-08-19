@@ -32,7 +32,8 @@ test.describe("bulk-add", () => {
     await expect(blocks).toHaveCount(2);
 
     const yesterdayBlock = blocks.nth(1);
-    await yesterdayBlock.getByRole("button", { name: "Yesterday" }).click();
+    await yesterdayBlock.getByRole("button", { name: "Today" }).click();
+    await page.getByRole("button", { name: "Yesterday" }).click();
     const yesterdayRows = yesterdayBlock.getByTestId("bulk-row");
     await yesterdayRows.nth(0).getByLabel("Amount").fill("75");
     await yesterdayRows.nth(0).getByLabel("Category").click();

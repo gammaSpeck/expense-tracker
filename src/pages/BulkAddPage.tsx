@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, KeyboardEvent, SetStateAction } from "react";
 import { useNavigate, Link } from "react-router";
-import { format, subDays } from "date-fns";
-import { ArrowLeft, ChevronDown, Clock, Trash2 } from "lucide-react";
+import { format, parseISO, subDays } from "date-fns";
+import { ArrowLeft, Calendar, ChevronDown, Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectTrigger } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   CategorySelectValue,
   CategoryOptionItems,
@@ -16,7 +17,7 @@ import { TagChipList } from "@/components/expenses/TagChipList";
 import { useCategories } from "@/hooks/useExpenseData";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { getCurrentTime24 } from "@/lib/time";
-import { addExpensesBulk } from "@/db/expenseTrackerDb";
+import { addExpensesBulk, getDescriptionSuggestions } from "@/db/expenseTrackerDb";
 import { getBulkDraft, saveBulkDraft, clearBulkDraft } from "@/db/bulkDraft";
 import type { BulkDraft, BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
 import type { Category, Expense } from "@/types/expense";
@@ -529,6 +530,77 @@ function RowAdhocToggle({
   );
 }
 
+const DESCRIPTION_SUGGESTION_MIN_LENGTH = 2;
+const DESCRIPTION_SUGGESTION_LIMIT = 8;
+
+function filterDescriptions(all: string[], query: string): string[] {
+  const trimmed = query.trim().toLowerCase();
+  if (trimmed.length < DESCRIPTION_SUGGESTION_MIN_LENGTH) return [];
+  return all.filter((d) => d.toLowerCase().includes(trimmed)).slice(0, DESCRIPTION_SUGGESTION_LIMIT);
+}
+
+function RowDescriptionSuggestions({
+  show,
+  suggestions,
+  onSelect,
+}: {
+  show: boolean;
+  suggestions: string[];
+  onSelect: (value: string) => void;
+}) {
+  if (!show) return null;
+  return (
+    <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+      {suggestions.map((suggestion) => (
+        <button
+          key={suggestion}
+          type="button"
+          onClick={() => onSelect(suggestion)}
+          className="w-full text-left px-3 py-2 text-sm hover:bg-accent"
+        >
+          {suggestion}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface RowDescriptionFieldProps {
+  value: string;
+  allDescriptions: string[];
+  onChange: (value: string) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
+}
+
+function RowDescriptionField({ value, allDescriptions, onChange, onKeyDown }: RowDescriptionFieldProps) {
+  const [focused, setFocused] = useState(false);
+  const suggestions = filterDescriptions(allDescriptions, value);
+
+  const selectSuggestion = (suggestion: string) => {
+    onChange(suggestion);
+    setFocused(false);
+  };
+
+  return (
+    <div className="relative">
+      <Input
+        aria-label="Description"
+        placeholder="Description"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setTimeout(() => setFocused(false), 150)}
+      />
+      <RowDescriptionSuggestions
+        show={focused && suggestions.length > 0}
+        suggestions={suggestions}
+        onSelect={selectSuggestion}
+      />
+    </div>
+  );
+}
+
 interface RowCardProps {
   block: BulkDraftBlock;
   row: BulkDraftRow;
@@ -536,6 +608,7 @@ interface RowCardProps {
   categories: Category[];
   currencySymbol: string;
   errors: RowFieldErrors | undefined;
+  allDescriptions: string[];
   onUpdate: (patch: Partial<BulkDraftRow>) => void;
   onRemove: () => void;
   onCommit: () => void;
@@ -550,6 +623,7 @@ function RowCard({
   categories,
   currencySymbol,
   errors,
+  allDescriptions,
   onUpdate,
   onRemove,
   onCommit,
@@ -572,11 +646,10 @@ function RowCard({
         onCommit={onCommit}
         registerAmountRef={registerAmountRef}
       />
-      <Input
-        aria-label="Description"
-        placeholder="Description"
+      <RowDescriptionField
         value={row.description}
-        onChange={(e) => onUpdate({ description: e.target.value })}
+        allDescriptions={allDescriptions}
+        onChange={(v) => onUpdate({ description: v })}
         onKeyDown={(e) => commitOnEnter(e, onCommit)}
       />
       <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
@@ -593,26 +666,62 @@ function RowCard({
   );
 }
 
-function DateChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
+function DateOption({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "px-2.5 py-1 rounded-full text-xs font-medium border",
-        active ? "bg-primary text-primary-foreground border-primary" : "border-input",
-      )}
+      className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent"
     >
       {label}
     </button>
+  );
+}
+
+function blockDateLabel(block: BulkDraftBlock, today: string, yesterday: string): string {
+  if (block.date === today) return "Today";
+  if (block.date === yesterday) return "Yesterday";
+  return format(parseISO(block.date), "d MMM");
+}
+
+interface BlockDateControlProps {
+  block: BulkDraftBlock;
+  today: string;
+  yesterday: string;
+  onSetDate: (date: string) => void;
+}
+
+function BlockDateControl({ block, today, yesterday, onSetDate }: BlockDateControlProps) {
+  const [open, setOpen] = useState(false);
+
+  const choose = (date: string) => {
+    onSetDate(date);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground flex items-center gap-1 shrink-0"
+        >
+          <Calendar className="h-3 w-3" />
+          {blockDateLabel(block, today, yesterday)}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-40 p-1" align="start">
+        <DateOption label="Today" onClick={() => choose(today)} />
+        <DateOption label="Yesterday" onClick={() => choose(yesterday)} />
+        <input
+          type="date"
+          aria-label="Custom date"
+          value={block.date}
+          onChange={(e) => choose(e.target.value)}
+          className="w-full h-8 text-xs border border-input rounded-md px-2 bg-background mt-1"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -651,19 +760,7 @@ function BlockHeader({
           className={cn("h-4 w-4 transition-transform", block.collapsed && "-rotate-90")}
         />
       </button>
-      <DateChip label="Today" active={block.date === today} onClick={() => onSetDate(today)} />
-      <DateChip
-        label="Yesterday"
-        active={block.date === yesterday}
-        onClick={() => onSetDate(yesterday)}
-      />
-      <input
-        type="date"
-        aria-label="Custom date"
-        value={block.date}
-        onChange={(e) => onSetDate(e.target.value)}
-        className="h-7 text-xs border border-input rounded-md px-2 bg-background"
-      />
+      <BlockDateControl block={block} today={today} yesterday={yesterday} onSetDate={onSetDate} />
       <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
         {count} {count === 1 ? "entry" : "entries"} · {formatValue(total)}
       </span>
@@ -685,6 +782,7 @@ interface BlockBodyProps {
   categories: Category[];
   currencySymbol: string;
   errors: Map<string, RowFieldErrors>;
+  allDescriptions: string[];
   onAddRow: () => void;
   onUpdateRow: (rowId: string, patch: Partial<BulkDraftRow>) => void;
   onRemoveRow: (rowId: string) => void;
@@ -698,6 +796,7 @@ function BlockBody({
   categories,
   currencySymbol,
   errors,
+  allDescriptions,
   onAddRow,
   onUpdateRow,
   onRemoveRow,
@@ -717,6 +816,7 @@ function BlockBody({
           categories={categories}
           currencySymbol={currencySymbol}
           errors={errors.get(row.id)}
+          allDescriptions={allDescriptions}
           onUpdate={(patch) => onUpdateRow(row.id, patch)}
           onRemove={() => onRemoveRow(row.id)}
           onCommit={onAddRow}
@@ -855,6 +955,11 @@ export default function BulkAddPage() {
   const lastCategoryRef = useRef("");
   const amountRefs = useRef(new Map<string, HTMLInputElement>());
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
+  const [allDescriptions, setAllDescriptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    getDescriptionSuggestions(undefined, 500).then(setAllDescriptions);
+  }, []);
 
   const defaultCategoryId = useDefaultCategoryId(categories, setBlocks);
   const { pendingDraft, resumeDraft, discardDraft } = useBulkDraftPersistence(blocks, setBlocks);
@@ -974,6 +1079,7 @@ export default function BulkAddPage() {
           yesterday={yesterday}
           categories={categories}
           currencySymbol={currency.symbol}
+          allDescriptions={allDescriptions}
           formatValue={formatValue}
           errors={rowErrors}
           onSetDate={(date) => handleSetDate(block.id, date)}
