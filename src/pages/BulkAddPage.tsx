@@ -579,16 +579,16 @@ function RowCard({
         onChange={(e) => onUpdate({ description: e.target.value })}
         onKeyDown={(e) => commitOnEnter(e, onCommit)}
       />
-      <TagChipList
-        tags={row.tags}
-        onRemoveTag={(t) => onUpdate({ tags: row.tags.filter((x) => x !== t) })}
-      />
-      <RowFieldError message={errors?.tags} />
       <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
         <RowTagsToggle row={row} onUpdate={onUpdate} />
         <RowTimeToggle block={block} row={row} today={today} onUpdate={onUpdate} />
         <RowAdhocToggle row={row} onUpdate={onUpdate} />
       </div>
+      <TagChipList
+        tags={row.tags}
+        onRemoveTag={(t) => onUpdate({ tags: row.tags.filter((x) => x !== t) })}
+      />
+      <RowFieldError message={errors?.tags} />
     </div>
   );
 }
