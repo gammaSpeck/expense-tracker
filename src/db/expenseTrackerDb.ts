@@ -413,10 +413,10 @@ async function buildCategoryKeyMap(
   return keyToId;
 }
 
-function countTags(drafts: DraftExpense[]): Map<string, number> {
+function countTags(items: { tags: string[] }[]): Map<string, number> {
   const tagCounts = new Map<string, number>();
-  for (const draft of drafts) {
-    for (const tag of draft.tags) {
+  for (const item of items) {
+    for (const tag of item.tags) {
       tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
     }
   }
@@ -465,4 +465,31 @@ export async function importCsvExpenses(
 
   touchInstallMarker(await db.expenses.count());
   return drafts.length;
+}
+
+// Bulk-writes rows built by the bulk-add page inside one Dexie transaction, then rebuilds
+// tagMetadata (bulkAdd bypasses addExpense, and useTags() reads this table directly) and
+// touches the install marker after the transaction commits. Mirrors importCsvExpenses,
+// minus the category-rule machinery — category ids are already resolved by the caller.
+// Any throw aborts atomically; a partial write is unreachable.
+export async function addExpensesBulk(
+  expenses: Omit<Expense, "id" | "createdAt" | "updatedAt">[],
+): Promise<number> {
+  if (expenses.length === 0) return 0;
+
+  const now = new Date().toISOString();
+  await db.transaction("rw", [db.expenses, db.tagMetadata], async () => {
+    await db.expenses.bulkAdd(
+      expenses.map((expense) => ({
+        ...expense,
+        id: crypto.randomUUID(),
+        createdAt: now,
+        updatedAt: now,
+      })),
+    );
+    await writeTagMetadata(countTags(expenses), now);
+  });
+
+  touchInstallMarker(await db.expenses.count());
+  return expenses.length;
 }

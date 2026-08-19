@@ -27,6 +27,7 @@ const STORAGE_KEYS = {
   theme: "expense-tracker-theme",
   backupReminder: "expense-tracker-backup-reminder",
   install: "expense-tracker-install",
+  bulkCoach: "expense-tracker-bulk-coach",
 } as const;
 
 const WEEKLY_REMINDER_DAY = 0;
@@ -159,6 +160,14 @@ class UserPreferences {
 
   setInstallMarker(marker: InstallMarker): void {
     this.setItem(STORAGE_KEYS.install, JSON.stringify(marker));
+  }
+
+  getBulkCoachSeen(): boolean {
+    return this.getItem(STORAGE_KEYS.bulkCoach) === "true";
+  }
+
+  setBulkCoachSeen(): void {
+    this.setItem(STORAGE_KEYS.bulkCoach, "true");
   }
 
   clearAll(): void {

@@ -83,6 +83,14 @@ export function SidebarNav() {
         Add Expense
       </button>
 
+      {/* Add Many (bulk entry) Button */}
+      <button
+        onClick={() => navigate("/add/bulk")}
+        className="flex items-center justify-center gap-2 w-full py-2 mb-4 rounded-xl bg-muted text-foreground text-sm font-medium hover:bg-muted/80 transition-colors"
+      >
+        Add many
+      </button>
+
       <nav className="flex flex-col gap-1">
         {sidebarNavItems.map((item) => {
           const isActive = isNavItemActive(location.pathname, item.path);
