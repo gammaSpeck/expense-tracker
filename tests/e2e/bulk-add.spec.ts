@@ -73,13 +73,13 @@ test.describe("bulk-add", () => {
     await rows.nth(0).getByLabel("Amount").fill("100");
     await rows.nth(0).getByLabel("Amount").press("Enter");
     await expect(rows).toHaveCount(2);
+    await expect(rows.nth(1).getByLabel("Amount")).toBeFocused();
 
     await page.getByRole("button", { name: "Save all" }).click();
 
     await expect(page).toHaveURL(/\/$/);
     const expenses = await readExpenses(page);
     expect(expenses).toHaveLength(1);
-    await expect(page.getByText(/is required/)).toHaveCount(0);
   });
 
   test("a draft survives reload and is resumable", async ({ page }) => {
@@ -92,8 +92,61 @@ test.describe("bulk-add", () => {
     await page.reload();
 
     await expect(page.getByText("Resume your unsaved draft (1 entry)?")).toBeVisible();
+    await expect(page.getByRole("alertdialog")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Resume" })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("alertdialog")).toBeVisible();
     await page.getByRole("button", { name: "Resume" }).click();
     await expect(page.getByTestId("bulk-row").first().getByLabel("Amount")).toHaveValue("321");
+  });
+
+  test("a draft saved in an unreadable shape is discarded, not rehydrated", async ({ page }) => {
+    await gotoApp(page, "/");
+    await page.evaluate(() => {
+      const { promise, resolve, reject } = Promise.withResolvers<void>();
+      const open = indexedDB.open("expense-tracker-bulk");
+      open.onupgradeneeded = () => open.result.createObjectStore("draft");
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const tx = db.transaction("draft", "readwrite");
+        // numeric amount, no `tags` — the shape an older build could have left behind
+        tx.objectStore("draft").put({ blocks: [{ rows: [{ value: 12 }] }] }, "draft");
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => {
+          db.close();
+          reject(tx.error);
+        };
+      };
+      return promise;
+    });
+
+    await gotoApp(page, "/add/bulk");
+    await expect(page.getByRole("heading", { name: "Add many" })).toBeVisible();
+    await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
+
+    // the unreadable record is gone and autosave re-armed
+    await page.getByTestId("bulk-row").first().getByLabel("Amount").fill("321");
+    await page.waitForTimeout(800);
+    await page.reload();
+    await expect(page.getByText("Resume your unsaved draft (1 entry)?")).toBeVisible();
+  });
+
+  test("factory reset clears an unsaved bulk draft", async ({ page }) => {
+    await gotoApp(page, "/add/bulk");
+    await page.getByTestId("bulk-row").first().getByLabel("Amount").fill("321");
+    await page.waitForTimeout(800);
+
+    await gotoApp(page, "/settings/data");
+    await page.getByRole("button", { name: "Factory Reset" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
+    await expect(page.getByText("All data cleared. App reset to default state.")).toBeVisible();
+
+    await gotoApp(page, "/add/bulk");
+    await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
   });
 
   test.describe("FAB gesture (mobile)", () => {

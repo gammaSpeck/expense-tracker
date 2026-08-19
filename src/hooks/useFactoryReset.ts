@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { db, initializeDatabase } from "@/db/expenseTrackerDb";
+import { clearBulkDraft } from "@/db/bulkDraft";
 import { userPreferences } from "@/db/userPreferences";
 import { clearPassphrase } from "@/lib/backup";
 import { captureError } from "@/lib/telemetry";
@@ -15,7 +16,12 @@ export function useFactoryReset() {
     setIsResetting(true);
     try {
       // Clear all data
-      await Promise.all([db.expenses.clear(), db.categories.clear(), db.tagMetadata.clear()]);
+      await Promise.all([
+        db.expenses.clear(),
+        db.categories.clear(),
+        db.tagMetadata.clear(),
+        clearBulkDraft(),
+      ]);
 
       userPreferences.clearAll();
       await clearPassphrase();

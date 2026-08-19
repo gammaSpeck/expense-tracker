@@ -54,6 +54,7 @@ export function FloatingActionButton() {
       onPointerMove={handlePointerMove}
       onPointerUp={clearPressTimer}
       onPointerLeave={clearPressTimer}
+      onPointerCancel={clearPressTimer}
       onContextMenu={(e) => e.preventDefault()}
       onClick={handleClick}
       className="fixed bottom-20 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center z-50 fab select-none touch-manipulation [-webkit-touch-callout:none]"

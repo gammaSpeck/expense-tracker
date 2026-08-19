@@ -10,6 +10,16 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectTrigger } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   CategorySelectValue,
   CategoryOptionItems,
 } from "@/components/categories/CategorySelectOptions";
@@ -581,7 +591,7 @@ function RowDescriptionField({
   onKeyDown,
 }: RowDescriptionFieldProps) {
   const [focused, setFocused] = useState(false);
-  const suggestions = filterDescriptions(allDescriptions, value);
+  const suggestions = focused ? filterDescriptions(allDescriptions, value) : [];
 
   const selectSuggestion = (suggestion: string) => {
     onChange(suggestion);
@@ -886,7 +896,7 @@ function BlockCard({
   );
 }
 
-function DraftResumeBanner({
+function DraftResumeDialog({
   pendingDraft,
   onResume,
   onDiscard,
@@ -895,26 +905,37 @@ function DraftResumeBanner({
   onResume: () => void;
   onDiscard: () => void;
 }) {
+  const resumeRef = useRef<HTMLButtonElement>(null);
   if (!pendingDraft) return null;
   const { count } = pageTotals(pendingDraft.blocks);
 
   return (
-    <div
-      data-testid="bulk-draft-prompt"
-      className="p-3 rounded-lg border border-border bg-muted/50 flex items-center justify-between gap-3"
-    >
-      <span className="text-sm">
-        Resume your unsaved draft ({count} {count === 1 ? "entry" : "entries"})?
-      </span>
-      <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={onResume}>
-          Resume
-        </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onDiscard}>
-          Discard
-        </Button>
-      </div>
-    </div>
+    <AlertDialog open>
+      <AlertDialogContent
+        data-testid="bulk-draft-prompt"
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          resumeRef.current?.focus();
+        }}
+      >
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Resume your unsaved draft ({count} {count === 1 ? "entry" : "entries"})?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Entries from your last visit are still on this device. Discarding removes them
+            permanently.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onDiscard}>Discard</AlertDialogCancel>
+          <AlertDialogAction ref={resumeRef} onClick={onResume}>
+            Resume
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -977,7 +998,10 @@ export default function BulkAddPage() {
   const [allDescriptions, setAllDescriptions] = useState<string[]>([]);
 
   useEffect(() => {
-    getDescriptionSuggestions(undefined, 500).then(setAllDescriptions);
+    // Suggestions are optional — a read failure must not surface as an unhandled rejection.
+    getDescriptionSuggestions(undefined, 500)
+      .then(setAllDescriptions)
+      .catch(() => setAllDescriptions([]));
   }, []);
 
   const defaultCategoryId = useDefaultCategoryId(categories, setBlocks);
@@ -1084,7 +1108,7 @@ export default function BulkAddPage() {
         <h1 className="text-xl font-semibold">Add many</h1>
       </div>
 
-      <DraftResumeBanner
+      <DraftResumeDialog
         pendingDraft={pendingDraft}
         onResume={resumeDraft}
         onDiscard={discardDraft}
