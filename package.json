@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "HTTPS=true vite",
     "build": "vite build",
     "build:analyze": "ANALYZE=true bun run build",
     "build:dev": "vite build --mode development",
@@ -16,6 +17,7 @@
     "analyze:security": "fallow security",
     "audit:pr": "fallow audit",
     "preview": "vite preview",
+    "preview:mobile": "vite build && HTTPS=true vite preview",
     "test:e2e": "playwright test",
     "test:e2e:staging": "E2E_ENV=staging playwright test --grep @smoke",
     "test:e2e:production": "E2E_ENV=production playwright test --grep @smoke",
@@ -77,6 +79,7 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
+    "vite-plugin-mkcert": "^2.1.0",
     "vite-plugin-pwa": "^1.2.0",
     "workbox-window": "^7.4.0"
   }

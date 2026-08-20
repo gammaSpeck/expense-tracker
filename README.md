@@ -62,8 +62,43 @@ $ bun install # or npm install / pnpm install
 # 3. Start the dev server
 $ bun run dev # or npm run dev / pnpm dev
 
-# 4. Open http://localhost:4173 in your browser
+# 4. Open http://localhost:3000 in your browser
 ```
+
+### Testing on a phone over Wi-Fi
+
+`crypto.randomUUID` and `crypto.subtle` are only available in a browser "secure context" —
+`https://` origins or the loopback exceptions (`localhost`, `127.0.0.1`, `::1`). A plain-HTTP
+LAN address like `http://192.168.0.100:3000` is not one, so add/edit, encrypted backup/restore,
+and PWA install/update all fail there. `bun run dev:mobile` and `bun run preview:mobile` serve
+the app over HTTPS with a locally-trusted certificate covering the machine's LAN IPs, making
+`https://192.168.0.100:3000` a genuine secure context.
+
+1. Run `bun run dev:mobile` once on the Mac. First run downloads the `mkcert` binary from the
+   GitHub releases API into `~/.vite-plugin-mkcert/`, creates a root CA there, installs it into
+   the macOS login keychain (expect a keychain password prompt), and issues a cert covering
+   `localhost`, `::1`, and every local interface IP.
+2. Note the printed `https://192.168.0.100:3000` URL.
+3. Serve the root CA to the phone over plain HTTP (the CA certificate is public; only
+   `rootCA-key.pem` is secret and is not requested by the phone):
+   ```bash
+   cd ~/.vite-plugin-mkcert && python3 -m http.server 8000
+   ```
+   The path is `~/.vite-plugin-mkcert/rootCA.pem`, **not** the macOS mkcert default
+   `~/Library/Application Support/mkcert` — the plugin injects its own `CAROOT`.
+4. On the phone, open `http://192.168.0.100:8000/rootCA.pem` and install it:
+   - **iOS:** Safari shows "Profile Downloaded" → Settings → General → VPN & Device Management →
+     install the profile → **then** Settings → General → About → Certificate Trust Settings →
+     enable full trust for the mkcert root. The second step is mandatory; without it the cert
+     stays untrusted and the origin is not a secure context.
+   - **Android:** Settings → Security & privacy → More security settings → Encryption &
+     credentials → Install a certificate → **CA certificate** → Install anyway → pick the
+     downloaded file. Chrome on Android honours the user CA store.
+5. Stop the `python3 -m http.server`.
+6. Open `https://192.168.0.100:3000` on the phone. Use `bun run preview:mobile` instead when
+   testing PWA install or the update prompt.
+7. Google Drive connect is expected to fail from the phone (Google rejects raw-IP redirect
+   URIs) and must be tested on desktop `http://localhost:3000` via `bun run dev`.
 
 ## 🧪 Testing
 
