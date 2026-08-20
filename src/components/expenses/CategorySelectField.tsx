@@ -1,7 +1,7 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CategoryIcon } from "@/components/categories/CategoryIcon";
+import { Select, SelectContent, SelectTrigger } from "@/components/ui/select";
+import { CategorySelectValue, CategoryOptionItems } from "@/components/categories/CategorySelectOptions";
 import { ExpenseFormData } from "@/types/expense";
 import { Category } from "@/types/expense";
 
@@ -24,24 +24,10 @@ export function CategorySelectField({ categories, onCreateNew, errorMessage }: C
           return (
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger aria-label="Category">
-                <SelectValue placeholder="Select category">
-                  {selectedCategory && (
-                    <div className="flex items-center gap-2">
-                      <CategoryIcon icon={selectedCategory.icon} color={selectedCategory.color} size="sm" />
-                      <span>{selectedCategory.name}</span>
-                    </div>
-                  )}
-                </SelectValue>
+                <CategorySelectValue category={selectedCategory} placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center gap-2">
-                      <CategoryIcon icon={category.icon} color={category.color} size="sm" />
-                      <span>{category.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                <CategoryOptionItems categories={categories} />
                 <div className="border-t border-border mt-1 pt-1">
                   <button
                     type="button"
