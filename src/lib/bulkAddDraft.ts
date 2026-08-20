@@ -54,6 +54,11 @@ export function pageTotals(blocks: BulkDraftBlock[]): { count: number; total: nu
   );
 }
 
+/** "entry"/"entries" — shared by every count summary (block header, footer, resume dialog). */
+export function entryLabel(count: number): string {
+  return count === 1 ? "entry" : "entries";
+}
+
 function amountFormatError(trimmedValue: string): string | undefined {
   if (trimmedValue === "") return "Amount is required";
   if (Number.isNaN(Number(trimmedValue))) return "Amount is required";
@@ -101,22 +106,31 @@ interface PartitionResult {
   invalidRows: Map<string, InvalidRow>;
 }
 
+type RowClassification =
+  | { kind: "draft"; draft: ExpenseDraft }
+  | { kind: "invalid"; rowId: string; invalid: InvalidRow }
+  | { kind: "blank" };
+
+function classifyRow(block: BulkDraftBlock, row: BulkDraftRow, today: string): RowClassification {
+  if (isRowBlank(row)) return { kind: "blank" };
+  const errors = validateRow(row);
+  if (Object.values(errors).some(Boolean)) {
+    return { kind: "invalid", rowId: row.id, invalid: { blockId: block.id, errors } };
+  }
+  return { kind: "draft", draft: buildExpenseDraft(block, row, today) };
+}
+
 /** Splits every row into a write-ready draft or a validation failure. Blank rows are
  *  silently dropped (neither list). */
 export function partitionRows(blocks: BulkDraftBlock[], today: string): PartitionResult {
   const toWrite: ExpenseDraft[] = [];
   const invalidRows = new Map<string, InvalidRow>();
+  const rows = blocks.flatMap((block) => block.rows.map((row) => ({ block, row })));
 
-  for (const block of blocks) {
-    for (const row of block.rows) {
-      if (isRowBlank(row)) continue;
-      const errors = validateRow(row);
-      if (errors.amount || errors.category || errors.tags) {
-        invalidRows.set(row.id, { blockId: block.id, errors });
-      } else {
-        toWrite.push(buildExpenseDraft(block, row, today));
-      }
-    }
+  for (const { block, row } of rows) {
+    const result = classifyRow(block, row, today);
+    if (result.kind === "draft") toWrite.push(result.draft);
+    else if (result.kind === "invalid") invalidRows.set(result.rowId, result.invalid);
   }
 
   return { toWrite, invalidRows };

@@ -4,7 +4,7 @@ import { Calendar, ChevronDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { blockTotals } from "@/lib/bulkAddDraft";
+import { blockTotals, entryLabel } from "@/lib/bulkAddDraft";
 import type { RowFieldErrors } from "@/lib/bulkAddDraft";
 import { RowCard } from "@/components/bulk-add/RowCard";
 import type { BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
@@ -111,7 +111,7 @@ function BlockHeader({
       </button>
       <BlockDateControl block={block} today={today} yesterday={yesterday} onSetDate={onSetDate} />
       <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
-        {count} {count === 1 ? "entry" : "entries"} · {formatValue(total)}
+        {count} {entryLabel(count)} · {formatValue(total)}
       </span>
       <button
         type="button"

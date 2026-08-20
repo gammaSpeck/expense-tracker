@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { entryLabel } from "@/lib/bulkAddDraft";
 
 const SCALE_HINT_THRESHOLD = 100;
 
@@ -32,7 +33,7 @@ export function BulkFooter({
   return (
     <div className="fixed bottom-16 inset-x-0 lg:bottom-0 border-t border-border bg-background/95 backdrop-blur p-3 flex items-center justify-between gap-3 z-60">
       <span className="text-sm text-muted-foreground">
-        {entryCount} {entryCount === 1 ? "entry" : "entries"} · {formatValue(grandTotal)}
+        {entryCount} {entryLabel(entryCount)} · {formatValue(grandTotal)}
       </span>
       <Button type="button" onClick={onSave} disabled={disabled}>
         Save all

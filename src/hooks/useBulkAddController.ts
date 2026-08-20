@@ -5,14 +5,14 @@ import { toast } from "sonner";
 import { useCategories } from "@/hooks/useExpenseData";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { addExpensesBulk, getDescriptionSuggestions, getTagSuggestions } from "@/db/expenseTrackerDb";
-import { getBulkDraft, saveBulkDraft, clearBulkDraft } from "@/db/bulkDraft";
-import type { BulkDraft, BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
+import { clearBulkDraft } from "@/db/bulkDraft";
+import type { BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
+import { useBulkDraftPersistence } from "@/hooks/useBulkDraftPersistence";
 import {
   makeBlock,
   makeRow,
   blockHasContent,
   pageTotals,
-  draftHasContent,
   updateBlockRow,
   addRowToBlock,
   removeRowFromBlock,
@@ -27,8 +27,6 @@ import {
   pickDefaultCategoryId,
 } from "@/lib/bulkAddDraft";
 import type { ExpenseDraft, RowFieldErrors } from "@/lib/bulkAddDraft";
-
-const DRAFT_DEBOUNCE_MS = 500;
 
 /** Owns all bulk-add page state: the blocks[] draft, its localStorage-backed autosave/resume,
  *  suggestion data, validation, and save. The page only renders. */
@@ -46,8 +44,6 @@ export function useBulkAddController() {
   const [saving, setSaving] = useState(false);
   const [allDescriptions, setAllDescriptions] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const [pendingDraft, setPendingDraft] = useState<BulkDraft | null>(null);
-  const [draftDecided, setDraftDecided] = useState(false);
   const lastCategoryRef = useRef("");
   const amountRefs = useRef(new Map<string, HTMLInputElement>());
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
@@ -67,38 +63,11 @@ export function useBulkAddController() {
     setBlocks((bs) => fillPlaceholderCategory(bs, defaultCategoryId));
   }, [defaultCategoryId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    getBulkDraft().then((draft) => {
-      if (cancelled) return;
-      if (draft && draftHasContent(draft)) setPendingDraft(draft);
-      setDraftDecided(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!draftDecided || pendingDraft) return;
-    const timer = setTimeout(() => void saveBulkDraft({ blocks }), DRAFT_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [blocks, draftDecided, pendingDraft]);
+  const { pendingDraft, resumeDraft, discardDraft } = useBulkDraftPersistence(blocks, setBlocks);
 
   const isDirty = blocks.some(blockHasContent);
   const totalRowCount = blocks.reduce((n, b) => n + b.rows.length, 0);
   const { count: entryCount, total: grandTotal } = pageTotals(blocks);
-
-  const resumeDraft = () => {
-    if (!pendingDraft) return;
-    setBlocks(pendingDraft.blocks);
-    setPendingDraft(null);
-  };
-
-  const discardDraft = () => {
-    setPendingDraft(null);
-    void clearBulkDraft();
-  };
 
   const clearRowError = (rowId: string) => {
     setRowErrors((errs) => {

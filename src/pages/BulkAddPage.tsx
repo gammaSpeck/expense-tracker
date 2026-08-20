@@ -6,35 +6,7 @@ import { BlockCard } from "@/components/bulk-add/BlockCard";
 import { ScaleHint, BulkFooter } from "@/components/bulk-add/BulkFooter";
 
 export default function BulkAddPage() {
-  const {
-    categories,
-    currency,
-    formatValue,
-    today,
-    yesterday,
-    blocks,
-    rowErrors,
-    saving,
-    pendingDraft,
-    allDescriptions,
-    allTags,
-    totalRowCount,
-    entryCount,
-    grandTotal,
-    resumeDraft,
-    discardDraft,
-    handleUpdateRow,
-    handleAddRow,
-    handleRemoveRow,
-    handleAddBlock,
-    handleRemoveBlock,
-    handleToggleCollapse,
-    handleSetDate,
-    handleBack,
-    handleSave,
-    registerAmountRef,
-    registerRowRef,
-  } = useBulkAddController();
+  const bulk = useBulkAddController();
 
   return (
     <div className="px-4 py-6 pb-44 lg:pb-28 max-w-2xl mx-auto space-y-4">
@@ -43,7 +15,7 @@ export default function BulkAddPage() {
           variant="ghost"
           size="icon"
           aria-label="Go back"
-          onClick={handleBack}
+          onClick={bulk.handleBack}
           className="h-9 w-9"
         >
           <ArrowLeft className="h-5 w-5" />
@@ -52,46 +24,46 @@ export default function BulkAddPage() {
       </div>
 
       <DraftResumeDialog
-        pendingDraft={pendingDraft}
-        onResume={resumeDraft}
-        onDiscard={discardDraft}
+        pendingDraft={bulk.pendingDraft}
+        onResume={bulk.resumeDraft}
+        onDiscard={bulk.discardDraft}
       />
 
-      {blocks.map((block) => (
+      {bulk.blocks.map((block) => (
         <BlockCard
           key={block.id}
           block={block}
-          today={today}
-          yesterday={yesterday}
-          categories={categories}
-          currencySymbol={currency.symbol}
-          allDescriptions={allDescriptions}
-          allTags={allTags}
-          formatValue={formatValue}
-          errors={rowErrors}
-          onSetDate={(date) => handleSetDate(block.id, date)}
-          onToggleCollapse={() => handleToggleCollapse(block.id)}
-          onRemoveBlock={() => handleRemoveBlock(block.id)}
-          onAddRow={() => handleAddRow(block.id)}
-          onUpdateRow={(rowId, patch) => handleUpdateRow(block.id, rowId, patch)}
-          onRemoveRow={(rowId) => handleRemoveRow(block.id, rowId)}
-          registerAmountRef={registerAmountRef}
-          registerRowRef={registerRowRef}
+          today={bulk.today}
+          yesterday={bulk.yesterday}
+          categories={bulk.categories}
+          currencySymbol={bulk.currency.symbol}
+          allDescriptions={bulk.allDescriptions}
+          allTags={bulk.allTags}
+          formatValue={bulk.formatValue}
+          errors={bulk.rowErrors}
+          onSetDate={(date) => bulk.handleSetDate(block.id, date)}
+          onToggleCollapse={() => bulk.handleToggleCollapse(block.id)}
+          onRemoveBlock={() => bulk.handleRemoveBlock(block.id)}
+          onAddRow={() => bulk.handleAddRow(block.id)}
+          onUpdateRow={(rowId, patch) => bulk.handleUpdateRow(block.id, rowId, patch)}
+          onRemoveRow={(rowId) => bulk.handleRemoveRow(block.id, rowId)}
+          registerAmountRef={bulk.registerAmountRef}
+          registerRowRef={bulk.registerRowRef}
         />
       ))}
 
-      <Button type="button" variant="outline" className="w-full" onClick={handleAddBlock}>
+      <Button type="button" variant="outline" className="w-full" onClick={bulk.handleAddBlock}>
         + Add another day
       </Button>
 
-      <ScaleHint totalRowCount={totalRowCount} />
+      <ScaleHint totalRowCount={bulk.totalRowCount} />
 
       <BulkFooter
-        entryCount={entryCount}
-        grandTotal={grandTotal}
-        formatValue={formatValue}
-        onSave={() => void handleSave()}
-        disabled={entryCount === 0 || saving}
+        entryCount={bulk.entryCount}
+        grandTotal={bulk.grandTotal}
+        formatValue={bulk.formatValue}
+        onSave={() => void bulk.handleSave()}
+        disabled={bulk.entryCount === 0 || bulk.saving}
       />
     </div>
   );

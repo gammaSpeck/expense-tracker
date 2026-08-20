@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { pageTotals } from "@/lib/bulkAddDraft";
+import { pageTotals, entryLabel } from "@/lib/bulkAddDraft";
 import type { BulkDraft } from "@/db/bulkDraft";
 
 export function DraftResumeDialog({
@@ -37,7 +37,7 @@ export function DraftResumeDialog({
       >
         <AlertDialogHeader>
           <AlertDialogTitle>
-            Resume your unsaved draft ({count} {count === 1 ? "entry" : "entries"})?
+            Resume your unsaved draft ({count} {entryLabel(count)})?
           </AlertDialogTitle>
           <AlertDialogDescription>
             Entries from your last visit are still on this device. Discarding removes them
