@@ -124,5 +124,25 @@ export async function runInstalledPwaJourney(handle: InstalledPwaHandle) {
     await handle.context.setOffline(false);
   }
 
+  // 6. Auto-backup Tier 1 runs on every foreground with no user interaction — confirms OPFS
+  // availability isn't gated behind `display-mode: standalone` on any of the three engines this
+  // journey runs on (Brave, Chrome-mobile, WebKit).
+  await page.reload();
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        try {
+          const root = await navigator.storage.getDirectory();
+          const dir = await root.getDirectoryHandle("backups");
+          const file = await (await dir.getFileHandle("manifest.json")).getFile();
+          const manifest: { history: { expenseCount: number }[] } = JSON.parse(await file.text());
+          return manifest.history[0]?.expenseCount ?? 0;
+        } catch {
+          return 0;
+        }
+      }),
+    )
+    .toBeGreaterThanOrEqual(1);
+
   expect(errors, `unexpected console/page errors:\n${errors.join("\n")}`).toEqual([]);
 }

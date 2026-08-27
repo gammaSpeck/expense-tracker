@@ -1,6 +1,7 @@
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
@@ -10,6 +11,8 @@ import { lazy } from "react";
 import { initializeDatabase } from "@/db/expenseTrackerDb";
 import { userPreferences } from "@/db/userPreferences";
 import { useAppStartup } from "@/hooks/useAppStartup";
+import { markAutoBackup } from "@/lib/backup";
+import { restoreSnapshot } from "@/lib/autoBackup";
 
 import HomePage from "./pages/HomePage";
 
@@ -31,7 +34,8 @@ const BulkAddPage = lazy(() => import("@/pages/BulkAddPage"));
 
 function AppContent() {
   const navigate = useNavigate();
-  const { lossCount, setLossCount, lossDialogOpen, setLossDialogOpen } = useAppStartup();
+  const { lossCount, setLossCount, lossDialogOpen, setLossDialogOpen, restoreOffer, setRestoreOffer } =
+    useAppStartup();
 
   return (
     <AppLayout>
@@ -50,10 +54,11 @@ function AppContent() {
         <Route path="/settings/about" element={<AboutPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {lossCount !== null && (
+      {(lossCount !== null || restoreOffer !== null) && (
         <DataLossDialog
           open={lossDialogOpen}
           lastSeenExpenseCount={lossCount}
+          snapshot={restoreOffer}
           onStartFresh={() => {
             const freshNow = new Date().toISOString();
             userPreferences.setInstallMarker({
@@ -61,14 +66,36 @@ function AppContent() {
               lastSeenAt: freshNow,
               lastSeenExpenseCount: 0,
             });
+            if (restoreOffer) markAutoBackup({ restoreOfferDeclinedFor: restoreOffer.name });
             setLossDialogOpen(false);
             setLossCount(null);
+            setRestoreOffer(null);
             void initializeDatabase();
           }}
           onRestore={() => {
             setLossDialogOpen(false);
             navigate("/settings/data");
           }}
+          onRestoreSnapshot={
+            restoreOffer
+              ? () => {
+                  const offer = restoreOffer;
+                  void restoreSnapshot(offer.name)
+                    .then(({ expenseCount }) => {
+                      setLossDialogOpen(false);
+                      setLossCount(null);
+                      setRestoreOffer(null);
+                      toast.success(
+                        `Restored ${expenseCount} expenses. Currency and theme settings are not part of a safety copy.`,
+                      );
+                      navigate("/transactions");
+                    })
+                    .catch((err: unknown) => {
+                      toast.error(err instanceof Error ? err.message : "Restore failed");
+                    });
+                }
+              : undefined
+          }
         />
       )}
       <BackupReminderPrompt />

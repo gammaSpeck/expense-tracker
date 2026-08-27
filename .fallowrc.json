@@ -160,6 +160,36 @@
         "functions": ["TransactionsPage"],
         "maxCrap": 45,
         "reason": "Page composition wiring search/pagination/delete hooks plus the empty-state and infinite-scroll-sentinel ternaries; coverage-blind CRAP, not accidental complexity."
+      },
+      {
+        "files": ["src/components/more/backup/AutoBackupStatus.tsx"],
+        "functions": ["AutoBackupStatus"],
+        "maxCrap": 120,
+        "reason": "Quiet status row rendering: safety-copy line, Drive line, anomaly escape hatch, actionable-passphrase row, and the restore-history dialog are each an independent presence check; coverage-blind CRAP on a presentational component, not accidental complexity."
+      },
+      {
+        "files": ["src/lib/snapshotStore.ts"],
+        "functions": ["commitSnapshot"],
+        "maxCrap": 120,
+        "reason": "Write, reread-and-verify, delete-on-failure, build manifest, commit last, prune orphans -- a single-transaction commit protocol where the correctness argument depends on this exact order in one function."
+      },
+      {
+        "files": ["src/lib/autoBackup.ts"],
+        "functions": ["runTier1", "runAutoBackupBody", "runTier2", "degradeForQuota"],
+        "maxCrap": 100,
+        "reason": "Daily-gate/skip-unchanged/anomaly-guard/quota-degrade branching is the issue's specified auto-backup state machine; each branch is a distinct real-world outcome (unchanged, collapsed, degrade tier 1/2/3, offline, no-passphrase, session-expired), not accidental complexity."
+      },
+      {
+        "files": ["src/hooks/useAppStartup.ts"],
+        "functions": ["<arrow>"],
+        "maxCrap": 100,
+        "reason": "Startup sequencing: persisted-storage warning, data-loss detection, and the empty-list-with-snapshot restore offer all gate on the same boot state; matches the useExpenseFormController.ts <arrow> precedent above."
+      },
+      {
+        "files": ["src/components/DataLossDialog.tsx"],
+        "functions": ["DataLossDialog"],
+        "maxCrap": 35,
+        "reason": "lastSeenExpenseCount-present-vs-null and snapshot-present-vs-absent JSX branches; coverage-blind CRAP on an alert dialog, matches the DeleteCategoryDialog precedent above."
       }
     ]
   },

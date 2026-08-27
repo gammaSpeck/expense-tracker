@@ -1,10 +1,12 @@
 # 🔄 Google Drive Backup & Enhanced Export System
 
-**Status:** Spec Confirmed — Ready for Implementation  
-**Version:** 0.2.0  
-**Date:** 2026-03-02  
+**Status:** Implemented — Phases 1-4 shipped (client-side encryption, silent OAuth refresh,
+automatic daily Tier 1/Tier 2 backup, and one-tap restore); Phase 5 (browse/import from Drive UI)
+remains future scope.  
+**Version:** 0.3.0  
+**Date:** 2026-08-28  
 **Target Release:** Feature Set 3  
-**Active Phases:** Phase 1 (Backup Reminders) + Phase 2 (Simplified Export)
+**Active Phases:** All of Phase 1-4
 
 ---
 
@@ -86,15 +88,17 @@ Enhance the existing export/import system with:
 - Account management: View status, change folder, unlink account
 - Graceful fallback to device export if Drive or auth fails
 
-**🔒 Future Scope: Client-Side Encryption**
+**🔒 Client-Side Encryption (Shipped)**
 
-- Encrypt backup JSON locally using Web Crypto API before upload (Explore other AES etc ways.)
-- Zero knowledge
-- Only the user can decrypt (key derived from a user-defined passphrase or device key)
-- Even if Google Drive is compromised/leaked, data is unreadable
-- Decrypt locally on import (no server involved)
-- Requires user-selected folder (not `appDataFolder`) so user can manage encrypted files
-- Incremental: encryption layer added on top of existing Drive upload
+- Every file that leaves the origin sandbox (Drive uploads, manual exports) is encrypted with
+  AES-GCM-256, key derived via PBKDF2-SHA256 (600k iterations) from a user-defined passphrase —
+  see `src/lib/backup.ts`.
+- Zero knowledge: only the user's passphrase can decrypt; Google never sees plaintext.
+- Decrypted locally on import — no server involved.
+- The automatic local OPFS snapshot (Tier 1 of the auto-backup feature, see
+  `src/lib/snapshotStore.ts` / `src/lib/autoBackup.ts`) is deliberately **plaintext** — it never
+  leaves the origin sandbox, the same boundary that already protects the unencrypted IndexedDB it
+  copies from.
 
 ---
 
@@ -481,17 +485,16 @@ function shouldShowReminderBanner(settings: BackupSettings): boolean {
 - [ ] Test token auto-refresh (wait ~1hr or force expiry)
 - [ ] Test offline behavior (graceful failure message)
 
-### **Phase 4: Client-Side Encryption (Future Scope)**
+### **Phase 4: Client-Side Encryption (Shipped)**
 
-**Effort:** 6-8 hours  
-**Goal:** Zero-knowledge backups — even Google cannot read exported files
-
-- Encrypt JSON locally using Web Crypto API (AES-GCM) before Drive upload
-- Key derived from user passphrase (PBKDF2)
-- Encrypted file uploaded to user-selected Drive folder
-- On import: detect encrypted file, prompt passphrase, decrypt locally
-- No passphrase stored anywhere — user is responsible
-- Works for device export too (optional encrypted local backup)
+- Encrypted locally using Web Crypto API (AES-GCM-256) before Drive upload
+- Key derived from user passphrase (PBKDF2-SHA256, 600k iterations)
+- Encrypted file uploaded to the `ExTrack Backups` Drive folder
+- On import: detect encrypted file, decrypt with stored or manually-entered passphrase
+- Passphrase stored in the same IndexedDB database as the data it protects — see
+  `src/lib/backup.ts` for the deliberate reasoning (the automatic OPFS snapshot stays plaintext
+  for the same reason: encrypting it would add no attacker resistance, only a failure mode)
+- Also protects the automatic daily device export (see `src/lib/autoBackup.ts`)
 
 ### **Phase 5: Import from Drive** (Future Scope)
 
@@ -541,7 +544,7 @@ Before implementation, confirm:
 | 3   | Drive folder              | **User-selected folder** via Google Picker (not `appDataFolder`)                                                                   |
 | 4   | Token storage             | IndexedDB plaintext for now                                                                                                        |
 | 5   | Token lifetime            | Access token: ~1hr; Refresh token: long-lived (until revoked)                                                                      |
-| 6   | File encryption           | Future scope (Phase 4) — AES-GCM via Web Crypto API, user passphrase                                                               |
+| 6   | File encryption           | Shipped — AES-GCM-256 via Web Crypto API, user passphrase (PBKDF2-SHA256, 600k iterations)                                          |
 | 7   | Multiple backups          | User-managed in their chosen folder; no auto-cleanup by app                                                                        |
 | 8   | CSV for Drive             | Not supported — Drive is JSON only; CSV available for device export                                                                |
 | 9   | Import source             | Device (JSON only), Drive import is future scope (Phase 5)                                                                         |
@@ -568,11 +571,13 @@ Before implementation, confirm:
 1. ✅ ~~Review plan and confirm approach~~
 2. ✅ ~~Answer open questions~~
 3. ✅ ~~Prioritize phases~~
-4. **Implement Phase 1** — Backup reminder system + BackupSettings UI
-5. **Implement Phase 2** — Simplified export dialog
-6. Test Phase 1 + 2 together end-to-end
-7. Plan Phase 3 (Drive integration) after Phase 1+2 are stable
+4. ✅ ~~Implement Phase 1~~ — Backup reminder system + BackupSettings UI
+5. ✅ ~~Implement Phase 2~~ — Simplified export dialog
+6. ✅ ~~Implement Phase 3~~ — Google Drive integration
+7. ✅ ~~Implement Phase 4~~ — Client-side encryption + automatic daily Tier 1/Tier 2 backup
+8. Phase 5 (browse/import from Drive UI) remains future scope
 
 ---
 
-**Spec confirmed. Ready to implement Phase 1 + Phase 2.**
+**Phases 1-4 shipped.** See `src/lib/autoBackup.ts`, `src/lib/snapshotStore.ts`, and
+`tests/e2e/auto-backup.spec.ts` for the automatic-backup layer.

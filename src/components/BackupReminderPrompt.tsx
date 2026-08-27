@@ -5,6 +5,7 @@ import {
   getDaysSinceLastBackup,
   markBackupReminderBannerShown,
   shouldShowBackupReminderBanner,
+  toDateKey,
 } from "@/lib/backup";
 import { type BackupReminderSchedule } from "@/db/userPreferences";
 import { BackupReminderBanner } from "@/components/BackupReminderBanner";
@@ -37,8 +38,24 @@ function getLastBackupText(daysSinceLastBackup: number | null): string {
   return `Last backup: ${daysSinceLastBackup} day${daysSinceLastBackup === 1 ? "" : "s"} ago.`;
 }
 
+const AUTO_BACKUP_FAILURE_THRESHOLD = 3;
+
 function getInitialPromptState(): PromptState {
   const preferences = getBackupReminderPreferences();
+
+  // Sustained automatic-backup failure escalates to this same banner surface, gated by the
+  // existing once-a-day bannerLastShownDate check — one banner, not a daily nag on top of it.
+  if (
+    preferences.autoBackupFailures >= AUTO_BACKUP_FAILURE_THRESHOLD &&
+    preferences.bannerLastShownDate !== toDateKey(new Date())
+  ) {
+    return {
+      visible: true,
+      schedule: preferences.reminderSchedule,
+      message: "Automatic backup has failed for 3 days in a row. Check your connection or Drive link.",
+    };
+  }
+
   const visible = shouldShowBackupReminderBanner(preferences);
 
   if (!visible) {

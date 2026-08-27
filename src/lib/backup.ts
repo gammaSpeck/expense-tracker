@@ -8,6 +8,7 @@ import {
   isReminderSchedule,
   userPreferences,
 } from "@/db/userPreferences";
+import { db } from "@/db/expenseTrackerDb";
 import type { Expense, Category } from "@/types/expense";
 
 // ---------------------------------------------------------------------------
@@ -88,6 +89,7 @@ export function buildBackupEnvelope(data: { expenses: Expense[]; categories: Cat
     {
       exportDate: new Date().toISOString(),
       version: "1.0",
+      schemaVersion: db.verno,
       expenses: data.expenses,
       categories: data.categories,
     },
@@ -200,7 +202,7 @@ export async function createEncryptedBackupFile(data: {
   return { filename, encrypted };
 }
 
-function toDateKey(value: Date): string {
+export function toDateKey(value: Date): string {
   return format(value, "yyyy-MM-dd");
 }
 
@@ -214,6 +216,11 @@ export function getBackupReminderPreferences(): BackupReminderPreferences {
     lastBackupDate: preferences.lastBackupDate,
     lastBackupMode: preferences.lastBackupMode,
     bannerLastShownDate: preferences.bannerLastShownDate,
+    lastAutoSnapshotAt: preferences.lastAutoSnapshotAt,
+    lastAutoDriveAt: preferences.lastAutoDriveAt,
+    autoBackupFailures: preferences.autoBackupFailures,
+    autoBackupAnomaly: preferences.autoBackupAnomaly,
+    restoreOfferDeclinedFor: preferences.restoreOfferDeclinedFor,
   };
 }
 
@@ -286,6 +293,10 @@ export function markBackupCompleted(
     lastBackupDate: toDateKey(now),
     lastBackupMode: mode,
   });
+}
+
+export function markAutoBackup(patch: Partial<BackupReminderPreferences>): BackupReminderPreferences {
+  return userPreferences.updateBackupReminderPreferences(patch);
 }
 
 export function setBackupReminderSchedule(
