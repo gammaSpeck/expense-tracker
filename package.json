@@ -67,7 +67,7 @@
     "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/bun": "^1.4.0",
-    "@types/node": "^25.5.0",
+    "@types/node": "^26.4.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
