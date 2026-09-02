@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.6.0...v1.7.0) (2026-09-02)
+
+
+### Features
+
+* **expenses:** add bulk-add page for logging a day's transactions in one pass ([#59](https://github.com/gammaSpeck/expense-tracker/issues/59)) ([d6d5396](https://github.com/gammaSpeck/expense-tracker/commit/d6d539650d32cd09beab241eeceb0bf0e90b22c7))
+* **import-external-csvs:** added feature to migrate from external csvs ([#52](https://github.com/gammaSpeck/expense-tracker/issues/52)) ([db41532](https://github.com/gammaSpeck/expense-tracker/commit/db415326e2cab0eafdfaff3fd944ecc423b80d30))
+
 ## [1.6.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.5.2...v1.6.0) (2026-08-11)
 
 
