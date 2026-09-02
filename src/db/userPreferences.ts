@@ -14,6 +14,16 @@ export interface BackupReminderPreferences {
   lastBackupDate: string | null;
   lastBackupMode: BackupMode | null;
   bannerLastShownDate: string | null;
+  /** Tier 1 (OPFS) — date key ("yyyy-MM-dd") of the last successful automatic snapshot. */
+  lastAutoSnapshotAt: string | null;
+  /** Tier 2 (Drive) — date key of the last successful silent upload. */
+  lastAutoDriveAt: string | null;
+  /** Consecutive automatic-backup failures (either tier), reset to 0 on any success. */
+  autoBackupFailures: number;
+  /** Human-readable reason the last automatic snapshot refused to overwrite, or null. */
+  autoBackupAnomaly: string | null;
+  /** Snapshot name the user already declined restoring, so it isn't re-offered. */
+  restoreOfferDeclinedFor: string | null;
 }
 
 export interface InstallMarker {
@@ -37,6 +47,11 @@ const DEFAULT_BACKUP_REMINDER_PREFERENCES: BackupReminderPreferences = {
   lastBackupDate: null,
   lastBackupMode: null,
   bannerLastShownDate: null,
+  lastAutoSnapshotAt: null,
+  lastAutoDriveAt: null,
+  autoBackupFailures: 0,
+  autoBackupAnomaly: null,
+  restoreOfferDeclinedFor: null,
 };
 
 const INSTALL_MARKER_VALIDATORS: [keyof InstallMarker, (parsed: Partial<InstallMarker>) => boolean][] = [
@@ -119,6 +134,16 @@ class UserPreferences {
         lastBackupDate: pickString(parsed.lastBackupDate, null),
         lastBackupMode,
         bannerLastShownDate: pickString(parsed.bannerLastShownDate, null),
+        lastAutoSnapshotAt: pickString(parsed.lastAutoSnapshotAt, null),
+        lastAutoDriveAt: pickString(parsed.lastAutoDriveAt, null),
+        autoBackupFailures:
+          typeof parsed.autoBackupFailures === "number" &&
+          Number.isFinite(parsed.autoBackupFailures) &&
+          parsed.autoBackupFailures >= 0
+            ? parsed.autoBackupFailures
+            : DEFAULT_BACKUP_REMINDER_PREFERENCES.autoBackupFailures,
+        autoBackupAnomaly: pickString(parsed.autoBackupAnomaly, null),
+        restoreOfferDeclinedFor: pickString(parsed.restoreOfferDeclinedFor, null),
       };
     } catch {
       return DEFAULT_BACKUP_REMINDER_PREFERENCES;

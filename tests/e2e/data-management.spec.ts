@@ -96,7 +96,11 @@ test.describe("data-management", () => {
     await expect(page.getByText("No expenses yet. Add your first one!")).toBeVisible();
 
     // Import the encrypted backup back in — passphrase was cleared, so manual entry is required.
+    // A safety-copy snapshot survives the reset (that's the point of Tier 1), so the restore
+    // offer dialog pops up on this empty-list foreground — decline it to continue with the
+    // deliberate manual import this test is exercising.
     await page.goto("/settings/data");
+    await page.getByRole("alertdialog").getByRole("button", { name: "Start fresh" }).click();
     await page.setInputFiles('[data-testid="import-file-input"]', {
       name: "backup.extrack",
       mimeType: "application/octet-stream",
@@ -135,6 +139,7 @@ test.describe("data-management", () => {
     await expect(page.getByText("All data cleared. App reset to default state.")).toBeVisible();
 
     await page.goto("/settings/data");
+    await page.getByRole("alertdialog").getByRole("button", { name: "Start fresh" }).click();
     await page.setInputFiles('[data-testid="import-file-input"]', {
       name: "backup.extrack",
       mimeType: "application/octet-stream",

@@ -5,6 +5,9 @@ export type MockDriveHandle = {
    *  actually sent over the wire, not just what it intended to send. `undefined` until an
    *  upload happens. */
   lastUpload(): string | undefined;
+  /** The `name` field from the most recent upload's `metadata` part — the actual filename Drive
+   *  received, not just what the caller intended. `undefined` until an upload happens. */
+  lastUploadName(): string | undefined;
 };
 
 /** Extracts one named part's body from a `multipart/form-data` request. Google's upload API
@@ -31,6 +34,7 @@ function extractMultipartPart(contentType: string, body: string, partName: strin
  */
 export async function mockDrive(page: Page): Promise<MockDriveHandle> {
   let lastUploadContent: string | undefined;
+  let lastUploadFilename: string | undefined;
 
   await page.route("**oauth2.googleapis.com/token", (route) =>
     route.fulfill({
@@ -70,7 +74,17 @@ export async function mockDrive(page: Page): Promise<MockDriveHandle> {
 
   await page.route("**www.googleapis.com/upload/drive/v3/files**", (route) => {
     const req = route.request();
-    lastUploadContent = extractMultipartPart(req.headers()["content-type"] ?? "", req.postData() ?? "", "file");
+    const contentType = req.headers()["content-type"] ?? "";
+    const body = req.postData() ?? "";
+    lastUploadContent = extractMultipartPart(contentType, body, "file");
+    const metadataPart = extractMultipartPart(contentType, body, "metadata");
+    if (metadataPart) {
+      // Written by buildMetadataBlob in src/lib/driveApi.ts — always { name, mimeType, parents? }.
+      const metadata: { name: string } = JSON.parse(metadataPart);
+      lastUploadFilename = metadata.name;
+    } else {
+      lastUploadFilename = undefined;
+    }
     return route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -85,5 +99,5 @@ export async function mockDrive(page: Page): Promise<MockDriveHandle> {
     route.fulfill({ status: 200, contentType: "text/plain", body: "" }),
   );
 
-  return { lastUpload: () => lastUploadContent };
+  return { lastUpload: () => lastUploadContent, lastUploadName: () => lastUploadFilename };
 }

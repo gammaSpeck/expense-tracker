@@ -8,6 +8,7 @@ export type SeedExpense = {
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:mm"
   isAdhoc?: boolean;
+  attachment?: string; // base64 data-URL, for the >10MB-snapshot restore test
 };
 
 type CategoryRow = { id: string; name: string };
@@ -70,6 +71,7 @@ export async function seedExpenses(page: Page, items: SeedExpense[]): Promise<vo
               date: item.date,
               time: item.time,
               isAdhoc: item.isAdhoc ?? false,
+              attachment: item.attachment,
               createdAt: now,
               updatedAt: now,
             });

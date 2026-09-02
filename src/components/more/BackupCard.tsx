@@ -3,6 +3,7 @@ import { useDriveConnection } from "@/hooks/useDriveConnection";
 import { useBackupReminderSchedule } from "@/hooks/useBackupReminderSchedule";
 import { ReminderScheduleSelect } from "@/components/more/backup/ReminderScheduleSelect";
 import { DriveConnectionRow } from "@/components/more/backup/DriveConnectionRow";
+import { AutoBackupStatus } from "@/components/more/backup/AutoBackupStatus";
 
 interface BackupCardProps {
   openOnMount?: boolean;
@@ -16,7 +17,8 @@ export function BackupCard({ openOnMount = false, onBackupSuccess }: BackupCardP
   return (
     <div className="space-y-1">
       <h2 className="text-sm font-semibold">Backup</h2>
-      <p className="text-xs text-muted-foreground pb-3">{lastBackupText}</p>
+      <p className="text-xs text-muted-foreground pb-1">{lastBackupText}</p>
+      <AutoBackupStatus />
 
       {/* Reminder frequency row */}
       <div className="flex items-center justify-between py-2">
