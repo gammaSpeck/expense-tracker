@@ -46,7 +46,7 @@
     "date-fns": "^4.1.0",
     "dexie": "^4.4.5",
     "dexie-react-hooks": "^4.2.0",
-    "framer-motion": "^12.38.0",
+    "framer-motion": "^13.1.1",
     "idb-keyval": "^6.2.2",
     "lucide-react": "^0.561.0",
     "papaparse": "^5.7.0",
