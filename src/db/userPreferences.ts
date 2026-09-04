@@ -22,11 +22,17 @@ export interface InstallMarker {
   lastSeenExpenseCount: number;
 }
 
+export interface WhatsNewState {
+  lastSeenVersion: string; // "x.y.z"
+  lastSeenAt: string; // ISO
+}
+
 const STORAGE_KEYS = {
   currency: "expense-tracker-currency",
   theme: "expense-tracker-theme",
   backupReminder: "expense-tracker-backup-reminder",
   install: "expense-tracker-install",
+  whatsNew: "expense-tracker-whats-new",
 } as const;
 
 const WEEKLY_REMINDER_DAY = 0;
@@ -54,6 +60,17 @@ const INSTALL_MARKER_VALIDATORS: [keyof InstallMarker, (parsed: Partial<InstallM
       typeof p.lastSeenExpenseCount === "number" &&
       Number.isFinite(p.lastSeenExpenseCount) &&
       p.lastSeenExpenseCount >= 0,
+  ],
+];
+
+const WHATS_NEW_VALIDATORS: [keyof WhatsNewState, (parsed: Partial<WhatsNewState>) => boolean][] = [
+  [
+    "lastSeenVersion",
+    (p) => typeof p.lastSeenVersion === "string" && /^\d+\.\d+\.\d+$/.test(p.lastSeenVersion),
+  ],
+  [
+    "lastSeenAt",
+    (p) => typeof p.lastSeenAt === "string" && !Number.isNaN(Date.parse(p.lastSeenAt)),
   ],
 ];
 
@@ -159,6 +176,25 @@ class UserPreferences {
 
   setInstallMarker(marker: InstallMarker): void {
     this.setItem(STORAGE_KEYS.install, JSON.stringify(marker));
+  }
+
+  getWhatsNewState(): WhatsNewState | null {
+    const rawValue = this.getItem(STORAGE_KEYS.whatsNew);
+    if (!rawValue) return null;
+
+    try {
+      const parsed = JSON.parse(rawValue) as Partial<WhatsNewState> | null;
+      if (!parsed) return null;
+
+      const isValid = WHATS_NEW_VALIDATORS.every(([, isFieldValid]) => isFieldValid(parsed));
+      return isValid ? (parsed as WhatsNewState) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  setWhatsNewState(state: WhatsNewState): void {
+    this.setItem(STORAGE_KEYS.whatsNew, JSON.stringify(state));
   }
 
   clearAll(): void {

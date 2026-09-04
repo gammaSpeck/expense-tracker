@@ -1,6 +1,7 @@
-import { config } from "@/config";
+import { config, GITHUB_REPO_LINK } from "@/config";
 import { Github, PiggyBank } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { Link } from "react-router";
 import { AboutFeatureHighlights } from "@/components/more/AboutFeatureHighlights";
 
 const versionLabel =
@@ -17,6 +18,9 @@ export function AboutSection() {
       <div className="text-xs text-muted-foreground space-y-0.5">
         <p>Version {versionLabel}</p>
         <p>Last Updated: {format(parseISO(config.buildTime), "dd MMMM yyyy")}</p>
+        <Link to="/settings/changelog" className="text-xs text-primary hover:underline">
+          View changelog
+        </Link>
       </div>
 
       <div className="text-xs">
@@ -25,7 +29,7 @@ export function AboutSection() {
       </div>
 
       <a
-        href="https://github.com/gammaSpeck/expense-tracker"
+        href={GITHUB_REPO_LINK}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline break-all"

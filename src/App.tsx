@@ -6,6 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ReloadPrompt } from "@/components/ReloadPrompt";
 import { BackupReminderPrompt } from "@/components/BackupReminderPrompt";
 import { DataLossDialog } from "@/components/DataLossDialog";
+import { WhatsNewDialog } from "@/components/whatsNew/WhatsNewDialog";
 import { lazy } from "react";
 import { initializeDatabase } from "@/db/expenseTrackerDb";
 import { userPreferences } from "@/db/userPreferences";
@@ -17,6 +18,7 @@ import TransactionsPage from "./pages/TransactionsPage";
 import SettingsPage from "./pages/SettingsPage";
 import DataManagementPage from "./pages/DataManagementPage";
 import AboutPage from "./pages/AboutPage";
+import ChangelogPage from "./pages/ChangelogPage";
 import NotFound from "./pages/NotFound";
 import GoogleCallbackPage from "./pages/GoogleCallbackPage";
 
@@ -48,6 +50,7 @@ function AppContent() {
         <Route path="/settings/data/import-csv" element={<CsvImportPage />} />
         <Route path="/add/bulk" element={<BulkAddPage />} />
         <Route path="/settings/about" element={<AboutPage />} />
+        <Route path="/settings/changelog" element={<ChangelogPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {lossCount !== null && (
@@ -72,6 +75,7 @@ function AppContent() {
         />
       )}
       <BackupReminderPrompt />
+      {lossCount === null && <WhatsNewDialog />}
     </AppLayout>
   );
 }

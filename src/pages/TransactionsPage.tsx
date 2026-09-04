@@ -8,7 +8,7 @@ import { DeleteExpenseDialog } from "@/components/expenses/DeleteExpenseDialog";
 import { useCategories, useFilteredExpenses } from "@/hooks/useExpenseData";
 import { useExpenseActions } from "@/hooks/useExpenseActions";
 import { useIncrementalReveal } from "@/hooks/useIncrementalReveal";
-import { TRANSACTIONS_PAGE_SIZE } from "@/config/limits";
+import { TRANSACTIONS_PAGE_SIZE } from "@/config";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -19,11 +19,11 @@ export default function TransactionsPage() {
 
   const categories = useCategories();
   const expenses = useFilteredExpenses({ search });
-  const { visible: visibleExpenses, hasMore, sentinelRef } = useIncrementalReveal(
-    expenses,
-    TRANSACTIONS_PAGE_SIZE,
-    search,
-  );
+  const {
+    visible: visibleExpenses,
+    hasMore,
+    sentinelRef,
+  } = useIncrementalReveal(expenses, TRANSACTIONS_PAGE_SIZE, search);
 
   const {
     expenseToDelete,
@@ -44,10 +44,17 @@ export default function TransactionsPage() {
         <h1 className="text-xl font-semibold">All Transactions</h1>
       </div>
 
-      <TransactionSearchBar search={search} onSearchChange={setSearch} resultCount={expenses.length} />
+      <TransactionSearchBar
+        search={search}
+        onSearchChange={setSearch}
+        resultCount={expenses.length}
+      />
 
       {/* Transaction List */}
-      <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
+      <div
+        className="animate-fade-in"
+        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+      >
         <ExpenseList
           expenses={visibleExpenses}
           categories={categories}
