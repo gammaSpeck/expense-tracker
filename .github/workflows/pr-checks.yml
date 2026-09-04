@@ -65,3 +65,26 @@ jobs:
       - name: Health score gate
         if: always()
         run: bunx fallow health --score --min-score 95
+
+  release-notes:
+    name: Release notes reminder
+    if: >-
+      github.event.action == 'opened' &&
+      (startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/'))
+    runs-on: ubuntu-slim
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Remind when user-facing code changed without a release note
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.number }}
+          TARGET_REPO: ${{ github.repository }}
+        run: |
+          files=$(gh pr diff "$PR" --repo "$TARGET_REPO" --name-only)
+          echo "$files" | grep -q '^src/' || exit 0
+          echo "$files" | grep -qx 'src/content/releaseNotes.ts' && exit 0
+          gh pr comment "$PR" --repo "$TARGET_REPO" --body \
+            'Does this change need a user-facing note? `src/**` changed but `src/content/releaseNotes.ts` did not. If a user would notice this change, add one entry (benefit first, no jargon) with `version` set to the next release. Refactors, tests, tooling and dependency bumps need nothing — ignore this comment.'

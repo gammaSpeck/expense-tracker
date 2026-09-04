@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/command";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
 import { ColumnSelect } from "@/components/more/import-csv/CsvMappingStep";
-import { MAX_CSV_PICKER_VALUES } from "@/config/limits";
+import { MAX_CSV_PICKER_VALUES } from "@/config";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CategoryRule, IgnoreRule } from "@/types/csvImport";
 import type { Category } from "@/types/expense";
@@ -326,8 +326,8 @@ function LockedRuleHints({
       <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-xs text-muted-foreground">
         <Lock className="h-3.5 w-3.5 shrink-0" />
         <span>
-          Rows where &quot;{amountColLabel}&quot; or &quot;{dateColLabel}&quot; cannot be parsed
-          are reported as data errors, not skipped
+          Rows where &quot;{amountColLabel}&quot; or &quot;{dateColLabel}&quot; cannot be parsed are
+          reported as data errors, not skipped
         </span>
       </div>
     </div>

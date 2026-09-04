@@ -3,7 +3,7 @@ import { AlertTriangle, ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CsvPreviewTable, type PreviewRow } from "@/components/more/import-csv/CsvPreviewTable";
-import { CSV_PREVIEW_ROW_COUNT } from "@/config/limits";
+import { CSV_PREVIEW_ROW_COUNT } from "@/config";
 import type { CsvImportState } from "@/hooks/useCsvImport";
 import type { CategoryRule, CsvImportPlan, DraftExpense } from "@/types/csvImport";
 
