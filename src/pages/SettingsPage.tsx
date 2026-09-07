@@ -38,6 +38,15 @@ export default function SettingsPage() {
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </button>
 
+        {/* Changelog Row */}
+        <button
+          onClick={() => navigate("/settings/changelog")}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-card border border-border/50 hover:bg-accent/50 transition-colors"
+        >
+          <span className="text-sm font-medium">Changelog</span>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </button>
+
         {/* About App Row */}
         <button
           onClick={() => navigate("/settings/about")}

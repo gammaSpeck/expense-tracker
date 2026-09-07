@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { MAX_CSV_ROWS, MAX_CSV_FILE_BYTES } from "@/config/limits";
+import { MAX_CSV_ROWS, MAX_CSV_FILE_BYTES } from "@/config";
 import type { ParsedCsv } from "@/types/csvImport";
 
 // "Account","Account" -> "Account","Account (2)" so the mapping dropdown stays unambiguous.

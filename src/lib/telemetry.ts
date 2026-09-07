@@ -1,6 +1,6 @@
 import posthog from "posthog-js";
 import { config } from "@/config";
-import { MAX_TELEMETRY_MESSAGE_LENGTH } from "@/config/limits";
+import { MAX_TELEMETRY_MESSAGE_LENGTH } from "@/config";
 
 const enabled = config.posthog.key.length > 0;
 

@@ -43,6 +43,9 @@ playwright-report/
 blob-report/
 playwright/.cache/
 
+# Scratch demo videos (e.g. from ad-hoc Playwright recordings) — not committed.
+demo/
+
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 graft/
 

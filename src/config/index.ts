@@ -27,3 +27,7 @@ export const config: Config = {
   appVersion: __APP_VERSION__,
   buildTime: __BUILD_TIME__,
 };
+
+// Barrel exports
+export * from "./constants";
+export * from "./limits";

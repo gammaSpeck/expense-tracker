@@ -160,6 +160,42 @@
         "functions": ["TransactionsPage"],
         "maxCrap": 45,
         "reason": "Page composition wiring search/pagination/delete hooks plus the empty-state and infinite-scroll-sentinel ternaries; coverage-blind CRAP, not accidental complexity."
+      },
+      {
+        "files": ["src/components/whatsNew/WhatsNewList.tsx"],
+        "functions": ["NoteCard"],
+        "maxCrap": 85,
+        "reason": "Per-note badge row (type plus security/setup/preference flags), optional action link, and optional issue link are independent conditionals on a presentational list-item renderer; coverage-blind CRAP, not accidental complexity."
+      },
+      {
+        "files": ["src/db/userPreferences.ts"],
+        "functions": ["getBackupReminderPreferences"],
+        "maxCrap": 50,
+        "reason": "Parses persisted backup-reminder JSON with per-field fallback validation (schedule/mode enums, string coercion) before trusting localStorage; necessary input validation, not accidental complexity."
+      },
+      {
+        "files": ["src/db/userPreferences.ts"],
+        "functions": ["getInstallMarker", "getWhatsNewState"],
+        "maxCrap": 35,
+        "reason": "Validates persisted JSON against a field validator array before trusting localStorage (parse guard, shape check, per-field validation); same coverage-blind CRAP as the rest of this file's get/set preference pairs."
+      },
+      {
+        "files": ["src/hooks/useWhatsNew.ts"],
+        "functions": ["markWhatsNewSeen"],
+        "maxCrap": 35,
+        "reason": "Guards against a missing visible group and only advances lastSeenVersion when it doesn't already cover the target, so a stale write can never move the seen marker backwards; necessary monotonicity check."
+      },
+      {
+        "files": ["src/hooks/useWhatsNew.ts"],
+        "functions": ["resolveLastSeenVersion"],
+        "maxCrap": 35,
+        "reason": "Stored-state / fresh-install / existing-install branches are the seen-version heuristic's entire job; not reducible without hiding the same branches elsewhere."
+      },
+      {
+        "files": ["src/lib/telemetry.ts"],
+        "functions": ["captureError"],
+        "maxCrap": 35,
+        "reason": "Error-shape narrowing (Error vs non-Error) for name/message plus the message-length cap; necessary defensive telemetry formatting, not accidental complexity."
       }
     ]
   },
