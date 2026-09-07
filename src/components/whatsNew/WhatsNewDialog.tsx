@@ -14,7 +14,14 @@ export function WhatsNewDialog() {
     <Dialog open={open} onOpenChange={(next) => { if (!next) dismiss(); }}>
       <DialogContent
         className="max-h-[85vh] flex flex-col gap-0 p-0"
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        onOpenAutoFocus={(event) => {
+          // Default Radix behaviour focuses the first focusable descendant (a note's action
+          // button), which reads as an unintended default action. Focus the dialog container
+          // itself instead of the background: keeps it announced to assistive tech and keeps
+          // Escape/Tab working, without auto-triggering any particular update's action.
+          event.preventDefault();
+          (event.currentTarget as HTMLElement | null)?.focus();
+        }}
       >
         <DialogHeader className="p-6 pb-4 pr-10 text-left">
           <DialogTitle>What's new</DialogTitle>

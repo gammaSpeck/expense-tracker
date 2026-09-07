@@ -6,6 +6,7 @@ import { clearBulkDraft } from "@/db/bulkDraft";
 import { userPreferences } from "@/db/userPreferences";
 import { clearPassphrase } from "@/lib/backup";
 import { captureError } from "@/lib/telemetry";
+import { markWhatsNewSeen } from "@/hooks/useWhatsNew";
 
 export function useFactoryReset() {
   const [open, setOpen] = useState(false);
@@ -24,6 +25,11 @@ export function useFactoryReset() {
       ]);
 
       userPreferences.clearAll();
+      // Re-stamps lastSeenVersion at the current release, same as a real fresh install would —
+      // otherwise initializeDatabase() below writes a new install marker with no matching
+      // what's-new state, and the very next reload misreads that as an existing install
+      // adopting the feature for the first time and auto-opens the dialog.
+      markWhatsNewSeen();
       await clearPassphrase();
 
       // Re-seed default categories
