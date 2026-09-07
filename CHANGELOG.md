@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.7.0...v1.8.0) (2026-09-07)
+
+
+### Features
+
+* **whats-new:** built out feature of whats new ([#64](https://github.com/gammaSpeck/expense-tracker/issues/64)) ([1da2529](https://github.com/gammaSpeck/expense-tracker/commit/1da2529c3475322fa895f963f2106f60a331f945))
+
 ## [1.7.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.6.0...v1.7.0) (2026-09-02)
 
 
