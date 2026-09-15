@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.8.0...v1.9.0) (2026-09-15)
+
+
+### Features
+
+* **transactions:** added filters for transactions ([#75](https://github.com/gammaSpeck/expense-tracker/issues/75)) ([ea6784b](https://github.com/gammaSpeck/expense-tracker/commit/ea6784b31d649a6480ec2309f7d833c434995e60))
+
 ## [1.8.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.7.0...v1.8.0) (2026-09-07)
 
 
