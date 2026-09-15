@@ -62,6 +62,8 @@ export interface ExpenseFilters {
   dateRange?: DateRange;
   includeAdhoc?: boolean;
   timePeriod?: TimePeriod;
+  minAmount?: number;
+  maxAmount?: number;
 }
 
 // Analysis types

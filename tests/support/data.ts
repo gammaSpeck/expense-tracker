@@ -1,3 +1,4 @@
+import { format, subYears } from "date-fns";
 import { daysAgo } from "./app";
 import type { SeedExpense } from "./db";
 
@@ -47,3 +48,10 @@ export const manyRows = (n: number): SeedExpense[] =>
     date: daysAgo(i),
     time: "12:00",
   }));
+
+/** 2 rows: one today (always inside the current month, quarter and year) and one exactly a
+ *  year back (never inside any of them) — deterministic for date-preset filter assertions. */
+export const thisMonthAndLastYear = (): SeedExpense[] => [
+  { value: 100, categoryName: "Bills", description: "Recent bill", tags: [], date: daysAgo(0), time: "10:00" },
+  { value: 200, categoryName: "Bills", description: "Old bill", tags: [], date: format(subYears(new Date(), 1), "yyyy-MM-dd"), time: "10:00" },
+];

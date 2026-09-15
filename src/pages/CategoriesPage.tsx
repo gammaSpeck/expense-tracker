@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteCategoryDialog } from "@/components/categories/DeleteCategoryDialog";
@@ -9,6 +10,7 @@ import { useCategoryDeletion } from "@/hooks/useCategoryDeletion";
 import { Category } from "@/types/expense";
 
 export default function CategoriesPage() {
+  const navigate = useNavigate();
   const categories = useCategories();
   const expenseCounts = useCategoryExpenseCounts();
 
@@ -40,6 +42,7 @@ export default function CategoriesPage() {
         expenseCounts={expenseCounts}
         onEdit={setEditCategory}
         onDeleteClick={handleDeleteClick}
+        onCategoryClick={(categoryId) => navigate("/transactions", { state: { filterCategory: categoryId } })}
       />
 
       <CategoryFormDialogs

@@ -41,3 +41,16 @@ no API key, $0).
 <!-- graft:end -->
 
 @RTK.md
+
+# Release notes
+
+**Mandatory**: every feature and every bug fix adds one entry to
+`src/content/releaseNotes.ts` in the same change. Not done until the entry
+exists.
+
+- Chores are exempt: refactors, tests, tooling, dependency bumps, docs.
+- Follow the authoring contract at the top of that file — user benefit, no
+  mechanism, `title` <= 60 chars, `body` <= 160 chars.
+- Set `version` to the next unreleased version (bump the minor for a feature,
+  the patch for a fix, from the `version` in `package.json`).
+- Never hand-edit `CHANGELOG.md`; release-please generates it from commits.

@@ -9,9 +9,16 @@ interface CategoryGridProps {
   expenseCounts: Record<string, number>;
   onEdit: (category: Category) => void;
   onDeleteClick: (category: Category) => void;
+  onCategoryClick: (categoryId: string) => void;
 }
 
-export function CategoryGrid({ categories, expenseCounts, onEdit, onDeleteClick }: CategoryGridProps) {
+export function CategoryGrid({
+  categories,
+  expenseCounts,
+  onEdit,
+  onDeleteClick,
+  onCategoryClick,
+}: CategoryGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {categories.map((category, index) => (
@@ -24,12 +31,17 @@ export function CategoryGrid({ categories, expenseCounts, onEdit, onDeleteClick 
             "hover:border-primary/20 transition-colors",
           )}
         >
-          <CategoryIcon icon={category.icon} color={category.color} size="lg" />
-
-          <div className="flex-1 min-w-0">
-            <p className="font-medium truncate">{category.name}</p>
-            <p className="text-sm text-muted-foreground">{expenseCounts[category.id] || 0} expenses</p>
-          </div>
+          <button
+            type="button"
+            onClick={() => onCategoryClick(category.id)}
+            className="flex flex-1 items-center gap-3 min-w-0 text-left"
+          >
+            <CategoryIcon icon={category.icon} color={category.color} size="lg" />
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">{category.name}</p>
+              <p className="text-sm text-muted-foreground">{expenseCounts[category.id] || 0} expenses</p>
+            </div>
+          </button>
 
           <div className="flex items-center gap-1">
             <Button

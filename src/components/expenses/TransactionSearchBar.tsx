@@ -5,9 +5,15 @@ interface TransactionSearchBarProps {
   search: string;
   onSearchChange: (value: string) => void;
   resultCount: number;
+  children?: React.ReactNode;
 }
 
-export function TransactionSearchBar({ search, onSearchChange, resultCount }: TransactionSearchBarProps) {
+export function TransactionSearchBar({
+  search,
+  onSearchChange,
+  resultCount,
+  children,
+}: TransactionSearchBarProps) {
   return (
     <div
       className="sticky top-0 z-20 bg-background/95 backdrop-blur-xs -mx-4 px-4 py-2 animate-slide-in-up"
@@ -30,6 +36,7 @@ export function TransactionSearchBar({ search, onSearchChange, resultCount }: Tr
           </button>
         )}
       </div>
+      {children}
       {resultCount > 0 && (
         <p className="text-xs text-muted-foreground mt-2">
           Showing {resultCount} transaction

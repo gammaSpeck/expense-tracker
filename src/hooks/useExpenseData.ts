@@ -78,6 +78,14 @@ export function useFilteredExpenses(filters: ExpenseFilters = {}) {
       );
     }
 
+    // Amount range filter (inclusive on both ends)
+    if (filters.minAmount !== undefined) {
+      filtered = filtered.filter((expense) => expense.value >= filters.minAmount!);
+    }
+    if (filters.maxAmount !== undefined) {
+      filtered = filtered.filter((expense) => expense.value <= filters.maxAmount!);
+    }
+
     // Date range filter
     if (filters.dateRange) {
       filtered = filtered.filter((expense) => {
