@@ -33,6 +33,28 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.9.0-transaction-filters",
+    version: "1.9.0",
+    date: "2026-09-14",
+    type: "new",
+    title: "Filter your transactions",
+    body: "Narrow All Transactions by date, category, tag, amount or ad-hoc spends. Tap the filter button and combine as many as you like.",
+    action: { label: "Try filters", to: "/transactions" },
+    issue: 33,
+  },
+
+  {
+    id: "1.9.0-category-tag-drilldown",
+    version: "1.9.0",
+    date: "2026-09-14",
+    type: "improved",
+    title: "Jump from a category or tag to its spends",
+    body: "Tapping a category or tag now opens All Transactions already filtered to it.",
+    action: { label: "Open categories", to: "/categories" },
+    issue: 33,
+  },
+
+  {
     id: "1.8.0-whats-new",
     version: "1.8.0",
     date: "2026-09-04",

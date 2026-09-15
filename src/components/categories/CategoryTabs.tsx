@@ -9,9 +9,16 @@ interface CategoryTabsProps {
   expenseCounts: Record<string, number>;
   onEdit: (category: Category) => void;
   onDeleteClick: (category: Category) => void;
+  onCategoryClick: (categoryId: string) => void;
 }
 
-export function CategoryTabs({ categories, expenseCounts, onEdit, onDeleteClick }: CategoryTabsProps) {
+export function CategoryTabs({
+  categories,
+  expenseCounts,
+  onEdit,
+  onDeleteClick,
+  onCategoryClick,
+}: CategoryTabsProps) {
   return (
     <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
       <Tabs defaultValue="categories" className="w-full">
@@ -32,6 +39,7 @@ export function CategoryTabs({ categories, expenseCounts, onEdit, onDeleteClick 
             expenseCounts={expenseCounts}
             onEdit={onEdit}
             onDeleteClick={onDeleteClick}
+            onCategoryClick={onCategoryClick}
           />
         </TabsContent>
 
