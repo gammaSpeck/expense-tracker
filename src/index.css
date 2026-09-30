@@ -22,6 +22,8 @@ layer(base);
 
 @theme {
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 0.875rem;
 
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -332,6 +334,14 @@ layer(base);
 
 @utility stagger-5 {
   animation-delay: 0.25s;
+}
+
+@utility stagger-var {
+  animation-delay: var(--stagger-delay, 0ms);
+}
+
+@utility fill-mode-backwards {
+  animation-fill-mode: backwards;
 }
 
 @utility shimmer {

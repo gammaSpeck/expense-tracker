@@ -27,12 +27,12 @@ export function ExpenseCardDetails({
         {tags.length > 0 && (
           <div className="flex items-center gap-1 overflow-hidden">
             {tags.slice(0, 2).map((tag) => (
-              <span key={tag} className="tag-badge text-[10px] truncate max-w-20">
+              <span key={tag} className="tag-badge text-2xs truncate max-w-20">
                 {tag}
               </span>
             ))}
             {tags.length > 2 && (
-              <span className="text-[10px] text-muted-foreground">+{tags.length - 2}</span>
+              <span className="text-2xs text-muted-foreground">+{tags.length - 2}</span>
             )}
           </div>
         )}

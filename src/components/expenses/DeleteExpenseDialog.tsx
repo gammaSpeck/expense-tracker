@@ -25,10 +25,7 @@ export function DeleteExpenseDialog(props: DeleteExpenseDialogProps) {
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          onClick={props.onConfirm}
-          className="bg-destructive hover:bg-destructive/90"
-        >
+        <AlertDialogAction onClick={props.onConfirm} variant="destructive">
           Delete
         </AlertDialogAction>
       </AlertDialogFooter>

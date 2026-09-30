@@ -24,7 +24,7 @@ export function ExpenseCardAmount({ value, isAdhoc, hasAttachment }: ExpenseCard
         <ExpenseValue value={value} />
       </span>
       <div className="flex items-center gap-1">
-        {isAdhoc && <span className="adhoc-badge text-[10px]">Adhoc</span>}
+        {isAdhoc && <span className="adhoc-badge text-2xs">Adhoc</span>}
         {hasAttachment && <Paperclip className="h-3 w-3 text-muted-foreground" />}
       </div>
     </div>

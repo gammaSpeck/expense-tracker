@@ -23,14 +23,11 @@ export function RecentTransactionsSection({
   onDelete,
 }: RecentTransactionsSectionProps) {
   return (
-    <div
-      className="space-y-4 animate-slide-in-up"
-      style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
-    >
+    <div className="space-y-4 animate-slide-in-up stagger-4 fill-mode-backwards">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Recent Transactions</h2>
         {expenses.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={onSeeAll} className="text-primary">
+          <Button variant="link" size="sm" onClick={onSeeAll}>
             See All
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>

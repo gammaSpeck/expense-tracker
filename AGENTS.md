@@ -54,3 +54,8 @@ exists.
 - Set `version` to the next unreleased version (bump the minor for a feature,
   the patch for a fix, from the `version` in `package.json`).
 - Never hand-edit `CHANGELOG.md`; release-please generates it from commits.
+
+# Design system
+
+After changing UI code, run `bun run lint` and fix every error. Design-system rules
+(`shadcn/*`) are enforced; add a variant, size, or contract rather than overriding classes.

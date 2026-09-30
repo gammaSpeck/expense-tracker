@@ -26,7 +26,7 @@ export function ConfirmPassphraseField({
         onChange={(e) => onChange(e.target.value)}
         placeholder="Re-enter passphrase"
         autoComplete="new-password"
-        className={`focus-visible:ring-0 focus-visible:ring-offset-0 ${mismatch ? "border-destructive" : ""}`}
+        aria-invalid={mismatch || undefined}
       />
       {mismatch && <p className="text-xs text-destructive">Passphrases do not match</p>}
     </div>

@@ -18,8 +18,7 @@ export default function SettingsPage() {
       </div>
 
       <div
-        className="space-y-1 animate-slide-in-up"
-        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+        className="space-y-1 animate-slide-in-up stagger-2 fill-mode-backwards"
       >
         <ThemeToggleRow theme={theme} setTheme={setTheme} />
 

@@ -19,7 +19,8 @@ export default function ExportDialog({ open, onOpenChange, onExportCSV, onExport
         <div className="space-y-4 pt-4">
           <Button
             variant="outline"
-            className="w-full justify-start h-auto py-4"
+            size="option"
+            className="w-full justify-start"
             onClick={onExportCSV}
           >
             <div className="text-left">
@@ -29,7 +30,8 @@ export default function ExportDialog({ open, onOpenChange, onExportCSV, onExport
           </Button>
           <Button
             variant="outline"
-            className="w-full justify-start h-auto py-4"
+            size="option"
+            className="w-full justify-start"
             onClick={onExportJSON}
           >
             <div className="text-left">

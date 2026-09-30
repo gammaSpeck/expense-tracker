@@ -24,15 +24,11 @@ export function BackupReminderBanner({ message, onBackupNow, onDismiss }: Backup
               <p className="text-xs text-muted-foreground mb-3">{message}</p>
 
               <div className="flex gap-2">
-                <Button
-                  onClick={onBackupNow}
-                  size="sm"
-                  className="h-8 text-xs font-medium shadow-md hover:shadow-lg transition-all"
-                >
+                <Button onClick={onBackupNow} size="xs">
                   <Download className="mr-1.5 h-3.5 w-3.5" />
                   Backup Now
                 </Button>
-                <Button onClick={onDismiss} variant="ghost" size="sm" className="h-8 text-xs font-medium">
+                <Button onClick={onDismiss} variant="ghost" size="xs">
                   Later
                 </Button>
               </div>

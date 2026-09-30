@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { DateRange } from "@/types/expense";
 
 interface DatePickerFieldProps {
@@ -20,13 +19,7 @@ function DatePickerField({ label, date, placeholder, onSelect }: DatePickerField
       <Label className="text-xs">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className={cn(
-              "w-full justify-start text-left font-normal text-sm",
-              !date && "text-muted-foreground",
-            )}
-          >
+          <Button variant="field" data-placeholder={!date} className="w-full justify-start text-left">
             <CalendarIcon className="h-4 w-4" />
             {date ? format(date, "PP") : placeholder}
           </Button>

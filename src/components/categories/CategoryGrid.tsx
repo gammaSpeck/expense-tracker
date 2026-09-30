@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
@@ -24,11 +25,12 @@ export function CategoryGrid({
       {categories.map((category, index) => (
         <div
           key={category.id}
-          style={{ animationDelay: `${index * 30}ms`, animationFillMode: "backwards" }}
+          style={{ "--stagger-delay": `${index * 30}ms` } as CSSProperties}
           className={cn(
             "p-4 rounded-xl bg-card border border-border/50 animate-slide-in-up",
             "flex items-center gap-3",
             "hover:border-primary/20 transition-colors",
+            "stagger-var fill-mode-backwards",
           )}
         >
           <button
@@ -55,9 +57,9 @@ export function CategoryGrid({
             </Button>
             <Button
               aria-label={`Delete ${category.name}`}
-              variant="ghost"
+              variant="destructiveGhost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="h-8 w-8"
               onClick={() => onDeleteClick(category)}
             >
               <Trash2 className="h-4 w-4" />

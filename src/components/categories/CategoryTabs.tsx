@@ -20,7 +20,7 @@ export function CategoryTabs({
   onCategoryClick,
 }: CategoryTabsProps) {
   return (
-    <div className="animate-fade-in" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
+    <div className="animate-fade-in stagger-2 fill-mode-backwards">
       <Tabs defaultValue="categories" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="categories" className="flex items-center gap-2">

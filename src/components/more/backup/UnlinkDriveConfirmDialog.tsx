@@ -22,9 +22,8 @@ export function UnlinkDriveConfirmDialog({ isUnlinking, onConfirm }: UnlinkDrive
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+          variant="destructiveGhost"
+          size="xs"
           disabled={isUnlinking}
         >
           {isUnlinking ? (
@@ -46,7 +45,7 @@ export function UnlinkDriveConfirmDialog({ isUnlinking, onConfirm }: UnlinkDrive
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            variant="destructive"
             onClick={onConfirm}
           >
             Disconnect

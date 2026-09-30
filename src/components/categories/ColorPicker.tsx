@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import type { CSSProperties } from "react";
 import { CATEGORY_COLORS } from "@/db/expenseTrackerDb";
 
 interface ColorPickerProps {
@@ -20,10 +21,10 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             type="button"
             onClick={() => onChange(color)}
             className={cn(
-              "w-7 h-7 rounded-full transition-all duration-200",
+              "w-7 h-7 rounded-full transition-all duration-200 bg-(--swatch-color)",
               isSelected && "ring-2 ring-offset-2 ring-offset-background ring-primary scale-110",
             )}
-            style={{ backgroundColor: color }}
+            style={{ "--swatch-color": color } as CSSProperties}
           />
         );
       })}

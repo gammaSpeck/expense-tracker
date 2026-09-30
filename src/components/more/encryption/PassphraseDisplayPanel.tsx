@@ -16,7 +16,7 @@ export function PassphraseDisplayPanel({
   return (
     <div className="space-y-3">
       <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-        <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-green-500" />
+        <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-success" />
         <p className="text-xs text-muted-foreground">
           Encryption is active. Backups will be encrypted with your passphrase.
         </p>

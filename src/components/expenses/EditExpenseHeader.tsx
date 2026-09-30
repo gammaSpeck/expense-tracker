@@ -22,9 +22,9 @@ export function EditExpenseHeader({ onBack, onDelete }: EditExpenseHeaderProps) 
         trigger={
           <Button
             aria-label="Delete expense"
-            variant="ghost"
+            variant="destructiveGhost"
             size="icon"
-            className="h-9 w-9 text-destructive hover:text-destructive"
+            className="h-9 w-9"
           >
             <Trash2 className="h-5 w-5" />
           </Button>

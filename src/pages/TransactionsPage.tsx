@@ -77,8 +77,7 @@ export default function TransactionsPage() {
 
       {/* Transaction List */}
       <div
-        className="animate-fade-in"
-        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+        className="animate-fade-in stagger-2 fill-mode-backwards"
       >
         <ExpenseList
           expenses={visibleExpenses}

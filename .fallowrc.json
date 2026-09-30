@@ -1,14 +1,9 @@
 {
   // This file is JSONC: fallow reads these comments; generic JSON tools may not.
   "$schema": "./node_modules/fallow/schema.json",
-  "entry": [
-    "src/index.{ts,tsx,js,jsx}",
-    "src/main.{ts,tsx,js,jsx}"
-  ],
+  "entry": ["src/index.{ts,tsx,js,jsx}", "src/main.{ts,tsx,js,jsx}"],
   "ignorePatterns": ["**/*.d.ts", "docs/**", "public/**"],
-  "ignoreExports": [
-    { "file": "src/components/ui/**", "exports": ["*"] }
-  ],
+  "ignoreExports": [{ "file": "src/components/ui/**", "exports": ["*"] }],
   "ignoreExportsUsedInFile": true,
   "rules": {
     "unresolved-imports": "error",
@@ -22,15 +17,7 @@
     "unused-types": "warn",
     "dev-dependencies-in-production": "warn",
     "test-only-dependencies": "warn",
-    "stale-suppressions": "warn",
-    // Tailwind arbitrary values (`max-h-[85vh]`, `text-[10px]`, `w-[320px]`, cmdk's
-    // `**:[[cmdk-item]]:px-2` selectors, ...) are an established, deliberate pattern here for
-    // values with no scale step (viewport-relative sizes, sub-scale pixel tweaks, third-party
-    // selector overrides) -- see WhatsNewDialog.tsx, ExpenseCardDetails.tsx, command.tsx. This
-    // finding is verdict-neutral by default (fallow audit's own docs: css findings only gate CI
-    // when set to "error"), but it re-surfaces as a review comment on nearly every UI PR for a
-    // pattern the team already accepted; silencing it instead of re-litigating it each time.
-    "css-token-drift": "off"
+    "stale-suppressions": "warn"
   },
   "duplicates": {
     "mode": "mild",
@@ -237,9 +224,7 @@
     // fresh scan found src/lib/backup.ts -> src/db/userPreferences.ts and
     // src/lib/driveAuth.ts -> src/db/driveCredentials.ts, both legitimate
     // service-layer usage of the db layer, not an accidental inversion.
-    "rules": [
-      { "from": "data", "allow": ["shared"] }
-    ]
+    "rules": [{ "from": "data", "allow": ["shared"] }]
   },
   "audit": {
     "gate": "new-only"

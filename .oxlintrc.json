@@ -1,13 +1,34 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": [],
+  "jsPlugins": ["@shadcn/lint"],
   "categories": {
     "correctness": "warn",
   },
   "env": {
     "builtin": true,
   },
-  "ignorePatterns": ["dist", "src/components/ui/**", ".omp/**"],
+  "ignorePatterns": ["dist", ".omp/**"],
+  "rules": {
+    "shadcn/no-restyle": [
+      "error",
+      {
+        "allow": ["layout"],
+        "contracts": [
+          { "pattern": "(Content|Header|Footer|Group|List|Item|Trigger|Panel)$", "allow": ["layout", "spacing"] },
+          { "pattern": "(Header|Footer)$", "allow": ["layout", "spacing", "border-t"] },
+          { "pattern": "(Title|Description)$", "allow": ["layout", "spacing", "typography"] },
+          { "pattern": "^(Input|Textarea|SelectTrigger)$", "allow": ["layout", "typography", "pl-*", "pr-*", "resize-none"] },
+          { "pattern": "^Label$", "allow": ["layout", "typography", "text-muted-foreground", "text-destructive"] },
+        ],
+      },
+    ],
+    "shadcn/no-raw-colors": "error",
+    "shadcn/no-arbitrary-values": ["error", { "allow": ["layout"] }],
+    "shadcn/no-inline-styles": "error",
+    "shadcn/no-unknown-classes": ["error", { "allow": ["toaster"] }],
+    "shadcn/require-static-classes": "error",
+  },
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
@@ -60,7 +81,15 @@
         "no-unsafe-optional-chaining": "error",
         "no-unused-labels": "error",
         "no-unused-private-class-members": "error",
-        "no-unused-vars": "off",
+        "no-unused-vars": [
+          "warn",
+          {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_",
+          },
+        ],
         "no-useless-backreference": "error",
         "no-useless-catch": "error",
         "no-useless-escape": "error",
@@ -93,16 +122,6 @@
         "@typescript-eslint/triple-slash-reference": "error",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
-        "unused-imports/no-unused-imports": "error",
-        "unused-imports/no-unused-vars": [
-          "warn",
-          {
-            "vars": "all",
-            "varsIgnorePattern": "^_",
-            "args": "after-used",
-            "argsIgnorePattern": "^_",
-          },
-        ],
         "react/only-export-components": [
           "warn",
           {
@@ -111,11 +130,20 @@
         ],
       },
       "plugins": ["typescript", "react"],
-      "jsPlugins": ["eslint-plugin-unused-imports"],
       "env": {
         "es2020": true,
         "browser": true,
       },
+    },
+    {
+      "files": ["src/components/ui/**"],
+      "rules": {
+        "shadcn/no-restyle": "off",
+        "shadcn/no-arbitrary-values": "off",
+        "shadcn/require-static-classes": "off",
+        "react/only-export-components": "off",
+      },
+      "plugins": ["typescript", "react"],
     },
   ],
 }

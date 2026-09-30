@@ -49,7 +49,7 @@ export function BottomNav() {
               <Icon className={cn("h-5 w-5 relative z-10", isActive && "text-primary")} />
               <span
                 className={cn(
-                  "text-[10px] mt-1 font-medium relative z-10",
+                  "text-2xs mt-1 font-medium relative z-10",
                   isActive && "text-primary",
                 )}
               >

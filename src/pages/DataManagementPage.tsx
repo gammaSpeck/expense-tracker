@@ -25,10 +25,7 @@ export default function DataManagementPage() {
         onBack={() => navigate("/settings")}
       />
 
-      <div
-        className="space-y-3 animate-slide-in-up"
-        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
-      >
+      <div className="space-y-3 animate-slide-in-up stagger-2 fill-mode-backwards">
         {/* Encryption card */}
         <div className="p-4 rounded-xl bg-card border border-border/50">
           <EncryptionSettings />

@@ -42,7 +42,7 @@ export function BackupDialog({
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-green-500 shrink-0" />
+            <ShieldCheck className="h-3.5 w-3.5 text-success shrink-0" />
             Backups are end-to-end encrypted (.extrack)
           </div>
 

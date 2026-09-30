@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router";
 import { format, parseISO } from "date-fns";
-import { Button } from "@/components/ui/button";
 import type { ReleaseNoteGroup } from "@/lib/whatsNew";
 import type { ReleaseNote } from "@/content/releaseNotes";
 import { GITHUB_REPO_LINK } from "@/config";
@@ -13,7 +12,7 @@ const TYPE_BADGE_LABEL: Record<ReleaseNote["type"], string> = {
 
 function Badge({ label }: { label: string }) {
   return (
-    <span className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground">
+    <span className="rounded-full px-2 py-0.5 text-2xs font-medium bg-muted text-muted-foreground">
       {label}
     </span>
   );
@@ -35,17 +34,16 @@ function NoteCard({ note, onNavigate }: { note: ReleaseNote; onNavigate?: () => 
       {(note.action || note.issue) && (
         <div className="flex items-center gap-2">
           {note.action && (
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-xs font-normal"
+            <button
+              type="button"
+              className="text-xs text-primary hover:underline"
               onClick={() => {
                 onNavigate?.();
                 navigate(note.action!.to);
               }}
             >
               {note.action.label}
-            </Button>
+            </button>
           )}
           {note.issue && (
             <a
