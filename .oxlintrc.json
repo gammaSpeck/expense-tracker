@@ -82,7 +82,7 @@
         "no-unused-labels": "error",
         "no-unused-private-class-members": "error",
         "no-unused-vars": [
-          "warn",
+          "error",
           {
             "vars": "all",
             "varsIgnorePattern": "^_",

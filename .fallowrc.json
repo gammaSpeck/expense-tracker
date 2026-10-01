@@ -210,6 +210,12 @@
         "functions": ["activeFilterChips"],
         "maxCognitive": 20,
         "reason": "Flat sequence of independent optional chip builders (categories loop, tags loop, amount/date/adhoc conditionals) appended to one array; fallow's per-branch weight adds up but none of it nests or couples."
+      },
+      {
+        "files": ["src/components/categories/CategoryIcon.tsx"],
+        "functions": ["<arrow>"],
+        "maxCrap": 35,
+        "reason": "IconPicker's per-icon map callback: missing-icon guard, selected-state class/style branches; coverage-blind CRAP on a presentational grid renderer, not accidental complexity."
       }
     ]
   },
