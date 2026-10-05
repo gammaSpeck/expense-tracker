@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.9.0...v1.9.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **design-system:** fixed the design system using Shad cn lint ([#82](https://github.com/gammaSpeck/expense-tracker/issues/82)) ([5c20b74](https://github.com/gammaSpeck/expense-tracker/commit/5c20b747a79efbf2379fb7fd7e9f323f1ac8203d))
+
 ## [1.9.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.8.0...v1.9.0) (2026-09-15)
 
 
