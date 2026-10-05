@@ -59,7 +59,7 @@ function SummaryCard({
     variant === "primary"
       ? "text-primary"
       : variant === "warning"
-        ? "text-yellow-500"
+        ? "text-warning"
         : "text-foreground";
   return (
     <div className="p-3 rounded-xl bg-card border border-border/50 text-center">
@@ -105,7 +105,7 @@ function ErrorsDisclosure({ errors }: { errors: CsvImportPlan["errors"] }) {
     >
       <summary className="flex items-center gap-2 text-sm font-medium cursor-pointer">
         <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
-        <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
+        <AlertTriangle className="h-3.5 w-3.5 text-warning" />
         {errors.length} error{errors.length !== 1 ? "s" : ""}
       </summary>
       {/* Scroll cap tuned to ~6 error rows; no design-token step lands near 200px. */}

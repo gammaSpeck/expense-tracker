@@ -31,16 +31,12 @@ export function AnalysisContent({
 }: AnalysisContentProps) {
   return (
     <>
-      <div
-        className="animate-slide-in-up"
-        style={{ animationDelay: "150ms", animationFillMode: "backwards" }}
-      >
+      <div className="animate-slide-in-up stagger-3 fill-mode-backwards">
         <SummaryStatsGrid summary={summary} currency={currency} formatValue={formatValue} />
       </div>
 
       <div
-        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
-        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-2 fill-mode-backwards"
       >
         <Suspense fallback={chartFallback}>
           <CategoryBreakdown
@@ -53,8 +49,7 @@ export function AnalysisContent({
       </div>
 
       <div
-        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
-        style={{ animationDelay: "200ms", animationFillMode: "backwards" }}
+        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-4 fill-mode-backwards"
       >
         <Suspense fallback={chartFallback}>
           <TrendSection

@@ -30,8 +30,7 @@ export function PeriodSelector({
 }: PeriodSelectorProps) {
   return (
     <div
-      className="space-y-3 p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up"
-      style={{ animationDelay: "50ms", animationFillMode: "backwards" }}
+      className="space-y-3 p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-1 fill-mode-backwards"
     >
       {/* Tabs */}
       <Tabs value={periodTab} onValueChange={onPeriodChange}>

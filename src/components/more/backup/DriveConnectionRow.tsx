@@ -36,7 +36,7 @@ export function DriveConnectionRow({ creds, isUnlinking, onUnlink }: DriveConnec
       {driveConnected ? (
         <UnlinkDriveConfirmDialog isUnlinking={isUnlinking} onConfirm={onUnlink} />
       ) : (
-        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => initiateGoogleAuth()}>
+        <Button variant="ghost" size="xs" onClick={() => initiateGoogleAuth()}>
           <Link2 className="h-3 w-3 mr-1" />
           Connect
         </Button>

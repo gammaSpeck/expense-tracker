@@ -17,10 +17,7 @@ export function AnalysisExportSection({
 }: AnalysisExportSectionProps) {
   return (
     <>
-      <div
-        className="animate-slide-in-up"
-        style={{ animationDelay: "250ms", animationFillMode: "backwards" }}
-      >
+      <div className="animate-slide-in-up stagger-5 fill-mode-backwards">
         <Button variant="outline" className="w-full" onClick={() => setShowExportDialog(true)}>
           <Download className="h-4 w-4 mr-2" />
           Export

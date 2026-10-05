@@ -26,7 +26,7 @@ export function ExpenseCardContextMenu({ trigger, onDuplicate, onEdit, onDelete 
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </ContextMenuItem>
-        <ContextMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+        <ContextMenuItem onClick={onDelete} variant="destructive">
           <Trash2 className="h-4 w-4 mr-2" />
           Delete
         </ContextMenuItem>

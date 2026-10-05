@@ -1,4 +1,5 @@
 import React from "react";
+import type { CSSProperties } from "react";
 import { useCurrency } from "@/contexts/CurrencyContext";
 
 type PiePayload = {
@@ -21,10 +22,8 @@ export default function CustomPieTooltip({ active, payload }: Props) {
   const percentage = ((data.value / data.payload.total) * 100).toFixed(1);
   return (
     <div
-      className="px-3 py-2 rounded-lg shadow-lg border border-white"
-      style={{
-        backgroundColor: data.payload.color,
-      }}
+      className="px-3 py-2 rounded-lg shadow-lg border border-white bg-(--tooltip-color)"
+      style={{ "--tooltip-color": data.payload.color } as CSSProperties}
     >
       <p className="font-medium text-white">{data.name}</p>
       <p className="text-white/90">

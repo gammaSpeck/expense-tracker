@@ -10,10 +10,7 @@ export default function AboutPage() {
     <div className="px-4 py-6 max-w-2xl mx-auto space-y-4 overflow-x-hidden">
       <PageHeader icon={<Info className="h-5 w-5" />} title="About App" onBack={() => navigate("/settings")} />
 
-      <div
-        className="px-2 py-4 animate-slide-in-up"
-        style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
-      >
+      <div className="px-2 py-4 animate-slide-in-up stagger-2 fill-mode-backwards">
         <AboutSection />
       </div>
     </div>

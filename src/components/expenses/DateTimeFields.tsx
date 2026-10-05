@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { ExpenseFormData } from "@/types/expense";
 
 export function DateTimeFields() {
@@ -24,11 +23,9 @@ export function DateTimeFields() {
               <PopoverTrigger asChild>
                 <Button
                   aria-label="Date"
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal text-sm",
-                    !field.value && "text-muted-foreground",
-                  )}
+                  variant="field"
+                  data-placeholder={!field.value}
+                  className="w-full justify-start text-left"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {field.value ? format(new Date(field.value), "PP") : "Pick a date"}

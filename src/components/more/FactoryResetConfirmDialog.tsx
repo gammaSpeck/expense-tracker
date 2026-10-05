@@ -60,11 +60,7 @@ export function FactoryResetConfirmDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            disabled={isResetting}
-            className="bg-destructive hover:bg-destructive/90"
-          >
+          <AlertDialogAction onClick={onConfirm} disabled={isResetting} variant="destructive">
             {isResetting ? "Resetting..." : "Confirm Reset"}
           </AlertDialogAction>
         </AlertDialogFooter>

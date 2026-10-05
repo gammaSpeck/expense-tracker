@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { icons, LucideIcon, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,10 +27,10 @@ export function CategoryIcon({ icon, color, size = "md", className }: CategoryIc
 
   return (
     <div
-      className={cn("category-icon shrink-0", sizeClasses[size], className)}
-      style={{ backgroundColor: `${color}20` }}
+      className={cn("category-icon shrink-0 bg-(--category-tint)", sizeClasses[size], className)}
+      style={{ "--category-tint": `${color}20` } as CSSProperties}
     >
-      <Icon className={iconSizeClasses[size]} style={{ color }} />
+      <Icon className={cn(iconSizeClasses[size], "text-(--category-color)")} style={{ "--category-color": color } as CSSProperties} />
     </div>
   );
 }
@@ -129,8 +130,8 @@ export function IconPicker({ value, onChange, color }: IconPickerProps) {
             )}
           >
             <IconComponent
-              className="h-4 w-4 mx-auto"
-              style={{ color: isSelected ? color : undefined }}
+              className={cn("h-4 w-4 mx-auto", isSelected && "text-(--swatch-color)")}
+              style={isSelected ? ({ "--swatch-color": color } as CSSProperties) : undefined}
             />
           </button>
         );

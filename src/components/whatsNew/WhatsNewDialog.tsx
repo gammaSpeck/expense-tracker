@@ -30,7 +30,7 @@ export function WhatsNewDialog() {
         <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-4">
           <WhatsNewList groups={unseen.slice(0, MAX_DIALOG_GROUPS)} onNavigate={dismiss} />
         </div>
-        <DialogFooter className="flex-row items-center justify-between gap-3 p-6 pt-4 border-t border-border sm:justify-between sm:space-x-0">
+        <DialogFooter className="flex-row items-center justify-between gap-3 p-6 pt-4 border-t sm:justify-between sm:space-x-0">
           <Link
             to="/settings/changelog"
             onClick={dismiss}

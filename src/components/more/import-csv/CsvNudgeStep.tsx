@@ -28,7 +28,7 @@ export function CsvNudgeStep({ onSkip }: CsvNudgeStepProps) {
 
       <div className="flex flex-col gap-2 w-full max-w-xs">
         <Button onClick={() => navigate("/settings/data", { state: { openBackup: true } })}>Back up now</Button>
-        <Button variant="ghost" onClick={onSkip} className="gap-1">
+        <Button variant="ghost" onClick={onSkip}>
           Skip, continue <ArrowRight className="h-4 w-4" />
         </Button>
       </div>

@@ -61,7 +61,7 @@ export function DeleteCategoryDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="bg-destructive hover:bg-destructive/90"
+            variant="destructive"
             disabled={
               deleteAction === "move" && !!deleteData && deleteData.expenseCount > 0 && !moveToCategory
             }

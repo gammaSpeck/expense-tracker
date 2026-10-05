@@ -42,7 +42,7 @@ export function DataLossDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onStartFresh} className="bg-secondary text-secondary-foreground hover:bg-secondary/80">
+          <AlertDialogAction onClick={onStartFresh} variant="secondary">
             Start fresh
           </AlertDialogAction>
           <AlertDialogAction onClick={onRestore}>

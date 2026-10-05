@@ -37,8 +37,7 @@ export default function AnalysisPage() {
         />
       ) : (
         <div
-          className="flex flex-col items-center justify-center py-12 text-muted-foreground animate-slide-in-up"
-          style={{ animationDelay: "100ms", animationFillMode: "backwards" }}
+          className="flex flex-col items-center justify-center py-12 text-muted-foreground animate-slide-in-up stagger-2 fill-mode-backwards"
         >
           <p>No expense data for this period</p>
         </div>
