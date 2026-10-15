@@ -13,7 +13,11 @@ export function AttachmentField({ imagePreview, onUpload, onRemove }: Attachment
       <Label>Attachment (optional)</Label>
       {imagePreview ? (
         <div className="relative inline-block">
-          <img src={imagePreview} alt="Attachment preview" className="h-24 w-24 object-cover rounded-xl" />
+          <img
+            src={imagePreview}
+            alt="Attachment preview"
+            className="h-24 w-24 object-cover rounded-xl"
+          />
           <button
             aria-label="Remove attachment"
             type="button"

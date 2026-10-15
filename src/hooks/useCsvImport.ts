@@ -7,11 +7,22 @@ import { detectPreset, SOURCE_PRESETS, type SourcePreset } from "@/lib/csvImport
 import { importCsvExpenses } from "@/db/expenseTrackerDb";
 import { capture, captureError } from "@/lib/telemetry";
 import type { Category } from "@/types/expense";
-import type { CategoryRule, CsvColumnMapping, CsvImportPlan, IgnoreRule, ParsedCsv } from "@/types/csvImport";
+import type {
+  CategoryRule,
+  CsvColumnMapping,
+  CsvImportPlan,
+  IgnoreRule,
+  ParsedCsv,
+} from "@/types/csvImport";
 
 export type CsvImportStep = "nudge" | "upload" | "mapping" | "categories" | "preview" | "done";
 
-export type CsvMappingErrorKey = "amount" | "dateTime" | "dateFormat" | "category" | "defaultCategory";
+export type CsvMappingErrorKey =
+  | "amount"
+  | "dateTime"
+  | "dateFormat"
+  | "category"
+  | "defaultCategory";
 
 export interface CsvImportState {
   step: CsvImportStep;
@@ -54,9 +65,14 @@ const MAPPING_CHECKS: [CsvMappingErrorKey, (m: CsvColumnMapping) => boolean, str
   ["category", (m) => m.category === null, "Select the Category column."],
 ];
 
-function mappingValidationErrors(mapping: CsvColumnMapping): Partial<Record<CsvMappingErrorKey, string>> {
+function mappingValidationErrors(
+  mapping: CsvColumnMapping,
+): Partial<Record<CsvMappingErrorKey, string>> {
   return Object.fromEntries(
-    MAPPING_CHECKS.filter(([, failed]) => failed(mapping)).map(([key, , message]) => [key, message]),
+    MAPPING_CHECKS.filter(([, failed]) => failed(mapping)).map(([key, , message]) => [
+      key,
+      message,
+    ]),
   );
 }
 
@@ -64,10 +80,15 @@ function presetIgnoreRules(preset: SourcePreset, parsed: ParsedCsv | null): Igno
   const { columnIndex, values } = preset.ignoreValues;
   const rows = parsed ? parsed.rows : [];
   const presentValues = new Set(rows.map((row) => (row[columnIndex] ?? "").trim()));
-  return values.filter((value) => presentValues.has(value)).map((value) => ({ columnIndex, value }));
+  return values
+    .filter((value) => presentValues.has(value))
+    .map((value) => ({ columnIndex, value }));
 }
 
-function buildPresetCategoryRules(preset: SourcePreset, categories: Category[]): Record<string, CategoryRule> {
+function buildPresetCategoryRules(
+  preset: SourcePreset,
+  categories: Category[],
+): Record<string, CategoryRule> {
   const rules: Record<string, CategoryRule> = {};
   for (const [sourceValue, categoryName] of Object.entries(preset.categoryNames)) {
     const existing = categories.find((c) => c.name === categoryName);
@@ -141,7 +162,9 @@ function useCsvImportFormState() {
   // faster second pick's already-applied result.
   const fileSelectionRef = useRef(0);
   const [importedCount, setImportedCount] = useState(0);
-  const [mappingErrors, setMappingErrors] = useState<Partial<Record<CsvMappingErrorKey, string>>>({});
+  const [mappingErrors, setMappingErrors] = useState<Partial<Record<CsvMappingErrorKey, string>>>(
+    {},
+  );
   const [detectedPresetId, setDetectedPresetId] = useState<string | null>(null);
 
   // Default the write target to "Others" the first time categories load, but only while
@@ -159,17 +182,28 @@ function useCsvImportFormState() {
 
   return {
     categories,
-    step, setStep,
-    parsed, setParsed,
-    mapping, setMapping,
-    categoryRules, setCategoryRules,
-    defaultCategoryId, setDefaultCategoryId,
-    ignoreRules, setIgnoreRules,
-    isImporting, setIsImporting, isImportingRef,
+    step,
+    setStep,
+    parsed,
+    setParsed,
+    mapping,
+    setMapping,
+    categoryRules,
+    setCategoryRules,
+    defaultCategoryId,
+    setDefaultCategoryId,
+    ignoreRules,
+    setIgnoreRules,
+    isImporting,
+    setIsImporting,
+    isImportingRef,
     fileSelectionRef,
-    importedCount, setImportedCount,
-    mappingErrors, setMappingErrors,
-    detectedPresetId, setDetectedPresetId,
+    importedCount,
+    setImportedCount,
+    mappingErrors,
+    setMappingErrors,
+    detectedPresetId,
+    setDetectedPresetId,
     plan,
   };
 }
@@ -220,7 +254,8 @@ function toCsvImportState(
 
 export function useCsvImport(): CsvImportState {
   const state = useCsvImportFormState();
-  const { categories, parsed, mapping, categoryRules, defaultCategoryId, plan, isImportingRef } = state;
+  const { categories, parsed, mapping, categoryRules, defaultCategoryId, plan, isImportingRef } =
+    state;
 
   function reset() {
     resetImportState(state);

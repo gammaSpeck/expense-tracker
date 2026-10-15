@@ -8,11 +8,19 @@ interface CategoryFieldGroupProps {
   errorMessage?: string;
 }
 
-export function CategoryFieldGroup({ categories, onCreateNew, errorMessage }: CategoryFieldGroupProps) {
+export function CategoryFieldGroup({
+  categories,
+  onCreateNew,
+  errorMessage,
+}: CategoryFieldGroupProps) {
   return (
     <div className="space-y-2">
       <Label>Category</Label>
-      <CategorySelectField categories={categories} onCreateNew={onCreateNew} errorMessage={errorMessage} />
+      <CategorySelectField
+        categories={categories}
+        onCreateNew={onCreateNew}
+        errorMessage={errorMessage}
+      />
     </div>
   );
 }

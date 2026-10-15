@@ -23,8 +23,8 @@ export function DeleteTagDialog({ deleteData, onOpenChange, onConfirm }: DeleteT
           <AlertDialogTitle>Delete "{deleteData?.tag}"?</AlertDialogTitle>
           <AlertDialogDescription>
             This tag is used in {deleteData?.count} expense
-            {deleteData?.count !== 1 ? "s" : ""}. The tag will be removed from all expenses, but
-            the expenses themselves will NOT be deleted.
+            {deleteData?.count !== 1 ? "s" : ""}. The tag will be removed from all expenses, but the
+            expenses themselves will NOT be deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

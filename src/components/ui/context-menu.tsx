@@ -81,7 +81,8 @@ const ContextMenuItem = React.forwardRef<
     className={cn(
       "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-hidden data-disabled:pointer-events-none data-disabled:opacity-50 focus:bg-accent focus:text-accent-foreground",
       inset && "pl-8",
-      variant === "destructive" && "text-destructive focus:bg-destructive/10 focus:text-destructive",
+      variant === "destructive" &&
+        "text-destructive focus:bg-destructive/10 focus:text-destructive",
       className,
     )}
     {...props}

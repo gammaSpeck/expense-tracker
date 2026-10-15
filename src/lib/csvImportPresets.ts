@@ -63,7 +63,16 @@ export const SOURCE_PRESETS: SourcePreset[] = [
     id: "expense-manager-amitm29",
     label: "Money Manager & Expense tracker (Amit Mohan)",
     icon: expenseManagerAmitm29Icon,
-    headers: ["Date", "Category", "Amount", "Note", "Type", "Payment mode", "To payment mode", "Tags"],
+    headers: [
+      "Date",
+      "Category",
+      "Amount",
+      "Note",
+      "Type",
+      "Payment mode",
+      "To payment mode",
+      "Tags",
+    ],
     mapping: {
       amount: 2,
       dateTime: 0,
@@ -95,7 +104,9 @@ export const SOURCE_PRESETS: SourcePreset[] = [
 export function detectPreset(headers: string[]): SourcePreset | null {
   return (
     SOURCE_PRESETS.find(
-      (preset) => preset.headers.length === headers.length && preset.headers.every((h, i) => h === headers[i]),
+      (preset) =>
+        preset.headers.length === headers.length &&
+        preset.headers.every((h, i) => h === headers[i]),
     ) ?? null
   );
 }

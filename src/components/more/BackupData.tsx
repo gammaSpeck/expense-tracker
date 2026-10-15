@@ -12,11 +12,7 @@ interface BackupDataProps {
   driveConnected: boolean;
 }
 
-export function BackupData({
-  openOnMount = false,
-  onSuccess,
-  driveConnected,
-}: BackupDataProps) {
+export function BackupData({ openOnMount = false, onSuccess, driveConnected }: BackupDataProps) {
   const [open, setOpen] = useState(false);
   const hasAutoOpenedRef = useRef(false);
   const { passphraseSetupOpen, closeGate, requestOrProceed } = usePassphraseGate(() =>

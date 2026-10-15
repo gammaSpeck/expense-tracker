@@ -131,7 +131,12 @@ export function useEncryptedFileImport(onPreviewReady: (preview: ImportPreview) 
 
   async function handleManualDecrypt() {
     if (!pendingEncryptedText || !manualPassphrase) return;
-    await performManualDecrypt({ ...deps, pendingEncryptedText, manualPassphrase, setIsDecrypting });
+    await performManualDecrypt({
+      ...deps,
+      pendingEncryptedText,
+      manualPassphrase,
+      setIsDecrypting,
+    });
   }
 
   function resetEncryptedState() {

@@ -53,7 +53,10 @@ export default function CategoryBreakdown({
       </div>
 
       {/* Legend - ALL non-zero categories */}
-      <div className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0" data-testid="category-breakdown-legend">
+      <div
+        className="mt-4 space-y-2 lg:grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-2 lg:space-y-0"
+        data-testid="category-breakdown-legend"
+      >
         {nonZeroCategories.map((cat) => (
           <div key={cat.categoryId} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 min-w-0">

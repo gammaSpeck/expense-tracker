@@ -17,7 +17,11 @@ import {
 const hadPriorInstall = userPreferences.getInstallMarker() !== null;
 
 export function visibleGroups(): ReleaseNoteGroup[] {
-  const visibleNotes = selectVisibleNotes(RELEASE_NOTES, config.appVersion, config.env === "production");
+  const visibleNotes = selectVisibleNotes(
+    RELEASE_NOTES,
+    config.appVersion,
+    config.env === "production",
+  );
   return groupNotes(visibleNotes, config.appVersion);
 }
 
@@ -27,7 +31,10 @@ export function markWhatsNewSeen(): void {
   const stored = userPreferences.getWhatsNewState();
 
   if (!stored || compareVersions(stored.lastSeenVersion, target) < 0) {
-    userPreferences.setWhatsNewState({ lastSeenVersion: target, lastSeenAt: new Date().toISOString() });
+    userPreferences.setWhatsNewState({
+      lastSeenVersion: target,
+      lastSeenAt: new Date().toISOString(),
+    });
   }
 }
 
@@ -41,7 +48,10 @@ function resolveLastSeenVersion(): string | null {
     // Brand-new install: sees no dialog (it has no update to hear about) but still gets every
     // future announcement, and the full history stays browsable from Settings.
     const target = groups[0]?.version ?? config.appVersion;
-    userPreferences.setWhatsNewState({ lastSeenVersion: target, lastSeenAt: new Date().toISOString() });
+    userPreferences.setWhatsNewState({
+      lastSeenVersion: target,
+      lastSeenAt: new Date().toISOString(),
+    });
     return target;
   }
 

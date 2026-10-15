@@ -152,7 +152,13 @@ test.describe("data-management", () => {
 
     await page.goto("/");
     await seedExpenses(page, [
-      { value: 999, categoryName: "Others", description: "Should be gone", date: daysAgo(0), time: "09:00" },
+      {
+        value: 999,
+        categoryName: "Others",
+        description: "Should be gone",
+        date: daysAgo(0),
+        time: "09:00",
+      },
     ]);
 
     await page.goto("/settings/data");

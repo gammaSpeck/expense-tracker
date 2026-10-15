@@ -1,27 +1,21 @@
 {
-  // Use oxfmt (via the Oxc extension) as the formatter for all JS/TS files —
-  // this matches what `pnpm fix` runs with `oxfmt --write`.
-  "editor.formatOnSave": true,
+  // Vite+ editor setup (https://viteplus.dev/guide/ide-integration). The Oxc extension (>= 1.62)
+  // detects the project-local `vite-plus` and runs `vp lint --lsp` / `vp fmt --lsp`, so diagnostics
+  // and format-on-save use the `lint` / `fmt` blocks in vite.config.ts, same as `bun run check`.
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "[javascript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-  },
-
-  // Use oxlint (via the Oxc extension) for diagnostics — disable the
-  // built-in TS/JS validator to avoid duplicate or conflicting errors.
+  "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "oxc.enable": true,
+  "oxc.disableNestedConfig": true,
+  "oxc.fmt.disableNestedConfig": true,
+  "editor.formatOnSave": true,
+  // Oxfmt formats whole files only.
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": { "source.fixAll.oxc": "explicit" },
   "js/ts.validate.enabled": true,
-
   // Silence any Prettier suggestions so it can't override oxfmt on save.
   "prettier.enable": false,
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

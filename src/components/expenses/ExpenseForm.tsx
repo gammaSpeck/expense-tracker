@@ -13,7 +13,8 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ expense, duplicate, onSuccess, onCancel }: ExpenseFormProps) {
   const controller = useExpenseFormController(expense, duplicate, onSuccess);
-  const { currency, showCategoryDialog, setShowCategoryDialog, handleCategoryCreated, form } = controller;
+  const { currency, showCategoryDialog, setShowCategoryDialog, handleCategoryCreated, form } =
+    controller;
 
   return (
     <>

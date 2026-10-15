@@ -406,7 +406,12 @@ async function buildCategoryKeyMap(
   const keyToId = new Map<string, string>();
   let createdCount = 0;
   for (const key of new Set(drafts.map((d) => d.categoryKey))) {
-    const { id, created } = await resolveCategoryId(key, categoryRules[key], defaultCategoryId, createdCount);
+    const { id, created } = await resolveCategoryId(
+      key,
+      categoryRules[key],
+      defaultCategoryId,
+      createdCount,
+    );
     keyToId.set(key, id);
     if (created) createdCount++;
   }
@@ -443,7 +448,9 @@ export async function importCsvExpenses(
   const now = new Date().toISOString();
   await db.transaction("rw", [db.expenses, db.categories, db.tagMetadata], async () => {
     if (!(await db.categories.get(defaultCategoryId))) {
-      throw new Error("The selected default category no longer exists. Reopen the wizard and choose another.");
+      throw new Error(
+        "The selected default category no longer exists. Reopen the wizard and choose another.",
+      );
     }
     const keyToId = await buildCategoryKeyMap(drafts, categoryRules, defaultCategoryId);
     await db.expenses.bulkAdd(

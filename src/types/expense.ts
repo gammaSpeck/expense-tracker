@@ -94,5 +94,3 @@ export interface AnalysisSummary {
 
 // Theme types
 export type Theme = "light" | "dark" | "system";
-
-

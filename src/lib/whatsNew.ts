@@ -56,22 +56,27 @@ export function groupNotes(notes: ReleaseNote[], appVersion: string): ReleaseNot
     }
   }
 
-  const groups: ReleaseNoteGroup[] = Array.from(byVersion.entries()).map(([version, groupNotesList]) => {
-    const sortedNotes = [...groupNotesList].sort((a, b) => {
-      const rankDiff = noteRank(a) - noteRank(b);
-      if (rankDiff !== 0) return rankDiff;
-      return b.date.localeCompare(a.date);
-    });
+  const groups: ReleaseNoteGroup[] = Array.from(byVersion.entries()).map(
+    ([version, groupNotesList]) => {
+      const sortedNotes = [...groupNotesList].sort((a, b) => {
+        const rankDiff = noteRank(a) - noteRank(b);
+        if (rankDiff !== 0) return rankDiff;
+        return b.date.localeCompare(a.date);
+      });
 
-    const date = sortedNotes.reduce((latest, note) => (note.date > latest ? note.date : latest), sortedNotes[0].date);
+      const date = sortedNotes.reduce(
+        (latest, note) => (note.date > latest ? note.date : latest),
+        sortedNotes[0].date,
+      );
 
-    return {
-      version,
-      date,
-      isPending: compareVersions(version, appVersion) > 0,
-      notes: sortedNotes,
-    };
-  });
+      return {
+        version,
+        date,
+        isPending: compareVersions(version, appVersion) > 0,
+        notes: sortedNotes,
+      };
+    },
+  );
 
   return groups.sort((a, b) => compareVersions(b.version, a.version));
 }

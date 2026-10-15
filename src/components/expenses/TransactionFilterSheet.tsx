@@ -31,7 +31,9 @@ function FilterChipToggle({
       onClick={onClick}
       className={cn(
         "inline-flex min-h-9 items-center rounded-full px-3 py-2 text-sm transition-colors",
-        selected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80",
+        selected
+          ? "bg-primary text-primary-foreground"
+          : "bg-muted text-muted-foreground hover:bg-muted/80",
       )}
     >
       {label}
@@ -93,7 +95,9 @@ export function TransactionFilterSheet({
 
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-5">
           <section className="space-y-2">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Date</h3>
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Date
+            </h3>
             <div className="flex flex-wrap gap-2">
               {DATE_PRESETS.map(({ value, label }) => (
                 <FilterChipToggle
@@ -129,7 +133,9 @@ export function TransactionFilterSheet({
           </section>
 
           <section className="space-y-2">
-            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Amount</h3>
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Amount
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label htmlFor="filter-min-amount">Min</Label>
@@ -156,7 +162,9 @@ export function TransactionFilterSheet({
 
           {tags.length > 0 && (
             <section className="space-y-2">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tags</h3>
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Tags
+              </h3>
               {tags.length > 8 && (
                 <Input
                   placeholder="Search tags"

@@ -14,7 +14,9 @@ test.describe("pwa", () => {
     expect(count).toBeGreaterThan(0);
   });
 
-  test("manifest matches the shipped contract, and its icons and theme-color resolve", async ({ page }) => {
+  test("manifest matches the shipped contract, and its icons and theme-color resolve", async ({
+    page,
+  }) => {
     await gotoApp(page, "/");
     const manifestHref = await page.locator('link[rel="manifest"]').getAttribute("href");
     expect(manifestHref).toBe("/site.webmanifest");

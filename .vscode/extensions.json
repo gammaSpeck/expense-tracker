@@ -1,7 +1,7 @@
 {
   "recommendations": [
-    // Oxc: provides both oxlint diagnostics and oxfmt formatting in VS Code.
-    "oxc.oxc-vscode",
+    // Vite+ pack: Oxc (`vp lint` / `vp fmt` diagnostics + format-on-save) and Vitest (`vp test`).
+    "VoidZero.vite-plus-extension-pack",
     // Fallow: inline dead-code/dupe/complexity diagnostics + Code Lens reference counts.
     "fallow-rs.fallow-vscode"
   ]

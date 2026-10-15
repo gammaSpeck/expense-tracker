@@ -1,7 +1,10 @@
 import { Controller, useFormContext } from "react-hook-form";
 import { Plus } from "lucide-react";
 import { Select, SelectContent, SelectTrigger } from "@/components/ui/select";
-import { CategorySelectValue, CategoryOptionItems } from "@/components/categories/CategorySelectOptions";
+import {
+  CategorySelectValue,
+  CategoryOptionItems,
+} from "@/components/categories/CategorySelectOptions";
 import { ExpenseFormData } from "@/types/expense";
 import { Category } from "@/types/expense";
 
@@ -11,7 +14,11 @@ interface CategorySelectFieldProps {
   errorMessage?: string;
 }
 
-export function CategorySelectField({ categories, onCreateNew, errorMessage }: CategorySelectFieldProps) {
+export function CategorySelectField({
+  categories,
+  onCreateNew,
+  errorMessage,
+}: CategorySelectFieldProps) {
   const { control } = useFormContext<ExpenseFormData>();
 
   return (

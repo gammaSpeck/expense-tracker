@@ -50,7 +50,11 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
       {/* Icon Picker */}
       <div className="space-y-2">
         <Label>Icon</Label>
-        <IconPicker value={selectedIcon} onChange={(icon) => setValue("icon", icon)} color={selectedColor} />
+        <IconPicker
+          value={selectedIcon}
+          onChange={(icon) => setValue("icon", icon)}
+          color={selectedColor}
+        />
       </div>
 
       {/* Color Picker */}

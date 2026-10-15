@@ -5,6 +5,11 @@
   "ignorePatterns": ["**/*.d.ts", "docs/**", "public/**"],
   "ignoreExports": [{ "file": "src/components/ui/**", "exports": ["*"] }],
   "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": [
+    // Loaded by name from vite.config.ts `lint.jsPlugins`; fallow's oxlint plugin only reads
+    // .oxlintrc.json and needs an `oxlint` dependency, neither of which exists under Vite+.
+    "@shadcn/lint"
+  ],
   "rules": {
     "unresolved-imports": "error",
     "unlisted-dependencies": "error",

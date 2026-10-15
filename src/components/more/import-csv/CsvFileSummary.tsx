@@ -23,10 +23,16 @@ export function CsvFileSummary({ parsed, detectedPreset, onChangeSource }: CsvFi
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <img src={detectedPreset.icon} alt="" className="h-4 w-4 rounded-sm shrink-0" />
-            <p className="text-sm font-medium text-primary truncate">Detected: {detectedPreset.label}</p>
+            <p className="text-sm font-medium text-primary truncate">
+              Detected: {detectedPreset.label}
+            </p>
           </div>
           {onChangeSource && (
-            <button type="button" className="text-xs text-muted-foreground hover:underline shrink-0" onClick={onChangeSource}>
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:underline shrink-0"
+              onClick={onChangeSource}
+            >
               Change
             </button>
           )}
@@ -42,7 +48,10 @@ export function CsvFileSummary({ parsed, detectedPreset, onChangeSource }: CsvFi
       </div>
       <div className="flex flex-wrap gap-1.5">
         {parsed.headers.map((header) => (
-          <span key={header} className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground">
+          <span
+            key={header}
+            className="text-xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground"
+          >
             {header}
           </span>
         ))}

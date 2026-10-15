@@ -10,7 +10,9 @@ export interface CsvColumnMapping {
   tags: number[];
 }
 
-export type CategoryRule = { kind: "existing"; categoryId: string } | { kind: "create"; name: string };
+export type CategoryRule =
+  | { kind: "existing"; categoryId: string }
+  | { kind: "create"; name: string };
 
 export interface IgnoreRule {
   columnIndex: number;

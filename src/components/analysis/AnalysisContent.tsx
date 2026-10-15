@@ -35,9 +35,7 @@ export function AnalysisContent({
         <SummaryStatsGrid summary={summary} currency={currency} formatValue={formatValue} />
       </div>
 
-      <div
-        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-2 fill-mode-backwards"
-      >
+      <div className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-2 fill-mode-backwards">
         <Suspense fallback={chartFallback}>
           <CategoryBreakdown
             pieData={pieData}
@@ -48,9 +46,7 @@ export function AnalysisContent({
         </Suspense>
       </div>
 
-      <div
-        className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-4 fill-mode-backwards"
-      >
+      <div className="p-4 bg-card rounded-xl border border-border/50 animate-slide-in-up stagger-4 fill-mode-backwards">
         <Suspense fallback={chartFallback}>
           <TrendSection
             barData={granularity.barData}

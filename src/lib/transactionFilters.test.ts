@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import {
   activeFilterChips,
   dateRangeForPreset,
@@ -80,6 +80,12 @@ describe("activeFilterChips", () => {
     );
 
     expect(chips).toHaveLength(5);
-    expect(chips.map((c) => c.id)).toEqual(["category:c1", "category:c2", "tag:work", "amount", "adhoc"]);
+    expect(chips.map((c) => c.id)).toEqual([
+      "category:c1",
+      "category:c2",
+      "tag:work",
+      "amount",
+      "adhoc",
+    ]);
   });
 });
