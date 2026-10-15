@@ -4,6 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # vite-plus must move in lockstep with the `vite` -> @voidzero-dev/vite-plus-core alias, which
+    # Dependabot can't update (voidzero-dev/vite-plus#2356). Upgrade with:
+    #   bunx --package vite-plus@<version> vp migrate --no-interactive
+    ignore:
+      - dependency-name: "vite-plus"
     groups:
       bun-patch-and-minor:
         applies-to: version-updates

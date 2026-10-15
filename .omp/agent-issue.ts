@@ -11,7 +11,10 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const topLevel = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { stdout: "pipe", stderr: "ignore" });
+const topLevel = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], {
+  stdout: "pipe",
+  stderr: "ignore",
+});
 const REPO_ROOT = new TextDecoder().decode(topLevel.stdout).trim() || process.cwd();
 
 const PLAN_MODEL = "claude-opus-5";
@@ -36,10 +39,10 @@ type FixRecord = { label: string; attempts: number };
 // label -> shell command, in gate execution order.
 const GATE_COMMANDS: Record<string, string> = {
   "commits present": 'test "$(git rev-list --count origin/main..HEAD)" -gt 0',
-  "bun run typecheck": "bun run typecheck",
-  "bun run typecheck:e2e": "bun run typecheck:e2e",
-  "bun run lint": "bun run lint",
-  "bunx playwright test --project=chromium-desktop": "bunx playwright test --project=chromium-desktop",
+  "bun run check": "bun run check",
+  "bun run test": "bun run test",
+  "bunx playwright test --project=chromium-desktop":
+    "bunx playwright test --project=chromium-desktop",
   "bunx fallow health --score --min-score 95": "bunx fallow health --score --min-score 95",
 };
 
@@ -61,7 +64,12 @@ function runShellCapture(cmd: string): { code: number; out: string } {
 }
 
 function runInherit(cmd: string[]): number {
-  const res = Bun.spawnSync(cmd, { cwd: REPO_ROOT, stdout: "inherit", stderr: "inherit", stdin: "inherit" });
+  const res = Bun.spawnSync(cmd, {
+    cwd: REPO_ROOT,
+    stdout: "inherit",
+    stderr: "inherit",
+    stdin: "inherit",
+  });
   return res.exitCode ?? 1;
 }
 
@@ -116,7 +124,8 @@ function buildIssueBlock(n: string, issue: Issue): string {
   const lines = [`## Issue #${n}: ${issue.title}`, "", `Labels: ${labels}`, "", body];
   if (issue.comments.length > 0) {
     lines.push("");
-    for (const c of issue.comments) lines.push(`### @${c.author.login} (${c.createdAt})`, "", c.body, "");
+    for (const c of issue.comments)
+      lines.push(`### @${c.author.login} (${c.createdAt})`, "", c.body, "");
   }
   return [
     "<issue-data>",
@@ -227,7 +236,7 @@ function renderImplPrompt(n: string, issueBlock: string, runDir: string): string
     "   Confirm it FAILS for the intended reason — not a typo, bad selector, or missing seed.",
     "2. Make the source change.",
     "3. Run the spec again. Confirm it passes.",
-    "4. Run `bun run typecheck`, `bun run typecheck:e2e`, `bun run lint`,",
+    "4. Run `bun run check`, `bun run test`,",
     "   `bunx playwright test --project=chromium-desktop`, and `bunx fallow health --score --min-score 95`.",
     "   The driver gate runs exactly these commands and fails the run when any of them fails.",
     "5. Commit with a Conventional Commits subject: `<type>(<scope>): <subject>`, type `feat` or `fix`.",
@@ -278,7 +287,12 @@ function renderImplPrompt(n: string, issueBlock: string, runDir: string): string
   ].join("\n");
 }
 
-function renderReviewPrompt(n: string, issueBlock: string, runDir: string, handoffContent: string): string {
+function renderReviewPrompt(
+  n: string,
+  issueBlock: string,
+  runDir: string,
+  handoffContent: string,
+): string {
   return [
     `# Performance and security review of GitHub issue #${n}`,
     "",
@@ -348,7 +362,8 @@ function execImplSession(cmd: string[], runDir: string): void {
 function resolveSessionFile(implDir: string): string {
   const files = readdirSync(implDir).filter((f) => f.endsWith(".jsonl"));
   if (files.length === 0) fail("omp wrote no session file; cannot run the fix loop");
-  if (files.length > 1) fail(`omp wrote multiple session files in ${implDir}; expected exactly one`);
+  if (files.length > 1)
+    fail(`omp wrote multiple session files in ${implDir}; expected exactly one`);
   return join(implDir, files[0] as string);
 }
 
@@ -418,12 +433,18 @@ async function runGate(runDir: string, sessionFile: string): Promise<FixRecord[]
 
 // ---- push, PR, review, report --------------------------------------------
 
-function pushAndOpenPr(runDir: string, branch: string, n: string, type: string, issueTitle: string): string {
+function pushAndOpenPr(
+  runDir: string,
+  branch: string,
+  n: string,
+  type: string,
+  issueTitle: string,
+): string {
   if (run(["git", "push", "-u", "origin", branch]).code !== 0) fail("git push failed");
 
   // Title comes from the first commit on the branch; later commits are fix-loop follow-ups.
-  const subjects = run(["git", "log", "--reverse", "--format=%s", "origin/main..HEAD"]).out
-    .split("\n")
+  const subjects = run(["git", "log", "--reverse", "--format=%s", "origin/main..HEAD"])
+    .out.split("\n")
     .filter(Boolean);
   const title = subjects[0] ?? `${type}: ${issueTitle}`;
 
@@ -441,7 +462,7 @@ function pushAndOpenPr(runDir: string, branch: string, n: string, type: string, 
     "",
     "</details>",
     "",
-    "Local gate: `typecheck`, `typecheck:e2e`, `lint`, `playwright --project=chromium-desktop`, `fallow health --min-score 95` — all green.",
+    "Local gate: `check`, `test`, `playwright --project=chromium-desktop`, `fallow health --min-score 95` — all green.",
   ].join("\n");
   const prBodyPath = join(runDir, "pr-body.md");
   writeFileSync(prBodyPath, prBody);
@@ -481,7 +502,12 @@ function buildReviewCmd(reviewPromptPath: string): string[] {
   ];
 }
 
-async function runReviewSession(runDir: string, n: string, issueBlock: string, prUrl: string): Promise<void> {
+async function runReviewSession(
+  runDir: string,
+  n: string,
+  issueBlock: string,
+  prUrl: string,
+): Promise<void> {
   const diffPatchPath = join(runDir, "diff.patch");
   writeFileSync(diffPatchPath, `${run(["git", "diff", "origin/main...HEAD"]).out}\n`);
 
@@ -591,18 +617,21 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  if (run(["gh", "auth", "status"]).code !== 0) fail("gh is not authenticated; run `gh auth login`");
+  if (run(["gh", "auth", "status"]).code !== 0)
+    fail("gh is not authenticated; run `gh auth login`");
   if (run(["git", "status", "--porcelain"]).out.length > 0) {
     fail("working tree is dirty; commit or stash first");
   }
-  if (!dryRun && run(["git", "fetch", "origin", "main"]).code !== 0) fail("git fetch origin main failed");
+  if (!dryRun && run(["git", "fetch", "origin", "main"]).code !== 0)
+    fail("git fetch origin main failed");
 
   const issue = fetchIssue(n);
   const { branch, type, runDir, implDir } = deriveNames(n, issue);
 
   if (!dryRun) {
     const branchRes = run(["git", "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`]);
-    if (branchRes.code === 0) fail(`branch ${branch} already exists; delete it or finish that run first`);
+    if (branchRes.code === 0)
+      fail(`branch ${branch} already exists; delete it or finish that run first`);
   }
 
   if (dryRun) {
@@ -667,7 +696,12 @@ async function main(): Promise<void> {
   if (dryRun) {
     writeFileSync(
       reviewPromptPath,
-      renderReviewPrompt(n, issueBlock, runDir, "_(unavailable in --dry-run: handoff.md not yet written)_"),
+      renderReviewPrompt(
+        n,
+        issueBlock,
+        runDir,
+        "_(unavailable in --dry-run: handoff.md not yet written)_",
+      ),
     );
     printDryRun(
       runDir,
@@ -692,7 +726,8 @@ async function main(): Promise<void> {
   const sessionFile = resolveSessionFile(implDir);
   const tldrPath = join(runDir, "tldr.md");
   const handoffPath = join(runDir, "handoff.md");
-  if (!existsSync(tldrPath)) console.error(`warning: missing ${tldrPath}; continuing with an empty summary section`);
+  if (!existsSync(tldrPath))
+    console.error(`warning: missing ${tldrPath}; continuing with an empty summary section`);
   if (!existsSync(handoffPath)) {
     console.error(`warning: missing ${handoffPath}; continuing with an empty handoff section`);
   }

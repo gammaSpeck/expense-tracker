@@ -34,7 +34,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/e2e-setup
-      - run: bun run typecheck:e2e
       - run: bun run test:e2e
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -54,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/e2e-setup
-      - run: bunx playwright test --grep @smoke
+      - run: vp exec playwright test --grep @smoke
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
