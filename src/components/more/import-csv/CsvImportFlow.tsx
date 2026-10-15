@@ -57,8 +57,15 @@ export function CsvImportFlow({ csv }: CsvImportFlowProps) {
 
   return (
     <LazyMotion features={domAnimation}>
-      <m.div key={csv.step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-        {STEP_LABEL[csv.step] && <p className="text-xs text-muted-foreground">{STEP_LABEL[csv.step]}</p>}
+      <m.div
+        key={csv.step}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        {STEP_LABEL[csv.step] && (
+          <p className="text-xs text-muted-foreground">{STEP_LABEL[csv.step]}</p>
+        )}
         <CsvFlowFileSummary csv={csv} />
         {STEP_BODY[csv.step](csv)}
       </m.div>

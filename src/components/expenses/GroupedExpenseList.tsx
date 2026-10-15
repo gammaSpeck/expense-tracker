@@ -25,7 +25,9 @@ export function GroupedExpenseList({
     <div className="space-y-6">
       {groups.map(([date, dateExpenses]) => (
         <div key={date}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">{getDateGroupLabel(date)}</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">
+            {getDateGroupLabel(date)}
+          </h3>
           <div className="space-y-2">
             {dateExpenses.map((expense) => (
               <ExpenseListRow

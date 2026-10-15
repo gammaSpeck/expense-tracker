@@ -22,9 +22,7 @@ export default function ChangelogPage() {
         onBack={() => navigate("/settings")}
       />
 
-      <div
-        className="px-2 py-4 space-y-4 animate-slide-in-up stagger-2 fill-mode-backwards"
-      >
+      <div className="px-2 py-4 space-y-4 animate-slide-in-up stagger-2 fill-mode-backwards">
         <p className="text-xs text-muted-foreground">Every update since day one.</p>
 
         {groups.length === 0 ? (

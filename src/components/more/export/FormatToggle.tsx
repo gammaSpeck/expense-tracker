@@ -9,7 +9,9 @@ export function FormatToggle({ formatType, onChange }: FormatToggleProps) {
       <button
         onClick={() => onChange("json")}
         className={`py-2 rounded-lg transition-all ${
-          formatType === "json" ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
+          formatType === "json"
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted hover:bg-muted/80"
         }`}
       >
         JSON

@@ -38,8 +38,8 @@ export function ChangePassphraseWarningDialog({
           <DialogDescription asChild className="text-left">
             <div className="space-y-2 text-sm">
               <p>
-                Changing your passphrase will <strong>not</strong> re-encrypt existing backup
-                files. Any backup created with your current passphrase will still require it.
+                Changing your passphrase will <strong>not</strong> re-encrypt existing backup files.
+                Any backup created with your current passphrase will still require it.
               </p>
               <p>
                 Only backups made <strong>after</strong> this change will use the new passphrase.

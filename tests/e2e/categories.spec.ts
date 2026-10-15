@@ -18,7 +18,10 @@ test.describe("categories", () => {
     await gotoApp(page, "/categories");
     await createCategory(page, "Gym");
     await expect(page.getByText("Category created")).toBeVisible();
-    const row = page.locator("div").filter({ hasText: /^Gym0 expenses$/ }).last();
+    const row = page
+      .locator("div")
+      .filter({ hasText: /^Gym0 expenses$/ })
+      .last();
     await expect(row).toBeVisible();
   });
 
@@ -75,7 +78,10 @@ test.describe("categories", () => {
     await dialog.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByText("Category deleted")).toBeVisible();
 
-    const foodRow = page.locator("div").filter({ hasText: /^Food & Dining3 expenses$/ }).last();
+    const foodRow = page
+      .locator("div")
+      .filter({ hasText: /^Food & Dining3 expenses$/ })
+      .last();
     await expect(foodRow).toBeVisible();
   });
 

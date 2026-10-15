@@ -49,7 +49,9 @@ test.describe("csv-import", () => {
       "tests/fixtures/expense-manager-amitm29.csv",
     );
 
-    await expect(page.getByText("Detected: Money Manager & Expense tracker (Amit Mohan)")).toBeVisible();
+    await expect(
+      page.getByText("Detected: Money Manager & Expense tracker (Amit Mohan)"),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
     await page.getByRole("button", { name: "Next" }).click();
@@ -190,7 +192,9 @@ test.describe("csv-import", () => {
     // first selection's async work finish before the second one even starts.
     await page.evaluate(
       ([firstCsv, secondCsv]) => {
-        const input = document.querySelector<HTMLInputElement>('[data-testid="csv-import-file-input"]')!;
+        const input = document.querySelector<HTMLInputElement>(
+          '[data-testid="csv-import-file-input"]',
+        )!;
         const selectFile = (name: string, content: string) => {
           const dt = new DataTransfer();
           dt.items.add(new File([content], name, { type: "text/csv" }));

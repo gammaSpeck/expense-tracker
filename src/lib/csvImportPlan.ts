@@ -1,5 +1,13 @@
 import { parse, isValid, format } from "date-fns";
-import type { CsvColumnMapping, CsvImportConfig, CsvImportPlan, DraftExpense, IgnoreRule, ParsedCsv, RowError } from "@/types/csvImport";
+import type {
+  CsvColumnMapping,
+  CsvImportConfig,
+  CsvImportPlan,
+  DraftExpense,
+  IgnoreRule,
+  ParsedCsv,
+  RowError,
+} from "@/types/csvImport";
 
 const REFERENCE_DATE = new Date(2000, 0, 1, 0, 0, 0, 0);
 
@@ -28,8 +36,13 @@ function parseAmount(raw: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export function parseDateTime(row: string[], mapping: CsvColumnMapping): { date: string; time: string } | null {
-  const joined = [cell(row, mapping.dateTime), cell(row, mapping.dateTimeExtra)].filter(Boolean).join(" ");
+export function parseDateTime(
+  row: string[],
+  mapping: CsvColumnMapping,
+): { date: string; time: string } | null {
+  const joined = [cell(row, mapping.dateTime), cell(row, mapping.dateTimeExtra)]
+    .filter(Boolean)
+    .join(" ");
   try {
     const parsed = parse(joined, mapping.dateFormat, REFERENCE_DATE);
     if (!isValid(parsed)) return null;
@@ -67,12 +80,14 @@ function resolveRow(
   const rawAmount = cell(row, mapping.amount);
   if (rawAmount === "") return { kind: "skip-empty" };
   const value = parseAmount(rawAmount);
-  if (value === null) return { kind: "error", error: { rowNumber, field: "amount", rawValue: rawAmount } };
+  if (value === null)
+    return { kind: "error", error: { rowNumber, field: "amount", rawValue: rawAmount } };
 
   const rawDate = cell(row, mapping.dateTime);
   if (rawDate === "") return { kind: "skip-empty" };
   const dateTime = parseDateTime(row, mapping);
-  if (dateTime === null) return { kind: "error", error: { rowNumber, field: "date", rawValue: rawDate } };
+  if (dateTime === null)
+    return { kind: "error", error: { rowNumber, field: "date", rawValue: rawDate } };
 
   return {
     kind: "draft",

@@ -76,9 +76,7 @@ export default function TransactionsPage() {
       </TransactionSearchBar>
 
       {/* Transaction List */}
-      <div
-        className="animate-fade-in stagger-2 fill-mode-backwards"
-      >
+      <div className="animate-fade-in stagger-2 fill-mode-backwards">
         <ExpenseList
           expenses={visibleExpenses}
           categories={categories}

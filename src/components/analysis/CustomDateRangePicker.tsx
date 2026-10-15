@@ -19,7 +19,11 @@ function DatePickerField({ label, date, placeholder, onSelect }: DatePickerField
       <Label className="text-xs">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="field" data-placeholder={!date} className="w-full justify-start text-left">
+          <Button
+            variant="field"
+            data-placeholder={!date}
+            className="w-full justify-start text-left"
+          >
             <CalendarIcon className="h-4 w-4" />
             {date ? format(date, "PP") : placeholder}
           </Button>

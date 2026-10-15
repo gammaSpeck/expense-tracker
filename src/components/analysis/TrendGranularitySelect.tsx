@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { TrendGranularity } from "./analysisUtils";
 
 interface TrendGranularitySelectProps {
@@ -15,7 +21,10 @@ export function TrendGranularitySelect({
   if (granularityOptions.length <= 1) return null;
 
   return (
-    <Select value={trendGranularity} onValueChange={(v) => setTrendGranularity(v as TrendGranularity)}>
+    <Select
+      value={trendGranularity}
+      onValueChange={(v) => setTrendGranularity(v as TrendGranularity)}
+    >
       <SelectTrigger className="w-24 h-8 text-xs">
         <SelectValue />
       </SelectTrigger>

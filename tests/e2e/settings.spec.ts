@@ -7,9 +7,7 @@ test.describe("settings", () => {
 
     await page.getByLabel("light").click();
     await expect(page.locator("html")).toHaveClass(/light/);
-    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-theme"))).toBe(
-      "light",
-    );
+    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-theme"))).toBe("light");
 
     await page.getByLabel("dark").click();
     await expect(page.locator("html")).toHaveClass(/dark/);
@@ -17,9 +15,7 @@ test.describe("settings", () => {
 
     await page.emulateMedia({ colorScheme: "light" });
     await page.getByLabel("system").click();
-    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-theme"))).toBe(
-      "system",
-    );
+    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-theme"))).toBe("system");
     await expect(page.locator("html")).toHaveClass(/light/);
   });
 
@@ -30,9 +26,7 @@ test.describe("settings", () => {
     await page.getByPlaceholder("Search currency...").fill("USD");
     await page.getByText("USD — US Dollar").click();
 
-    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-currency"))).toBe(
-      "USD",
-    );
+    expect(await page.evaluate(() => localStorage.getItem("expense-tracker-currency"))).toBe("USD");
 
     await page.getByRole("link", { name: "Home" }).first().click();
     await expect(page.getByText("$0", { exact: true })).toBeVisible();

@@ -45,7 +45,10 @@ const DEFAULT_BACKUP_REMINDER_PREFERENCES: BackupReminderPreferences = {
   bannerLastShownDate: null,
 };
 
-const INSTALL_MARKER_VALIDATORS: [keyof InstallMarker, (parsed: Partial<InstallMarker>) => boolean][] = [
+const INSTALL_MARKER_VALIDATORS: [
+  keyof InstallMarker,
+  (parsed: Partial<InstallMarker>) => boolean,
+][] = [
   [
     "installedAt",
     (p) => typeof p.installedAt === "string" && !Number.isNaN(Date.parse(p.installedAt)),
@@ -111,7 +114,11 @@ class UserPreferences {
   }
 
   getTheme(fallback: Theme): Theme {
-    return pickEnum(this.getItem(STORAGE_KEYS.theme), ["light", "dark", "system"] as const, fallback);
+    return pickEnum(
+      this.getItem(STORAGE_KEYS.theme),
+      ["light", "dark", "system"] as const,
+      fallback,
+    );
   }
 
   setTheme(theme: Theme): void {

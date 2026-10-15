@@ -42,7 +42,11 @@ export function ExpenseCard({
       onMouseUp={handleTouchEnd}
       onMouseLeave={handleTouchEnd}
     >
-      <CategoryIcon icon={category?.icon || "MoreHorizontal"} color={category?.color || "#64748B"} size="md" />
+      <CategoryIcon
+        icon={category?.icon || "MoreHorizontal"}
+        color={category?.color || "#64748B"}
+        size="md"
+      />
 
       <ExpenseCardDetails
         description={expense.description}
@@ -52,9 +56,20 @@ export function ExpenseCard({
         tags={expense.tags}
       />
 
-      <ExpenseCardAmount value={expense.value} isAdhoc={expense.isAdhoc} hasAttachment={!!expense.attachment} />
+      <ExpenseCardAmount
+        value={expense.value}
+        isAdhoc={expense.isAdhoc}
+        hasAttachment={!!expense.attachment}
+      />
     </button>
   );
 
-  return <ExpenseCardContextMenu trigger={cardContent} onDuplicate={onDuplicate} onEdit={onEdit} onDelete={onDelete} />;
+  return (
+    <ExpenseCardContextMenu
+      trigger={cardContent}
+      onDuplicate={onDuplicate}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
+  );
 }

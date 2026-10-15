@@ -21,7 +21,9 @@ export function AdhocToggleField({ control }: AdhocToggleFieldProps) {
       <Controller
         control={control}
         name="isAdhoc"
-        render={({ field }) => <Switch id="isAdhoc" checked={field.value} onCheckedChange={field.onChange} />}
+        render={({ field }) => (
+          <Switch id="isAdhoc" checked={field.value} onCheckedChange={field.onChange} />
+        )}
       />
     </div>
   );

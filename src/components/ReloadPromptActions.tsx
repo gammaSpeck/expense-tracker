@@ -8,7 +8,12 @@ interface ReloadPromptActionsProps {
   onClose: () => void;
 }
 
-export function ReloadPromptActions({ needRefresh, isUpdating, onUpdate, onClose }: ReloadPromptActionsProps) {
+export function ReloadPromptActions({
+  needRefresh,
+  isUpdating,
+  onUpdate,
+  onClose,
+}: ReloadPromptActionsProps) {
   return (
     <div className="flex gap-2">
       {needRefresh && (

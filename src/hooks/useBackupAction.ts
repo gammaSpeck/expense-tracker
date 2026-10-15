@@ -46,7 +46,12 @@ export function useBackupAction(onSuccess: (() => void) | undefined, onDone: () 
           return;
         }
 
-        const result = await uploadBackupToDrive(encrypted, filename, accessToken, data.expenses.length);
+        const result = await uploadBackupToDrive(
+          encrypted,
+          filename,
+          accessToken,
+          data.expenses.length,
+        );
         if (!result) return;
 
         toast.success("Backup saved to Google Drive", {

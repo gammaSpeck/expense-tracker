@@ -421,12 +421,8 @@ Date,Time,Category,Description,Value,Tags,IsAdhoc,Attachment
 ```json
 {
   "exportDate": "2025-12-17T14:30:00Z",
-  "expenses": [
-    /* array of expense objects */
-  ],
-  "categories": [
-    /* array of category objects */
-  ]
+  "expenses": [/* array of expense objects */],
+  "categories": [/* array of category objects */]
 }
 ```
 

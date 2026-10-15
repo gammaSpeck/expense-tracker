@@ -4,7 +4,11 @@ import { format, subDays } from "date-fns";
 import { toast } from "sonner";
 import { useCategories } from "@/hooks/useExpenseData";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { addExpensesBulk, getDescriptionSuggestions, getTagSuggestions } from "@/db/expenseTrackerDb";
+import {
+  addExpensesBulk,
+  getDescriptionSuggestions,
+  getTagSuggestions,
+} from "@/db/expenseTrackerDb";
 import { clearBulkDraft } from "@/db/bulkDraft";
 import type { BulkDraftBlock, BulkDraftRow } from "@/db/bulkDraft";
 import { useBulkDraftPersistence } from "@/hooks/useBulkDraftPersistence";

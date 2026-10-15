@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CategoryIcon } from "@/components/categories/CategoryIcon";
@@ -23,7 +29,10 @@ export function DeleteActionOptions({
 }: DeleteActionOptionsProps) {
   return (
     <div className="space-y-4 py-4">
-      <RadioGroup value={deleteAction} onValueChange={(v) => setDeleteAction(v as "move" | "cascade")}>
+      <RadioGroup
+        value={deleteAction}
+        onValueChange={(v) => setDeleteAction(v as "move" | "cascade")}
+      >
         <div className="flex items-start space-x-3">
           <RadioGroupItem value="move" id="move" />
           <div className="space-y-1">

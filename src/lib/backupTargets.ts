@@ -33,7 +33,11 @@ export async function uploadBackupToDrive(
   return { webViewLink };
 }
 
-export function saveBackupToDevice(encrypted: string, filename: string, expenseCount: number): void {
+export function saveBackupToDevice(
+  encrypted: string,
+  filename: string,
+  expenseCount: number,
+): void {
   downloadFile(encrypted, filename, "application/octet-stream");
 
   markBackupCompleted("device");

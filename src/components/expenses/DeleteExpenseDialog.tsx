@@ -11,7 +11,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type DeleteExpenseDialogProps =
-  | { mode: "controlled"; open: boolean; onOpenChange: (open: boolean) => void; onConfirm: () => void }
+  | {
+      mode: "controlled";
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      onConfirm: () => void;
+    }
   | { mode: "trigger"; trigger: React.ReactNode; onConfirm: () => void };
 
 export function DeleteExpenseDialog(props: DeleteExpenseDialogProps) {

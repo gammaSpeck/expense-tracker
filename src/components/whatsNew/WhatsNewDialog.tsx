@@ -1,5 +1,12 @@
 import { Link } from "react-router";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useWhatsNew } from "@/hooks/useWhatsNew";
 import { MAX_DIALOG_GROUPS } from "@/lib/whatsNew";
@@ -11,7 +18,12 @@ export function WhatsNewDialog() {
   if (unseen.length === 0) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) dismiss(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) dismiss();
+      }}
+    >
       <DialogContent
         className="max-h-[85vh] flex flex-col gap-0 p-0"
         onOpenAutoFocus={(event) => {
