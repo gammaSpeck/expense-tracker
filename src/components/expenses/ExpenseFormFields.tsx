@@ -17,7 +17,12 @@ interface ExpenseFormFieldsProps {
   controller: Controller;
 }
 
-export function ExpenseFormFields({ expense, onCancel, currencySymbol, controller }: ExpenseFormFieldsProps) {
+export function ExpenseFormFields({
+  expense,
+  onCancel,
+  currencySymbol,
+  controller,
+}: ExpenseFormFieldsProps) {
   const {
     categories,
     form,
@@ -39,7 +44,11 @@ export function ExpenseFormFields({ expense, onCancel, currencySymbol, controlle
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <AmountField currencySymbol={currencySymbol} register={register} errorMessage={errors.value?.message} />
+      <AmountField
+        currencySymbol={currencySymbol}
+        register={register}
+        errorMessage={errors.value?.message}
+      />
 
       <CategoryFieldGroup
         categories={categories}

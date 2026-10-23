@@ -64,7 +64,13 @@ test.describe("expense-crud", () => {
   test("edit an expense", async ({ page }) => {
     await gotoApp(page, "/");
     await seedExpenses(page, [
-      { value: 100, categoryName: "Others", description: "Edit me", date: daysAgo(0), time: "10:00" },
+      {
+        value: 100,
+        categoryName: "Others",
+        description: "Edit me",
+        date: daysAgo(0),
+        time: "10:00",
+      },
     ]);
 
     await page.getByTestId("expense-card").filter({ hasText: "Edit me" }).click();
@@ -81,7 +87,13 @@ test.describe("expense-crud", () => {
   test("delete an expense from /transactions via the context menu", async ({ page }) => {
     await gotoApp(page, "/transactions");
     await seedExpenses(page, [
-      { value: 50, categoryName: "Others", description: "Delete me", date: daysAgo(0), time: "10:00" },
+      {
+        value: 50,
+        categoryName: "Others",
+        description: "Delete me",
+        date: daysAgo(0),
+        time: "10:00",
+      },
     ]);
 
     const card = page.getByTestId("expense-card").filter({ hasText: "Delete me" });
@@ -91,7 +103,9 @@ test.describe("expense-crud", () => {
     const dialog = page.getByRole("alertdialog");
     await expect(dialog.getByText("Delete Expense?")).toBeVisible();
     await expect(
-      dialog.getByText("Are you sure you want to delete this expense? This action cannot be undone."),
+      dialog.getByText(
+        "Are you sure you want to delete this expense? This action cannot be undone.",
+      ),
     ).toBeVisible();
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(card).toBeVisible();

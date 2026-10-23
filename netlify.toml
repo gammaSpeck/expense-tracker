@@ -1,5 +1,9 @@
 # SPA routing is handled by public/_redirects.
-# This file only carries security response headers.
+# This file pins the build command (Node comes from .node-version) and carries security response headers.
+
+[build]
+  command = "bun run build"
+  publish = "dist"
 
 [[headers]]
   for = "/*"

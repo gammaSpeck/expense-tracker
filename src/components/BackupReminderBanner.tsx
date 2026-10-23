@@ -7,7 +7,11 @@ interface BackupReminderBannerProps {
   onDismiss: () => void;
 }
 
-export function BackupReminderBanner({ message, onBackupNow, onDismiss }: BackupReminderBannerProps) {
+export function BackupReminderBanner({
+  message,
+  onBackupNow,
+  onDismiss,
+}: BackupReminderBannerProps) {
   return (
     <div className="fixed bottom-20 left-4 right-4 z-60 animate-slide-in-up transition-all duration-300">
       <div className="mx-auto max-w-md">

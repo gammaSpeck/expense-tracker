@@ -11,7 +11,13 @@ export function EditExpenseHeader({ onBack, onDelete }: EditExpenseHeaderProps) 
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" aria-label="Go back" onClick={onBack} className="h-9 w-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Go back"
+          onClick={onBack}
+          className="h-9 w-9"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl font-semibold">Edit Expense</h1>

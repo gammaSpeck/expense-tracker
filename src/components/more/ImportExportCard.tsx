@@ -27,7 +27,8 @@ export function ImportExportCard() {
 
       <div className="space-y-1">
         <p className="text-xs text-muted-foreground">
-          Import expenses from any app that exports CSV. Map columns and categories before committing.
+          Import expenses from any app that exports CSV. Map columns and categories before
+          committing.
         </p>
         <Button
           variant="outline"

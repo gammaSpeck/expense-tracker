@@ -40,7 +40,11 @@ export function TagTab() {
         ))}
       </div>
 
-      <DeleteTagDialog deleteData={deleteData} onOpenChange={clearDeleteData} onConfirm={handleDelete} />
+      <DeleteTagDialog
+        deleteData={deleteData}
+        onOpenChange={clearDeleteData}
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

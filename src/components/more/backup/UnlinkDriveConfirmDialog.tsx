@@ -17,15 +17,14 @@ interface UnlinkDriveConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export function UnlinkDriveConfirmDialog({ isUnlinking, onConfirm }: UnlinkDriveConfirmDialogProps) {
+export function UnlinkDriveConfirmDialog({
+  isUnlinking,
+  onConfirm,
+}: UnlinkDriveConfirmDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button
-          variant="destructiveGhost"
-          size="xs"
-          disabled={isUnlinking}
-        >
+        <Button variant="destructiveGhost" size="xs" disabled={isUnlinking}>
           {isUnlinking ? (
             <Loader2 className="h-3 w-3 animate-spin mr-1" />
           ) : (
@@ -44,10 +43,7 @@ export function UnlinkDriveConfirmDialog({ isUnlinking, onConfirm }: UnlinkDrive
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={onConfirm}
-          >
+          <AlertDialogAction variant="destructive" onClick={onConfirm}>
             Disconnect
           </AlertDialogAction>
         </AlertDialogFooter>

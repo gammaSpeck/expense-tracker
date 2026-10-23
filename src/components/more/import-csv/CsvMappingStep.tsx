@@ -173,7 +173,10 @@ function TagsField({
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium">Tags</p>
-      <Select key={tags.length} onValueChange={(v) => updateMapping({ tags: [...tags, Number(v)] })}>
+      <Select
+        key={tags.length}
+        onValueChange={(v) => updateMapping({ tags: [...tags, Number(v)] })}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Add tag column..." />
         </SelectTrigger>

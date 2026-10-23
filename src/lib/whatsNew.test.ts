@@ -1,9 +1,16 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vite-plus/test";
 import { groupNotes, groupsSince, selectVisibleNotes, shouldAutoOpen } from "@/lib/whatsNew";
 import type { ReleaseNote } from "@/content/releaseNotes";
 
 const fixtures: ReleaseNote[] = [
-  { id: "1.8.0-a", version: "1.8.0", date: "2026-09-04", type: "new", title: "New thing", body: "…" },
+  {
+    id: "1.8.0-a",
+    version: "1.8.0",
+    date: "2026-09-04",
+    type: "new",
+    title: "New thing",
+    body: "…",
+  },
   {
     id: "1.7.0-a",
     version: "1.7.0",
@@ -66,7 +73,13 @@ describe("selectVisibleNotes", () => {
 describe("groupNotes", () => {
   it("orders groups newest version first", () => {
     const groups = groupNotes([...fixtures], "1.8.0");
-    expect(groups.map((group) => group.version)).toEqual(["1.8.0", "1.7.0", "1.5.2", "1.5.1", "1.5.0"]);
+    expect(groups.map((group) => group.version)).toEqual([
+      "1.8.0",
+      "1.7.0",
+      "1.5.2",
+      "1.5.1",
+      "1.5.0",
+    ]);
   });
 
   it("puts a security note ahead of a plain new note within a group", () => {

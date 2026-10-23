@@ -30,7 +30,10 @@ export function CategoryIcon({ icon, color, size = "md", className }: CategoryIc
       className={cn("category-icon shrink-0 bg-(--category-tint)", sizeClasses[size], className)}
       style={{ "--category-tint": `${color}20` } as CSSProperties}
     >
-      <Icon className={cn(iconSizeClasses[size], "text-(--category-color)")} style={{ "--category-color": color } as CSSProperties} />
+      <Icon
+        className={cn(iconSizeClasses[size], "text-(--category-color)")}
+        style={{ "--category-color": color } as CSSProperties}
+      />
     </div>
   );
 }

@@ -10,7 +10,11 @@ export type MockDriveHandle = {
 /** Extracts one named part's body from a `multipart/form-data` request. Google's upload API
  *  (and `uploadFileToDrive`) sends the backup as a real multipart body via `fetch(FormData)`,
  *  so this is the only way to see what was actually uploaded — not what the caller intended. */
-function extractMultipartPart(contentType: string, body: string, partName: string): string | undefined {
+function extractMultipartPart(
+  contentType: string,
+  body: string,
+  partName: string,
+): string | undefined {
   const match = /boundary=(?:"([^"]+)"|([^;]+))/.exec(contentType);
   const boundary = match?.[1] ?? match?.[2];
   if (!boundary) return undefined;
@@ -70,7 +74,11 @@ export async function mockDrive(page: Page): Promise<MockDriveHandle> {
 
   await page.route("**www.googleapis.com/upload/drive/v3/files**", (route) => {
     const req = route.request();
-    lastUploadContent = extractMultipartPart(req.headers()["content-type"] ?? "", req.postData() ?? "", "file");
+    lastUploadContent = extractMultipartPart(
+      req.headers()["content-type"] ?? "",
+      req.postData() ?? "",
+      "file",
+    );
     return route.fulfill({
       status: 200,
       contentType: "application/json",

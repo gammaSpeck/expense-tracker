@@ -18,7 +18,10 @@ export function useAppStartup() {
         // history is guaranteed mounted, and a full reload is fine here since
         // it's a rare, user-initiated escape hatch out of a warning toast.
         toast.warning("This browser may delete your data automatically. Back up regularly.", {
-          action: { label: "Back up now", onClick: () => (window.location.href = "/settings/data") },
+          action: {
+            label: "Back up now",
+            onClick: () => (window.location.href = "/settings/data"),
+          },
         });
       }
 

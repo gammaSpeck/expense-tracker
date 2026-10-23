@@ -17,9 +17,7 @@ export default function SettingsPage() {
         </h1>
       </div>
 
-      <div
-        className="space-y-1 animate-slide-in-up stagger-2 fill-mode-backwards"
-      >
+      <div className="space-y-1 animate-slide-in-up stagger-2 fill-mode-backwards">
         <ThemeToggleRow theme={theme} setTheme={setTheme} />
 
         {/* Currency Row */}

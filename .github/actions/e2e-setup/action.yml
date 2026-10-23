@@ -1,12 +1,15 @@
 name: E2E setup
-description: Install deps and browsers (Brave + Playwright's chromium/chrome/webkit) for an E2E run
+description: Install deps (Vite+) and browsers (Brave + Playwright's chromium/chrome/webkit) for an E2E run
 
 runs:
   using: composite
   steps:
-    - uses: oven-sh/setup-bun@v2
-    - run: bun install --frozen-lockfile
-      shell: bash
+    - uses: voidzero-dev/setup-vp@v1.21.2
+      with:
+        node-version-file: .node-version
+        cache: true
+        run-install: |
+          args: ["--frozen-lockfile"]
     - name: Install Brave
       shell: bash
       run: |
@@ -17,5 +20,5 @@ runs:
           | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
         sudo apt-get update
         sudo apt-get install -y brave-browser
-    - run: bunx playwright install --with-deps chromium chrome webkit
+    - run: vp exec playwright install --with-deps chromium chrome webkit
       shell: bash

@@ -9,9 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 4 : undefined,
   timeout: 30_000,
   expect: { timeout: 7_000 },
-  reporter: process.env.CI
-    ? [["github"], ["html", { open: "never" }], ["list"]]
-    : [["list"]],
+  reporter: process.env.CI ? [["github"], ["html", { open: "never" }], ["list"]] : [["list"]],
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",
@@ -32,7 +30,7 @@ export default defineConfig({
   ],
   webServer: IS_LOCAL_SERVER
     ? {
-        command: "bunx vite build && bunx vite preview --port 4173 --strictPort",
+        command: "bun run build && bun run preview --port 4173 --strictPort",
         url: "http://localhost:4173",
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,

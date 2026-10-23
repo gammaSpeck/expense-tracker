@@ -112,7 +112,13 @@ async function findExistingFile(
  */
 function buildMetadataBlob(filename: string, folderID?: string): Blob {
   return new Blob(
-    [JSON.stringify({ name: filename, mimeType: "application/json", ...(folderID ? { parents: [folderID] } : {}) })],
+    [
+      JSON.stringify({
+        name: filename,
+        mimeType: "application/json",
+        ...(folderID ? { parents: [folderID] } : {}),
+      }),
+    ],
     { type: "application/json" },
   );
 }

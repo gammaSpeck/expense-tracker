@@ -159,23 +159,23 @@ _Step indicator: "Step X of 3" on Column Mapping, Category Value Rules, and Impo
 
 ### Edge Cases & Error States
 
-| Scenario                                               | Expected Behavior                                                                  |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Uploaded file is not a CSV                             | "File must be a .csv format" — user stays on upload screen                         |
-| CSV has no header row or is empty                      | "This file appears to be empty or has no column headers"                           |
-| CSV exceeds 200,000 rows                               | "This file is too large to import. Please split it into files under 200,000 rows." |
-| `value` column has non-numeric data in a row           | Row flagged as a data error — skippable in preview                                 |
-| Date regex extractor finds no match in a row           | Row flagged as a data error — raw cell value shown to help debug                   |
-| Date cell is empty in a row                            | Row is silently skipped by system rule (not a data error)                          |
-| Amount cell is empty in a row                          | Row is silently skipped by system rule (not a data error)                          |
-| Category cell is empty in a row                        | Row is NOT skipped — routed to default category                                    |
-| Required fields (Amount, Date, Category) left unmapped | Inline validation error on "Next" — cannot proceed                                 |
-| No default category selected                           | Block on "Next" in Category Mapping — must be set                                  |
-| 0 valid rows after all filters applied                 | "No valid rows to import" — import button is disabled                              |
-| Ignore rule matches all rows                           | Preview shows 0 rows to import with explanation — import blocked                   |
-| User uploads a second CSV                              | All mapping state is reset and wizard restarts from upload step                    |
+| Scenario                                               | Expected Behavior                                                                                                                        |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Uploaded file is not a CSV                             | "File must be a .csv format" — user stays on upload screen                                                                               |
+| CSV has no header row or is empty                      | "This file appears to be empty or has no column headers"                                                                                 |
+| CSV exceeds 200,000 rows                               | "This file is too large to import. Please split it into files under 200,000 rows."                                                       |
+| `value` column has non-numeric data in a row           | Row flagged as a data error — skippable in preview                                                                                       |
+| Date regex extractor finds no match in a row           | Row flagged as a data error — raw cell value shown to help debug                                                                         |
+| Date cell is empty in a row                            | Row is silently skipped by system rule (not a data error)                                                                                |
+| Amount cell is empty in a row                          | Row is silently skipped by system rule (not a data error)                                                                                |
+| Category cell is empty in a row                        | Row is NOT skipped — routed to default category                                                                                          |
+| Required fields (Amount, Date, Category) left unmapped | Inline validation error on "Next" — cannot proceed                                                                                       |
+| No default category selected                           | Block on "Next" in Category Mapping — must be set                                                                                        |
+| 0 valid rows after all filters applied                 | "No valid rows to import" — import button is disabled                                                                                    |
+| Ignore rule matches all rows                           | Preview shows 0 rows to import with explanation — import blocked                                                                         |
+| User uploads a second CSV                              | All mapping state is reset and wizard restarts from upload step                                                                          |
 | Import fails mid-write                                 | Entire transaction rolls back atomically (expenses, categories, tag metadata) — user sees "Import failed", never a partial-success count |
-| User exits wizard mid-flow                             | CSV data is cleared from memory; no partial data is written                        |
+| User exits wizard mid-flow                             | CSV data is cleared from memory; no partial data is written                                                                              |
 
 ---
 

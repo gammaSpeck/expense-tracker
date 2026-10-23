@@ -9,8 +9,12 @@ function DropzoneCopy({ parsed }: { parsed: { fileName: string } | null }) {
   if (parsed) {
     return (
       <>
-        <p className="text-sm font-medium">Drop a different CSV file to replace {parsed.fileName}</p>
-        <p className="text-xs text-muted-foreground mt-1">This clears the current mapping and re-detects the source</p>
+        <p className="text-sm font-medium">
+          Drop a different CSV file to replace {parsed.fileName}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          This clears the current mapping and re-detects the source
+        </p>
       </>
     );
   }
@@ -104,10 +108,17 @@ export function CsvUploadStep({ csv }: CsvUploadStepProps) {
 
       <AutoDetectHint visible={!csv.parsed} />
 
-      {csv.parsed && <CsvFileSummary parsed={csv.parsed} detectedPreset={findPreset(detectedPresetId)} />}
+      {csv.parsed && (
+        <CsvFileSummary parsed={csv.parsed} detectedPreset={findPreset(detectedPresetId)} />
+      )}
 
       <div className="flex justify-between">
-        <Button type="button" variant="ghost" disabled={!csv.parsed} onClick={() => csv.goToStep("mapping")}>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={!csv.parsed}
+          onClick={() => csv.goToStep("mapping")}
+        >
           Set up manually
         </Button>
         {detectedPresetId && (

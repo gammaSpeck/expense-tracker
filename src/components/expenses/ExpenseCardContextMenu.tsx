@@ -13,7 +13,12 @@ interface ExpenseCardContextMenuProps {
   onDelete?: () => void;
 }
 
-export function ExpenseCardContextMenu({ trigger, onDuplicate, onEdit, onDelete }: ExpenseCardContextMenuProps) {
+export function ExpenseCardContextMenu({
+  trigger,
+  onDuplicate,
+  onEdit,
+  onDelete,
+}: ExpenseCardContextMenuProps) {
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>{trigger}</ContextMenuTrigger>

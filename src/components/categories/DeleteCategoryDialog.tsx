@@ -63,7 +63,10 @@ export function DeleteCategoryDialog({
             onClick={onConfirm}
             variant="destructive"
             disabled={
-              deleteAction === "move" && !!deleteData && deleteData.expenseCount > 0 && !moveToCategory
+              deleteAction === "move" &&
+              !!deleteData &&
+              deleteData.expenseCount > 0 &&
+              !moveToCategory
             }
           >
             Delete

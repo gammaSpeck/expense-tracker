@@ -41,7 +41,9 @@ export function CategoryGrid({
             <CategoryIcon icon={category.icon} color={category.color} size="lg" />
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{category.name}</p>
-              <p className="text-sm text-muted-foreground">{expenseCounts[category.id] || 0} expenses</p>
+              <p className="text-sm text-muted-foreground">
+                {expenseCounts[category.id] || 0} expenses
+              </p>
             </div>
           </button>
 

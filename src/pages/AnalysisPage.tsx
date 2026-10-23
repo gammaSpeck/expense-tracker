@@ -36,9 +36,7 @@ export default function AnalysisPage() {
           granularity={state.granularity}
         />
       ) : (
-        <div
-          className="flex flex-col items-center justify-center py-12 text-muted-foreground animate-slide-in-up stagger-2 fill-mode-backwards"
-        >
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground animate-slide-in-up stagger-2 fill-mode-backwards">
           <p>No expense data for this period</p>
         </div>
       )}

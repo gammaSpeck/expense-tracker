@@ -28,7 +28,13 @@ test.describe("transactions", () => {
   test("singular pluralization with one seeded row", async ({ page }) => {
     await gotoApp(page, "/");
     await seedExpenses(page, [
-      { value: 100, categoryName: "Others", description: "Solo expense", date: daysAgo(0), time: "10:00" },
+      {
+        value: 100,
+        categoryName: "Others",
+        description: "Solo expense",
+        date: daysAgo(0),
+        time: "10:00",
+      },
     ]);
     await page.goto("/transactions");
     await expect(page.getByText("Showing 1 transaction", { exact: true })).toBeVisible();

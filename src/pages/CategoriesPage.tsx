@@ -42,7 +42,9 @@ export default function CategoriesPage() {
         expenseCounts={expenseCounts}
         onEdit={setEditCategory}
         onDeleteClick={handleDeleteClick}
-        onCategoryClick={(categoryId) => navigate("/transactions", { state: { filterCategory: categoryId } })}
+        onCategoryClick={(categoryId) =>
+          navigate("/transactions", { state: { filterCategory: categoryId } })
+        }
       />
 
       <CategoryFormDialogs

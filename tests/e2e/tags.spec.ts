@@ -17,7 +17,9 @@ test.describe("tags", () => {
 
     await expect(tagRow(page, "travel").getByText("Used in 2 expenses")).toBeVisible();
     await expect(tagRow(page, "work").getByText("Used in 2 expenses")).toBeVisible();
-    await expect(tagRow(page, "cafe").getByText("Used in 1 expense", { exact: true })).toBeVisible();
+    await expect(
+      tagRow(page, "cafe").getByText("Used in 1 expense", { exact: true }),
+    ).toBeVisible();
     await expect(
       tagRow(page, "fitness").getByText("Used in 1 expense", { exact: true }),
     ).toBeVisible();

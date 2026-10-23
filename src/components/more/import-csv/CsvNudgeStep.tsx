@@ -21,13 +21,16 @@ export function CsvNudgeStep({ onSkip }: CsvNudgeStepProps) {
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Back up before importing</h3>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Before importing new data, consider backing up your current expenses so you can restore them if needed.
+          Before importing new data, consider backing up your current expenses so you can restore
+          them if needed.
         </p>
         <p className="text-xs text-muted-foreground">{lastBackupText}</p>
       </div>
 
       <div className="flex flex-col gap-2 w-full max-w-xs">
-        <Button onClick={() => navigate("/settings/data", { state: { openBackup: true } })}>Back up now</Button>
+        <Button onClick={() => navigate("/settings/data", { state: { openBackup: true } })}>
+          Back up now
+        </Button>
         <Button variant="ghost" onClick={onSkip}>
           Skip, continue <ArrowRight className="h-4 w-4" />
         </Button>

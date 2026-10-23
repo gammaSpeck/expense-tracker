@@ -93,7 +93,11 @@ function useDefaultCategoryEffect(
 }
 
 /** Owns all ExpenseForm state and submit logic; the component only renders. */
-export function useExpenseFormController(expense: Expense | undefined, duplicate: Expense | undefined, onSuccess?: () => void) {
+export function useExpenseFormController(
+  expense: Expense | undefined,
+  duplicate: Expense | undefined,
+  onSuccess?: () => void,
+) {
   const categories = useCategories();
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
   const { currency } = useCurrency();

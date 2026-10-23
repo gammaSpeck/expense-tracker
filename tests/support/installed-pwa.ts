@@ -1,4 +1,11 @@
-import { chromium, webkit, devices, expect, type BrowserContext, type Page } from "@playwright/test";
+import {
+  chromium,
+  webkit,
+  devices,
+  expect,
+  type BrowserContext,
+  type Page,
+} from "@playwright/test";
 import { BASE_URL } from "./env";
 import { installHarness } from "./app";
 
@@ -99,7 +106,9 @@ export async function runInstalledPwaJourney(handle: InstalledPwaHandle) {
   await saveButton.tap();
   await expect(page.getByText("Expense added")).toBeVisible();
   await expect(page).toHaveURL(`${BASE_URL}/`);
-  await expect(page.getByTestId("expense-card").filter({ hasText: "Installed PWA journey" })).toBeVisible();
+  await expect(
+    page.getByTestId("expense-card").filter({ hasText: "Installed PWA journey" }),
+  ).toBeVisible();
 
   // 4. Service worker registers.
   const swCount = await page.evaluate(() =>
@@ -120,7 +129,9 @@ export async function runInstalledPwaJourney(handle: InstalledPwaHandle) {
 
     await handle.context.setOffline(true);
     await page.reload();
-    await expect(page.getByTestId("expense-card").filter({ hasText: "Installed PWA journey" })).toBeVisible();
+    await expect(
+      page.getByTestId("expense-card").filter({ hasText: "Installed PWA journey" }),
+    ).toBeVisible();
     await handle.context.setOffline(false);
   }
 

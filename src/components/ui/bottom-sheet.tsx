@@ -21,7 +21,10 @@ const BottomSheetContent = React.forwardRef<
       )}
       {...props}
     >
-      <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/30" aria-hidden />
+      <div
+        className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/30"
+        aria-hidden
+      />
       {children}
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
