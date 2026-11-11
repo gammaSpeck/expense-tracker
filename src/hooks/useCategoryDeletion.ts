@@ -39,6 +39,7 @@ export function useCategoryDeletion(categories: Category[], expenseCounts: Recor
     const count = expenseCounts[category.id] || 0;
     const othersCategory = categories.find((c) => c.name === "Others");
     setMoveToCategory(othersCategory?.id || "");
+    setDeleteAction("move");
     setDeleteData({ category, expenseCount: count });
   };
 

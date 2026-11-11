@@ -100,6 +100,45 @@ test.describe("categories", () => {
     await expect(page.getByText("Showing 3 transactions")).toBeVisible();
   });
 
+  test("cascade delete keeps the install marker count in sync", async ({ page }) => {
+    await gotoApp(page, "/");
+    await seedExpenses(page, [
+      { value: 10, categoryName: "Shopping", description: "A", date: "2024-01-01", time: "10:00" },
+      { value: 20, categoryName: "Shopping", description: "B", date: "2024-01-02", time: "10:00" },
+    ]);
+    const lastSeenCount = () =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("expense-tracker-install") ?? "{}").lastSeenExpenseCount,
+      );
+    await expect.poll(lastSeenCount).toBe(2);
+
+    await page.goto("/categories");
+    await page.getByLabel("Delete Shopping").click();
+    const dialog = page.getByRole("alertdialog");
+    await dialog.getByRole("radio", { name: "Delete all 2 expenses" }).click();
+    await dialog.getByRole("button", { name: "Delete" }).click();
+    await expect(page.getByText("Category deleted")).toBeVisible();
+
+    expect(await lastSeenCount()).toBe(0);
+  });
+
+  test("the delete dialog always reopens on Move", async ({ page }) => {
+    await gotoApp(page, "/");
+    await seedExpenses(page, mixed5());
+    await page.goto("/categories");
+
+    await page.getByLabel("Delete Shopping").click();
+    const dialog = page.getByRole("alertdialog");
+    await dialog.getByRole("radio", { name: "Delete all 2 expenses" }).click();
+    await dialog.getByRole("button", { name: "Cancel" }).click();
+
+    await page.getByLabel("Delete Transport").click();
+    await expect(
+      dialog.getByRole("radio", { name: "Move expenses to another category" }),
+    ).toBeChecked();
+  });
+
   test("Others category cannot be deleted", async ({ page }) => {
     await gotoApp(page, "/categories");
     await page.getByLabel("Delete Others").click();

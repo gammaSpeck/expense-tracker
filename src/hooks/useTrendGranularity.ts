@@ -11,12 +11,14 @@ export function useTrendGranularity(
   customRange: DateRange | undefined,
   dailyTrend: DailySummary[],
 ) {
-  const [trendGranularity, setTrendGranularity] = useState<TrendGranularity>("day");
+  const [selected, setTrendGranularity] = useState<TrendGranularity>("day");
 
   const granularityOptions = useMemo(
     () => getGranularityOptions(periodTab, customRange),
     [periodTab, customRange],
   );
+  // Falls back while the period disallows the pick; widening again restores it.
+  const trendGranularity = granularityOptions.includes(selected) ? selected : granularityOptions[0];
 
   const barData = useMemo(
     () => aggregateTrendData(dailyTrend, trendGranularity),

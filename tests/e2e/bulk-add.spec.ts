@@ -149,6 +149,61 @@ test.describe("bulk-add", () => {
     await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
   });
 
+  test("a confirmed Back discards the draft", async ({ page }) => {
+    await gotoApp(page, "/");
+    await page.goto("/add/bulk");
+    await page.getByTestId("bulk-row").first().getByLabel("Amount").fill("321");
+    await page.waitForTimeout(800);
+
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Go back" }).click();
+    await expect(page).toHaveURL(/\/$/);
+
+    await page.goto("/add/bulk");
+    await expect(page.getByRole("heading", { name: "Add many" })).toBeVisible();
+    await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
+  });
+
+  test("Discard in the resume prompt deletes the draft", async ({ page }) => {
+    await gotoApp(page, "/add/bulk");
+    await page.getByTestId("bulk-row").first().getByLabel("Amount").fill("321");
+    await page.waitForTimeout(800);
+
+    await page.reload();
+    await page.getByRole("button", { name: "Discard" }).click();
+    // let the delete (and the re-armed blank autosave) commit before the reload aborts them
+    await page.waitForTimeout(800);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Add many" })).toBeVisible();
+    await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
+  });
+
+  test("Save all clears the draft", async ({ page }) => {
+    await gotoApp(page, "/add/bulk");
+    const row = page.getByTestId("bulk-row").first();
+    await row.getByLabel("Amount").fill("120");
+    await row.getByLabel("Category").click();
+    await page.getByRole("option", { name: "Food & Dining" }).click();
+    await page.waitForTimeout(800);
+
+    await page.getByRole("button", { name: "Save all" }).click();
+    await expect(page).toHaveURL(/\/$/);
+
+    await page.goto("/add/bulk");
+    await expect(page.getByRole("heading", { name: "Add many" })).toBeVisible();
+    await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
+  });
+
+  test("clearing the custom date keeps the block's date", async ({ page }) => {
+    await gotoApp(page, "/add/bulk");
+    const block = page.getByTestId("bulk-block").first();
+    await block.getByRole("button", { name: "Today" }).click();
+    await page.getByLabel("Custom date").fill("");
+
+    await expect(block.getByRole("button", { name: "Today" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Add many" })).toBeVisible();
+  });
+
   test.describe("FAB gesture (mobile)", () => {
     test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 

@@ -8,6 +8,7 @@ export type SeedExpense = {
   date: string; // "YYYY-MM-DD"
   time: string; // "HH:mm"
   isAdhoc?: boolean;
+  attachment?: string; // data URL
 };
 
 type CategoryRow = { id: string; name: string };
@@ -70,6 +71,7 @@ export async function seedExpenses(page: Page, items: SeedExpense[]): Promise<vo
               date: item.date,
               time: item.time,
               isAdhoc: item.isAdhoc ?? false,
+              attachment: item.attachment,
               createdAt: now,
               updatedAt: now,
             });
@@ -101,6 +103,7 @@ export type ReadExpense = {
   date: string;
   time: string;
   isAdhoc: boolean;
+  attachment?: string;
 };
 
 /** Reads `expenses` out of IndexedDB with each row's category id resolved to its name. */
@@ -134,6 +137,7 @@ export async function readExpenses(page: Page): Promise<ReadExpense[]> {
                 date: e.date,
                 time: e.time,
                 isAdhoc: e.isAdhoc,
+                attachment: e.attachment,
               })),
             );
           };

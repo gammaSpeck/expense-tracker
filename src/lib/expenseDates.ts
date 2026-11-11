@@ -1,8 +1,9 @@
-import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from "date-fns";
+import { format, formatDistanceToNow, isToday, isValid, isYesterday, parseISO } from "date-fns";
 import { Expense } from "@/types/expense";
 
 export function formatRelativeDate(dateStr: string): string {
   const date = parseISO(dateStr);
+  if (!isValid(date)) return "Unknown date";
   if (isToday(date)) return "Today";
   if (isYesterday(date)) return "Yesterday";
   return formatDistanceToNow(date, { addSuffix: true });
@@ -10,6 +11,7 @@ export function formatRelativeDate(dateStr: string): string {
 
 export function getDateGroupLabel(dateStr: string): string {
   const date = parseISO(dateStr);
+  if (!isValid(date)) return "Unknown date";
   if (isToday(date)) return "Today";
   if (isYesterday(date)) return "Yesterday";
   return format(date, "EEEE, d MMM");

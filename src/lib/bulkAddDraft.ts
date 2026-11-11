@@ -91,7 +91,7 @@ function buildExpenseDraft(block: BulkDraftBlock, row: BulkDraftRow, today: stri
     description: row.description.trim() || undefined,
     tags: row.tags,
     date: block.date,
-    time: row.time ?? (block.date === today ? getCurrentTime24() : "12:00"),
+    time: row.time || (block.date === today ? getCurrentTime24() : "12:00"),
     isAdhoc: row.isAdhoc,
   };
 }

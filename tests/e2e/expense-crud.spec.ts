@@ -1,6 +1,6 @@
 import { test, expect } from "../support/fixtures";
 import { gotoApp, daysAgo } from "../support/app";
-import { seedExpenses } from "../support/db";
+import { readExpenses, seedExpenses } from "../support/db";
 
 test.describe("expense-crud", () => {
   test("add an expense through the real UI", { tag: "@smoke" }, async ({ page }) => {
@@ -20,9 +20,8 @@ test.describe("expense-crud", () => {
     await page.getByLabel("Adhoc Expense").click();
 
     await page.getByLabel("Date").click();
-    // ponytail: default date is already today (RDP marks it "selected"); clicking that same
-    // cell in single mode *deselects* it instead of re-picking, so just verify the popover
-    // opens over today's date and dismiss without touching the value.
+    // default date is already today; verify the popover opens over it and dismiss without
+    // touching the value (re-clicking the selected day is covered by its own test).
     await expect(page.getByRole("button", { name: /^Today,/ })).toBeVisible();
     await page.keyboard.press("Escape");
 
@@ -132,5 +131,81 @@ test.describe("expense-crud", () => {
     await expect(page).toHaveURL(/\/add$/);
     await expect(page.getByLabel("Amount")).toHaveValue("75");
     await expect(page.getByLabel("Description (optional)")).toHaveValue("Dup me");
+  });
+
+  test("clicking the selected day keeps the date", async ({ page }) => {
+    await gotoApp(page, "/add");
+    await page.getByLabel("Amount").fill("50");
+    await page.getByLabel("Date").click();
+    await page.getByRole("button", { name: /^Today,/ }).click();
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect(page.getByText("Expense added")).toBeVisible();
+    const [row] = await readExpenses(page);
+    expect(row.date).toBe(daysAgo(0));
+  });
+
+  test("a legacy expense with an empty date lists under Unknown date", async ({ page }) => {
+    await gotoApp(page, "/transactions");
+    await seedExpenses(page, [
+      { value: 42, categoryName: "Others", description: "Dateless", date: "", time: "10:00" },
+    ]);
+
+    await expect(page.getByRole("heading", { name: "Unknown date" })).toBeVisible();
+    await expect(page.getByText("Dateless")).toBeVisible();
+
+    await page.goto("/");
+    await expect(page.getByText("Dateless")).toBeVisible();
+
+    await page.goto("/transactions");
+    await page.getByTestId("expense-card").filter({ hasText: "Dateless" }).click();
+    await expect(page).toHaveURL(/\/expense\//);
+    await expect(page.getByLabel("Date")).toHaveText("Pick a date");
+    await page.getByRole("button", { name: "Update" }).click();
+    await expect(page.locator("p", { hasText: "Pick a date" })).toBeVisible();
+  });
+
+  test("a cleared time is rejected", async ({ page }) => {
+    await gotoApp(page, "/add");
+    await page.getByLabel("Amount").fill("50");
+    await page.getByLabel("Time").fill("");
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect(page.getByText("Pick a time")).toBeVisible();
+    expect(await readExpenses(page)).toEqual([]);
+  });
+
+  test("a missing expense says so instead of loading forever", async ({ page }) => {
+    await gotoApp(page, "/expense/does-not-exist/edit");
+    await expect(page.getByText("This expense doesn't exist anymore.")).toBeVisible();
+    await page.getByRole("button", { name: "Go to Home" }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("duplicate drops the attachment", async ({ page }) => {
+    await gotoApp(page, "/transactions");
+    await seedExpenses(page, [
+      {
+        value: 75,
+        categoryName: "Others",
+        description: "With receipt",
+        date: daysAgo(0),
+        time: "10:00",
+        attachment: "data:image/png;base64,iVBORw0KGgo=",
+      },
+    ]);
+
+    const card = page.getByTestId("expense-card").filter({ hasText: "With receipt" });
+    await card.click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Duplicate" }).click();
+    await expect(page).toHaveURL(/\/add$/);
+    await expect(page.getByAltText("Attachment preview")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText("Expense added")).toBeVisible();
+    const rows = await readExpenses(page);
+    expect(rows).toHaveLength(2);
+    expect(rows.filter((r) => r.attachment)).toHaveLength(1);
   });
 });

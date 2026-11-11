@@ -61,7 +61,7 @@ function BlockDateControl({ block, today, yesterday, onSetDate }: BlockDateContr
           type="date"
           aria-label="Custom date"
           value={block.date}
-          onChange={(e) => choose(e.target.value)}
+          onChange={(e) => e.target.value && choose(e.target.value)}
           className="w-full h-8 text-xs border border-input rounded-md px-2 bg-background mt-1"
         />
       </PopoverContent>
