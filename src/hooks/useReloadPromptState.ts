@@ -1,7 +1,10 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { captureError } from "@/lib/telemetry";
+import { capture } from "@/lib/telemetry";
+
+// A successful update reloads the page within a second or two (skip-waiting → controllerchange).
+const UPDATE_STALL_MS = 10_000;
 
 export function useReloadPromptState() {
   const {
@@ -37,17 +40,17 @@ export function useReloadPromptState() {
     return () => clearTimeout(timer);
   }, [offlineReady, needRefresh, close]);
 
-  // ponytail: a promise that resolves without reloading still leaves the spinner on; add a
-  // timeout reset if that ever shows up in telemetry.
+  // updateServiceWorker never rejects (vite-plugin-pwa fires the skip-waiting message and drops
+  // its promise), so success is only visible as a page reload. Still here after UPDATE_STALL_MS →
+  // the update stalled (message lost, waiting worker gone): unlock the prompt so the user can retry.
   const handleUpdate = async () => {
     setIsUpdating(true);
-    try {
-      await updateServiceWorker(true);
-    } catch (err) {
-      captureError("sw_update_failed", err);
+    await updateServiceWorker(true);
+    setTimeout(() => {
+      capture("sw_update_stalled");
       toast.error("Update failed. Close and reopen the app to update.");
       setIsUpdating(false);
-    }
+    }, UPDATE_STALL_MS);
   };
 
   return { offlineReady, needRefresh, isUpdating, close, handleUpdate };
