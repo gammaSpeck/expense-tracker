@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { test, expect } from "../support/fixtures";
 import { gotoApp } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { thisMonth3 } from "../support/data";
+import { thisMonthWithAdhoc } from "../support/data";
 
 // The global chromium-desktop project blocks service workers by default; this spec needs one.
 test.use({ serviceWorkers: "allow" });
@@ -17,7 +17,7 @@ const NEXT_BUILD = "/sw.js?e2e-next-build";
 async function bootWithPendingUpdate(page: Page) {
   await gotoApp(page, "/");
   await page.evaluate(() => navigator.serviceWorker.ready);
-  await seedExpenses(page, thisMonth3()); // reloads, so the active worker now controls the page
+  await seedExpenses(page, thisMonthWithAdhoc()); // reloads, so the active worker now controls the page
   await expect(page.getByText("₹4,000", { exact: true })).toBeVisible();
 
   await page.evaluate(async (url) => {

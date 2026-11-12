@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { test, expect } from "../support/fixtures";
 import { gotoApp, daysAgo, readDownload, DEFAULT_CATEGORY_NAMES } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { thisMonth3 } from "../support/data";
+import { thisMonthWithAdhoc } from "../support/data";
 
 async function setPassphrase(page: Page, passphrase: string) {
   await page.getByRole("button", { name: "Set Passphrase" }).click();
@@ -29,7 +29,7 @@ async function exportEncrypted(page: Page, passphrase: string): Promise<string> 
 test.describe("data-management", () => {
   test("plain JSON export", { tag: "@smoke" }, async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Export Data" }).first().click();
     const dialog = page.getByRole("dialog");
@@ -51,7 +51,7 @@ test.describe("data-management", () => {
 
   test("CSV export has the documented header", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Export Data" }).first().click();
     const dialog = page.getByRole("dialog");
@@ -85,7 +85,7 @@ test.describe("data-management", () => {
 
   test("encrypted round trip: export, factory reset, merge import", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     // Factory reset wipes data, categories, and the stored passphrase.
@@ -127,7 +127,7 @@ test.describe("data-management", () => {
 
   test("wrong manual passphrase is rejected", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
@@ -148,7 +148,7 @@ test.describe("data-management", () => {
   test("restore skips invalid records and says why", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, [
-      ...thisMonth3(),
+      ...thisMonthWithAdhoc(),
       { value: 9, categoryName: "Others", description: "Broken", date: "", time: "10:00" },
     ]);
     const backupContent = await exportEncrypted(page, "correcthorse123");
@@ -177,7 +177,7 @@ test.describe("data-management", () => {
 
   test("Cancel during decrypt shows no preview afterwards", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
@@ -224,7 +224,7 @@ test.describe("data-management", () => {
 
   test("override mode replaces existing data entirely", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     await page.goto("/");
@@ -255,7 +255,7 @@ test.describe("data-management", () => {
 
   test("factory reset clears everything", { tag: "@smoke" }, async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
