@@ -92,14 +92,26 @@
       {
         "files": ["src/hooks/useEncryptedFileImport.ts"],
         "functions": ["performFileSelect"],
-        "maxCrap": 35,
-        "reason": "File-check error / null-decrypt / resolvePlaintext-result branches; necessary import validation."
+        "maxCrap": 60,
+        "reason": "File-check error / null-decrypt / resolvePlaintext-result branches plus the stale-selection guards after each await (Cancel or a newer file must win); necessary import validation."
+      },
+      {
+        "files": ["src/hooks/useEncryptedFileImport.ts"],
+        "functions": ["performManualDecrypt"],
+        "maxCrap": 45,
+        "reason": "not-backup / invalid / ok result branches, decrypt-error toast, and the stale-attempt guards that keep a cancelled decrypt from surfacing a preview or error; necessary import flow."
       },
       {
         "files": ["src/hooks/useExpenseFormController.ts"],
-        "functions": ["submitExpense", "<arrow>"],
+        "functions": ["submitExpense", "initDefaults", "<arrow>"],
         "maxCrap": 35,
-        "reason": "Create-vs-update branch and the default-category effect guard; both coverage-blind CRAP on small extracted units."
+        "reason": "Create-vs-update branch, edit/duplicate/new default seeding, and the default-category effect guard; all coverage-blind CRAP on small extracted units."
+      },
+      {
+        "files": ["src/hooks/useTagEditing.ts"],
+        "functions": ["handleRename"],
+        "maxCrap": 60,
+        "reason": "Blur-while-merge-pending guard, blank/unchanged no-op, rename-vs-merge branch and the from-tag count lookup; the rename state machine's entire job."
       },
       {
         "files": ["src/hooks/useGoogleOAuthCallback.ts"],
@@ -112,12 +124,6 @@
         "functions": ["<arrow>"],
         "maxCrap": 75,
         "reason": "buildCategoryBreakdown's per-category mapper: unknown-category fallbacks plus divide-by-zero guard for percentage; necessary defensive logic."
-      },
-      {
-        "files": ["src/lib/importPreview.ts"],
-        "functions": ["buildImportPreview"],
-        "maxCrap": 75,
-        "reason": "JSON parse + shape validation + date-range derivation in a try/catch; necessary import-file guarding."
       },
       {
         "files": ["src/lib/csvImportPlan.ts"],

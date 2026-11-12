@@ -30,6 +30,12 @@ export function ImportPreviewPanel({
         <p>
           📅 {preview.dateRange.earliest} to {preview.dateRange.latest}
         </p>
+        {preview.skipped.length > 0 && (
+          <p>
+            ⚠️ {preview.skipped.length} invalid record{preview.skipped.length === 1 ? "" : "s"} will
+            be skipped (bad {[...new Set(preview.skipped)].join(", ")})
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">

@@ -5,16 +5,26 @@ import { useTagDeletion } from "@/hooks/useTagDeletion";
 import { TagRow } from "@/components/categories/TagRow";
 import { EmptyTagState } from "@/components/categories/EmptyTagState";
 import { DeleteTagDialog } from "@/components/categories/DeleteTagDialog";
+import { MergeTagDialog } from "@/components/categories/MergeTagDialog";
 
 export function TagTab() {
   const tags = useTags();
   const navigate = useNavigate();
-  const { editingTag, newName, setNewName, handleRename, startEditing, cancelEditing } =
-    useTagEditing();
+  const {
+    editingTag,
+    newName,
+    setNewName,
+    handleRename,
+    startEditing,
+    cancelEditing,
+    mergeData,
+    confirmMerge,
+    cancelMerge,
+  } = useTagEditing(tags);
   const { deleteData, setDeleteData, clearDeleteData, handleDelete } = useTagDeletion();
 
   function handleTagClick(tag: string) {
-    navigate("/transactions", { state: { filterTag: tag } });
+    navigate("/transactions", { state: { filters: { tags: [tag] } } });
   }
 
   if (tags.length === 0) {
@@ -45,6 +55,7 @@ export function TagTab() {
         onOpenChange={clearDeleteData}
         onConfirm={handleDelete}
       />
+      <MergeTagDialog mergeData={mergeData} onOpenChange={cancelMerge} onConfirm={confirmMerge} />
     </>
   );
 }

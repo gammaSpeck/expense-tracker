@@ -29,9 +29,13 @@ export function useTags() {
   return tags;
 }
 
-export function useExpense(id: string | undefined) {
-  const expense = useLiveQuery(() => (id ? db.expenses.get(id) : undefined), [id], undefined);
-  return expense;
+/** `undefined` while loading, `null` when no expense has this id. */
+export function useExpense(id: string | undefined): Expense | null | undefined {
+  return useLiveQuery(
+    async () => (id ? ((await db.expenses.get(id)) ?? null) : null),
+    [id],
+    undefined,
+  );
 }
 
 export function useCategoryExpenseCounts() {

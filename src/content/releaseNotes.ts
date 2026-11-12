@@ -33,6 +33,42 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.9.1-transactions-back",
+    version: "1.9.1",
+    date: "2026-11-11",
+    type: "fixed",
+    title: "Back keeps your search and filters",
+    body: "Returning to All Transactions restores exactly what you had.",
+  },
+
+  {
+    id: "1.9.1-tag-merge",
+    version: "1.9.1",
+    date: "2026-11-11",
+    type: "fixed",
+    title: "Rename a tag onto another to merge them",
+    body: "You're asked first, and each expense keeps one copy of the tag.",
+  },
+
+  {
+    id: "1.9.1-data-safety",
+    version: "1.9.1",
+    date: "2026-11-11",
+    type: "fixed",
+    title: "Safer dates, deletes and restores",
+    body: "Dates can't be cleared by accident, deleting a category no longer warns of missing data, and restores skip broken entries.",
+  },
+
+  {
+    id: "1.9.1-stuck-screens",
+    version: "1.9.1",
+    date: "2026-11-11",
+    type: "fixed",
+    title: "Fewer stuck screens",
+    body: "Updates, backups, imports and Add many now finish or recover, and a deleted expense says so instead of loading forever.",
+  },
+
+  {
     id: "1.9.0-transaction-filters",
     version: "1.9.0",
     date: "2026-09-14",

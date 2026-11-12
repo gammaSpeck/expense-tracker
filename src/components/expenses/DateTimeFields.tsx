@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ExpenseFormData } from "@/types/expense";
 
 export function DateTimeFields() {
-  const { control, register } = useFormContext<ExpenseFormData>();
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useFormContext<ExpenseFormData>();
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -18,31 +22,35 @@ export function DateTimeFields() {
         <Controller
           control={control}
           name="date"
-          render={({ field }) => (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  aria-label="Date"
-                  variant="field"
-                  data-placeholder={!field.value}
-                  className="w-full justify-start text-left"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {field.value ? format(new Date(field.value), "PP") : "Pick a date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                  autoFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          )}
+          render={({ field }) => {
+            const date = new Date(field.value); // Invalid Date for legacy "" or garbage rows
+            return (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    aria-label="Date"
+                    variant="field"
+                    data-placeholder={!isValid(date)}
+                    className="w-full justify-start text-left"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {isValid(date) ? format(date, "PP") : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={isValid(date) ? date : undefined}
+                    onSelect={(d) => d && field.onChange(format(d, "yyyy-MM-dd"))}
+                    autoFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            );
+          }}
         />
+        {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
       </div>
 
       <div className="space-y-2">
@@ -51,6 +59,7 @@ export function DateTimeFields() {
           <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input id="time" type="time" className="pl-10 text-sm" {...register("time")} />
         </div>
+        {errors.time && <p className="text-sm text-destructive">{errors.time.message}</p>}
       </div>
     </div>
   );

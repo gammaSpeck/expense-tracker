@@ -1,7 +1,7 @@
 import { test, expect } from "../support/fixtures";
 import { gotoApp, readDownload } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { thisMonth3 } from "../support/data";
+import { thisMonthWithAdhoc } from "../support/data";
 
 test.describe("analysis", () => {
   test("zero data shows the empty state and no chart testids", async ({ page }) => {
@@ -15,7 +15,7 @@ test.describe("analysis", () => {
     page,
   }) => {
     await gotoApp(page, "/");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     await page.goto("/analysis");
 
     // Default: Month period, Exclude Adhoc Expenses ON.
@@ -48,7 +48,7 @@ test.describe("analysis", () => {
 
   test("period tabs and navigation", async ({ page }) => {
     await gotoApp(page, "/");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     await page.goto("/analysis");
 
     const prevButton = page.getByLabel("Previous period");
@@ -74,7 +74,7 @@ test.describe("analysis", () => {
 
   test("CSV export downloads a header row plus one row per expense", async ({ page }) => {
     await gotoApp(page, "/");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     await page.goto("/analysis");
 
     await page.getByRole("button", { name: "Export" }).click();

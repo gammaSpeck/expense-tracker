@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { test, expect } from "../support/fixtures";
 import { gotoApp } from "../support/app";
-import { seedExpenses } from "../support/db";
+import { readExpenses, seedExpenses } from "../support/db";
 import { mixed5 } from "../support/data";
 
 function tagRow(page: Page, tag: string) {
@@ -41,6 +41,46 @@ test.describe("tags", () => {
     await page.goto("/transactions");
     await page.getByPlaceholder("Search transactions...").fill("coffee-shop");
     await expect(page.getByTestId("expense-card")).toHaveCount(1);
+  });
+
+  test("renaming onto an existing tag merges after confirmation", async ({ page }) => {
+    await gotoApp(page, "/");
+    await seedExpenses(page, mixed5());
+    await page.goto("/categories");
+    await page.getByRole("tab", { name: "Tags" }).click();
+
+    await tagRow(page, "travel").getByLabel("Rename tag").click();
+    const input = page.getByRole("textbox");
+    await input.fill("work");
+    await input.press("Enter");
+
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog.getByText('Merge "travel" into "work"?')).toBeVisible();
+    await dialog.getByRole("button", { name: "Merge" }).click();
+
+    await expect(page.getByText('Merged "travel" into "work"')).toBeVisible();
+    await expect(tagRow(page, "work").getByText("Used in 3 expenses")).toBeVisible();
+    await expect(tagRow(page, "travel")).toHaveCount(0);
+    const rows = await readExpenses(page);
+    expect(rows.find((r) => r.description === "Airport cab")?.tags).toEqual(["work"]);
+  });
+
+  test("cancelling a merge leaves both tags unchanged", async ({ page }) => {
+    await gotoApp(page, "/");
+    await seedExpenses(page, mixed5());
+    await page.goto("/categories");
+    await page.getByRole("tab", { name: "Tags" }).click();
+
+    await tagRow(page, "travel").getByLabel("Rename tag").click();
+    const input = page.getByRole("textbox");
+    await input.fill("work");
+    await input.press("Enter");
+    await page.getByRole("alertdialog").getByRole("button", { name: "Cancel" }).click();
+
+    await expect(tagRow(page, "travel").getByText("Used in 2 expenses")).toBeVisible();
+    await expect(tagRow(page, "work").getByText("Used in 2 expenses")).toBeVisible();
+    const rows = await readExpenses(page);
+    expect(rows.find((r) => r.description === "Airport cab")?.tags).toEqual(["travel", "work"]);
   });
 
   test("delete a tag", async ({ page }) => {

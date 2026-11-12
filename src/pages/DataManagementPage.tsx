@@ -1,6 +1,6 @@
 import { Database } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BackupCard } from "@/components/more/BackupCard";
 import { ImportExportCard } from "@/components/more/ImportExportCard";
@@ -12,6 +12,12 @@ export default function DataManagementPage() {
   const location = useLocation();
   const autoOpenBackup = Boolean((location.state as { openBackup?: boolean } | null)?.openBackup);
   const [backupRefreshKey, setBackupRefreshKey] = useState(0);
+
+  // Child effects run first, so BackupData has already auto-opened; dropping the flag keeps
+  // the success remount (key bump) and a reload from opening the dialog again.
+  useEffect(() => {
+    if (autoOpenBackup) navigate(location.pathname, { replace: true, state: null });
+  }, [autoOpenBackup, location.pathname, navigate]);
 
   function handleBackupSuccess() {
     setBackupRefreshKey((k) => k + 1);

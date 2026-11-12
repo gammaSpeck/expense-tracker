@@ -15,6 +15,15 @@ test.describe("boot", { tag: "@smoke" }, () => {
     }
   });
 
+  test("boots and seeds even when persistent storage is rejected", async ({ page }) => {
+    await page.addInitScript(() => {
+      navigator.storage.persisted = () => Promise.resolve(false);
+      navigator.storage.persist = () => Promise.reject(new Error("blocked"));
+    });
+    await gotoApp(page, "/categories");
+    await expect(page.getByText("Others", { exact: true })).toBeVisible();
+  });
+
   test("environment fingerprint at /settings/about", async ({ page }) => {
     await gotoApp(page, "/settings/about");
     const versionText = page.getByText(/^Version v/);

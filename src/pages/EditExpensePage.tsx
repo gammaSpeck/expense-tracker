@@ -47,7 +47,14 @@ export default function EditExpensePage() {
           </Button>
           <h1 className="text-xl font-semibold">Edit Expense</h1>
         </div>
-        <p className="text-muted-foreground">Loading...</p>
+        {expense === null ? (
+          <div className="space-y-4">
+            <p className="text-muted-foreground">This expense doesn't exist anymore.</p>
+            <Button onClick={() => navigate("/")}>Go to Home</Button>
+          </div>
+        ) : (
+          <p className="text-muted-foreground">Loading...</p>
+        )}
       </div>
     );
   }

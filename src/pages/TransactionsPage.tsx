@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { ArrowLeft, Funnel } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,19 +12,18 @@ import { useExpenseActions } from "@/hooks/useExpenseActions";
 import { useIncrementalReveal } from "@/hooks/useIncrementalReveal";
 import { useTransactionFilters } from "@/hooks/useTransactionFilters";
 import { useCurrency } from "@/contexts/CurrencyContext";
-import { activeFilterChips } from "@/lib/transactionFilters";
+import { activeFilterChips, type TransactionFilterState } from "@/lib/transactionFilters";
 import { TRANSACTIONS_PAGE_SIZE } from "@/config";
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const navState = location.state as {
+    filters?: Partial<TransactionFilterState>;
     search?: string;
-    filterTag?: string;
-    filterCategory?: string;
   } | null;
 
-  const [search, setSearch] = useState(navState?.search || "");
+  const [search, setSearch] = useState(navState?.search ?? "");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const categories = useCategories();
@@ -32,10 +31,13 @@ export default function TransactionsPage() {
   const { currency, formatValue } = useCurrency();
 
   const { state, filters, patch, toggleCategory, toggleTag, removeChip, clearAll } =
-    useTransactionFilters(search, {
-      ...(navState?.filterTag ? { tags: [navState.filterTag] } : {}),
-      ...(navState?.filterCategory ? { categories: [navState.filterCategory] } : {}),
-    });
+    useTransactionFilters(search, navState?.filters);
+
+  // History state is this page's memory: Back/Forward restores the exact search and filters.
+  // ponytail: replace-navigates on every change; debounce if it shows up in a profile
+  useEffect(() => {
+    navigate(location.pathname, { replace: true, state: { filters: state, search } });
+  }, [state, search, location.pathname, navigate]);
 
   const expenses = useFilteredExpenses(filters);
   const chips = useMemo(

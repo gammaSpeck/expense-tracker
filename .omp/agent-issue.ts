@@ -149,7 +149,7 @@ const REPO_CONVENTIONS_BLOCK = [
   "- Navigate with `gotoApp(page, path)` from `tests/support/app.ts`; it waits for the Dexie",
   "  category seed to land.",
   "- Seed data with `seedExpenses(page, items)` from `tests/support/db.ts`, using builders from",
-  "  `tests/support/data.ts` (`mixed5()`, `thisMonth3()`, `thisMonthNoAdhoc()`, `twelveToday()`,",
+  "  `tests/support/data.ts` (`mixed5()`, `thisMonthWithAdhoc()`, `thisMonthNoAdhoc()`, `twelveToday()`,",
   "  `manyRows(n)`). `gotoApp` MUST run before `seedExpenses` — it resolves category names to ids",
   "  and throws when a category is missing.",
   "- Query with `getByRole` / `getByText` / `getByTestId` (`testIdAttribute` is `data-testid`).",

@@ -48,8 +48,8 @@ export const mixed5 = (): SeedExpense[] => [
   },
 ];
 
-/** 3 rows, all dated today, so they are always inside the current calendar month. */
-export const thisMonth3 = (): SeedExpense[] => [
+/** 3 rows dated today (always inside the current month), one adhoc: ₹4,000 total, ₹1,500 excluding adhoc. */
+export const thisMonthWithAdhoc = (): SeedExpense[] => [
   {
     value: 1000,
     categoryName: "Food & Dining",
