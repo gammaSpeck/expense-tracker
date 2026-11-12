@@ -33,21 +33,12 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
-    id: "1.9.1-expense-dates",
+    id: "1.9.1-transactions-back",
     version: "1.9.1",
     date: "2026-11-11",
     type: "fixed",
-    title: "A cleared date can no longer crash the app",
-    body: 'Every expense now keeps a valid date and time. Older expenses without a date show under "Unknown date" so you can fix them.',
-  },
-
-  {
-    id: "1.9.1-category-delete",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Deleting a category is safer",
-    body: 'The delete dialog always starts on moving expenses, and deleting a category with its expenses no longer shows a false "Data missing" warning.',
+    title: "Back keeps your search and filters",
+    body: "Returning to All Transactions restores exactly what you had.",
   },
 
   {
@@ -56,79 +47,25 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
     date: "2026-11-11",
     type: "fixed",
     title: "Rename a tag onto another to merge them",
-    body: "Renaming a tag to one you already use now asks before merging, and never leaves duplicate tags or wrong counts.",
+    body: "You're asked first, and each expense keeps one copy of the tag.",
   },
 
   {
-    id: "1.9.1-backup-restore",
+    id: "1.9.1-data-safety",
     version: "1.9.1",
     date: "2026-11-11",
     type: "fixed",
-    title: "Restoring a backup skips damaged entries",
-    body: "The import preview tells you how many broken records will be skipped. Cancel during decryption now really cancels.",
+    title: "Safer dates, deletes and restores",
+    body: "Dates can't be cleared by accident, deleting a category no longer warns of missing data, and restores skip broken entries.",
   },
 
   {
-    id: "1.9.1-backup-dialog-once",
+    id: "1.9.1-stuck-screens",
     version: "1.9.1",
     date: "2026-11-11",
     type: "fixed",
-    title: "Back up now opens the backup dialog just once",
-    body: "After backing up from a reminder, the backup dialog no longer pops up again.",
-  },
-
-  {
-    id: "1.9.1-startup-update",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Updates and startup recover from errors",
-    body: "A failed update no longer freezes the update prompt, and the app still opens when the browser blocks permanent storage.",
-  },
-
-  {
-    id: "1.9.1-missing-expense",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Opening a deleted expense no longer loads forever",
-    body: "You now see that it doesn't exist anymore, with a button back to Home.",
-  },
-
-  {
-    id: "1.9.1-duplicate-attachment",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Duplicating an expense no longer copies its photo",
-    body: "A duplicate starts without the original's attachment, so no hidden image gets saved.",
-  },
-
-  {
-    id: "1.9.1-bulk-discard",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Discarding unsaved bulk entries really discards",
-    body: "Leaving Add many and choosing to discard no longer offers the draft again next time.",
-  },
-
-  {
-    id: "1.9.1-trend-granularity",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "The spending trend fits a shorter range",
-    body: "When a custom range becomes too short for weekly or monthly bars, the chart switches to daily bars.",
-  },
-
-  {
-    id: "1.9.1-transactions-back",
-    version: "1.9.1",
-    date: "2026-11-11",
-    type: "fixed",
-    title: "Back keeps your search and filters",
-    body: "Returning to All Transactions from an expense restores the exact search and filters you had.",
+    title: "Fewer stuck screens",
+    body: "Updates, backups, imports and Add many now finish or recover, and a deleted expense says so instead of loading forever.",
   },
 
   {
