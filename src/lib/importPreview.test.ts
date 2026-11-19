@@ -29,6 +29,34 @@ describe("buildImportPreview", () => {
     expect(preview?.skipped).toEqual(["date"]);
   });
 
+  it("moves expenses of a skipped category to Others", () => {
+    const others = { ...category, id: "o1", name: "Others" };
+    const preview = buildImportPreview(
+      JSON.stringify({
+        expenses: [expense("a", "2026-01-02")],
+        categories: [{ ...category, color: "red" }, others],
+      }),
+    );
+    expect(preview?.data.expenses.map((e) => e.category)).toEqual(["o1"]);
+    expect(preview?.movedToOthers).toBe(1);
+    expect(preview?.skipped).toEqual(["color"]);
+  });
+
+  it("skips expenses of a skipped category when there is no valid Others", () => {
+    const preview = buildImportPreview(
+      JSON.stringify({
+        expenses: [expense("a", "2026-01-02")],
+        categories: [
+          { ...category, color: "red" },
+          { ...category, id: "c2", name: "Bills" },
+        ],
+      }),
+    );
+    expect(preview?.data.expenses).toEqual([]);
+    expect(preview?.movedToOthers).toBe(0);
+    expect(preview?.skipped).toEqual(["color", "category"]);
+  });
+
   it("rejects a file whose collections are not arrays", () => {
     expect(buildImportPreview(JSON.stringify({ expenses: "nope", categories: [] }))).toBeNull();
   });

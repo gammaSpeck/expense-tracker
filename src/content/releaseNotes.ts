@@ -56,7 +56,7 @@ export const RELEASE_NOTES: readonly ReleaseNote[] = [
     date: "2026-11-11",
     type: "fixed",
     title: "Safer dates, deletes and restores",
-    body: "Dates can't be cleared by accident, deleting a category no longer warns of missing data, and restores skip broken entries.",
+    body: "Dates can't be cleared by accident or show a day early, deleting a category no longer warns of missing data, and restores skip broken entries.",
   },
 
   {

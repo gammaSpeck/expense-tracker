@@ -36,6 +36,12 @@ export function ImportPreviewPanel({
             be skipped (bad {[...new Set(preview.skipped)].join(", ")})
           </p>
         )}
+        {preview.movedToOthers > 0 && (
+          <p>
+            ⚠️ {preview.movedToOthers} expense{preview.movedToOthers === 1 ? "" : "s"} will move to
+            Others (category missing or invalid)
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">

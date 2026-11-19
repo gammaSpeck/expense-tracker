@@ -166,6 +166,25 @@ test.describe("expense-crud", () => {
     await expect(page.locator("p", { hasText: "Pick a date" })).toBeVisible();
   });
 
+  test.describe("west of UTC", () => {
+    test.use({ timezoneId: "America/Los_Angeles" });
+
+    test("the edit form shows the stored calendar day", async ({ page }) => {
+      await gotoApp(page, "/transactions");
+      await seedExpenses(page, [
+        {
+          value: 42,
+          categoryName: "Others",
+          description: "Ides",
+          date: "2024-03-15",
+          time: "10:00",
+        },
+      ]);
+      await page.getByTestId("expense-card").filter({ hasText: "Ides" }).click();
+      await expect(page.getByLabel("Date")).toHaveText("Mar 15, 2024");
+    });
+  });
+
   test("a cleared time is rejected", async ({ page }) => {
     await gotoApp(page, "/add");
     await page.getByLabel("Amount").fill("50");

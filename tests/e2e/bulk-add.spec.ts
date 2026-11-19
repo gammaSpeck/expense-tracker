@@ -149,13 +149,19 @@ test.describe("bulk-add", () => {
     await expect(page.getByText(/Resume your unsaved draft/)).toHaveCount(0);
   });
 
-  test("a confirmed Back discards the draft", async ({ page }) => {
+  test("a confirmed Back discards the draft, even with an autosave queued", async ({ page }) => {
     await gotoApp(page, "/");
     await page.goto("/add/bulk");
-    await page.getByTestId("bulk-row").first().getByLabel("Amount").fill("321");
-    await page.waitForTimeout(800);
+    const amount = page.getByTestId("bulk-row").first().getByLabel("Amount");
+    await amount.fill("321");
+    await page.waitForTimeout(800); // the draft is saved
+    await amount.fill("654"); // queues the next autosave (500 ms debounce)
 
-    page.once("dialog", (d) => d.accept());
+    // Hold the confirm open past the debounce, so that autosave is due the moment Back resumes.
+    page.once("dialog", async (d) => {
+      await page.waitForTimeout(800);
+      await d.accept();
+    });
     await page.getByRole("button", { name: "Go back" }).click();
     await expect(page).toHaveURL(/\/$/);
 

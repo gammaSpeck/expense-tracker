@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
-import { format, isValid } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { CalendarIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,9 @@ export function DateTimeFields() {
           control={control}
           name="date"
           render={({ field }) => {
-            const date = new Date(field.value); // Invalid Date for legacy "" or garbage rows
+            // Local calendar date (new Date("yyyy-MM-dd") is UTC: a day early west of UTC).
+            // Invalid Date for legacy "" or garbage rows.
+            const date = parseISO(field.value);
             return (
               <Popover>
                 <PopoverTrigger asChild>

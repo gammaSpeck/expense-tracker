@@ -66,6 +66,12 @@
         "reason": "Show/hide toggle ternary; coverage-blind CRAP on a presentational panel."
       },
       {
+        "files": ["src/components/more/import/ImportPreviewPanel.tsx"],
+        "functions": ["ImportPreviewPanel"],
+        "maxCrap": 45,
+        "reason": "Two optional restore warnings (skipped records, expenses moved to Others) with pluralized copy; coverage-blind CRAP on a presentational panel."
+      },
+      {
         "files": ["src/hooks/useBackupAction.ts"],
         "functions": ["handleBackup"],
         "maxCrap": 75,

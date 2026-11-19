@@ -4,6 +4,14 @@ import { gotoApp, daysAgo, readDownload, DEFAULT_CATEGORY_NAMES } from "../suppo
 import { seedExpenses } from "../support/db";
 import { thisMonthWithAdhoc } from "../support/data";
 
+declare global {
+  interface Window {
+    __decryptStarted?: boolean;
+    __decryptDone?: boolean;
+    __releaseDecrypt?: () => void;
+  }
+}
+
 async function setPassphrase(page: Page, passphrase: string) {
   await page.getByRole("button", { name: "Set Passphrase" }).click();
   const dialog = page.getByRole("dialog");
@@ -184,6 +192,19 @@ test.describe("data-management", () => {
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
     await expect(page.getByText("All data cleared. App reset to default state.")).toBeVisible();
 
+    // Hold AES-GCM decryption until the test releases it, so Cancel lands while it is in flight.
+    await page.addInitScript(() => {
+      const decrypt = crypto.subtle.decrypt.bind(crypto.subtle);
+      const gate = Promise.withResolvers<void>();
+      window.__releaseDecrypt = () => gate.resolve();
+      crypto.subtle.decrypt = async (...args: Parameters<SubtleCrypto["decrypt"]>) => {
+        window.__decryptStarted = true;
+        await gate.promise;
+        const plaintext = await decrypt(...args);
+        window.__decryptDone = true;
+        return plaintext;
+      };
+    });
     await page.goto("/settings/data");
     await page.setInputFiles('[data-testid="import-file-input"]', {
       name: "backup.extrack",
@@ -192,8 +213,10 @@ test.describe("data-management", () => {
     });
     await page.getByLabel("Passphrase").fill("correcthorse123");
     await page.getByRole("button", { name: "Decrypt" }).click();
+    await page.waitForFunction(() => window.__decryptStarted === true);
     await page.getByRole("button", { name: "Cancel" }).click();
-    await page.waitForTimeout(2000);
+    await page.evaluate(() => window.__releaseDecrypt?.());
+    await page.waitForFunction(() => window.__decryptDone === true);
 
     await expect(page.getByText("Import Preview")).toHaveCount(0);
     await expect(page.locator('[data-testid="import-file-input"]')).toBeAttached();
