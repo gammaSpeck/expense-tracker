@@ -14,6 +14,14 @@ test.describe("pwa", () => {
     expect(count).toBeGreaterThan(0);
   });
 
+  test("offline-ready prompt shows and dismisses", async ({ page }) => {
+    await gotoApp(page, "/");
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await expect(page.getByText("App ready to work offline")).toBeVisible();
+    await page.getByRole("button", { name: "Dismiss" }).click();
+    await expect(page.getByText("App ready to work offline")).toHaveCount(0);
+  });
+
   test("manifest matches the shipped contract, and its icons and theme-color resolve", async ({
     page,
   }) => {

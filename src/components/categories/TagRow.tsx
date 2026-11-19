@@ -34,7 +34,11 @@ export function TagRow({
             onChange={(e) => onNewNameChange(e.target.value)}
             onBlur={() => onRenameSubmit(tagData.tag)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onRenameSubmit(tagData.tag);
+              if (e.key === "Enter") {
+                // Without this the Enter keypress lands on the merge dialog's focused Cancel.
+                e.preventDefault();
+                onRenameSubmit(tagData.tag);
+              }
               if (e.key === "Escape") onCancelEdit();
             }}
             className="flex-1"

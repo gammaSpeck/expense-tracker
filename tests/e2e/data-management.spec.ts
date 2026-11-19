@@ -2,7 +2,15 @@ import type { Page } from "@playwright/test";
 import { test, expect } from "../support/fixtures";
 import { gotoApp, daysAgo, readDownload, DEFAULT_CATEGORY_NAMES } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { thisMonth3 } from "../support/data";
+import { thisMonthWithAdhoc } from "../support/data";
+
+declare global {
+  interface Window {
+    __decryptStarted?: boolean;
+    __decryptDone?: boolean;
+    __releaseDecrypt?: () => void;
+  }
+}
 
 async function setPassphrase(page: Page, passphrase: string) {
   await page.getByRole("button", { name: "Set Passphrase" }).click();
@@ -29,7 +37,7 @@ async function exportEncrypted(page: Page, passphrase: string): Promise<string> 
 test.describe("data-management", () => {
   test("plain JSON export", { tag: "@smoke" }, async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Export Data" }).first().click();
     const dialog = page.getByRole("dialog");
@@ -51,7 +59,7 @@ test.describe("data-management", () => {
 
   test("CSV export has the documented header", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Export Data" }).first().click();
     const dialog = page.getByRole("dialog");
@@ -85,7 +93,7 @@ test.describe("data-management", () => {
 
   test("encrypted round trip: export, factory reset, merge import", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     // Factory reset wipes data, categories, and the stored passphrase.
@@ -127,7 +135,7 @@ test.describe("data-management", () => {
 
   test("wrong manual passphrase is rejected", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
@@ -145,9 +153,102 @@ test.describe("data-management", () => {
     await expect(page.getByText("Wrong passphrase — try again")).toBeVisible();
   });
 
+  test("restore skips invalid records and says why", async ({ page }) => {
+    await gotoApp(page, "/settings/data");
+    await seedExpenses(page, [
+      ...thisMonthWithAdhoc(),
+      { value: 9, categoryName: "Others", description: "Broken", date: "", time: "10:00" },
+    ]);
+    const backupContent = await exportEncrypted(page, "correcthorse123");
+
+    await page.getByRole("button", { name: "Factory Reset" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
+    await expect(page.getByText("All data cleared. App reset to default state.")).toBeVisible();
+
+    await page.goto("/settings/data");
+    await page.setInputFiles('[data-testid="import-file-input"]', {
+      name: "backup.extrack",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.from(backupContent, "utf-8"),
+    });
+    await page.getByLabel("Passphrase").fill("correcthorse123");
+    await page.getByRole("button", { name: "Decrypt" }).click();
+
+    await expect(page.getByText("3 expenses")).toBeVisible();
+    await expect(page.getByText("⚠️ 1 invalid record will be skipped (bad date)")).toBeVisible();
+    await page.getByRole("button", { name: "Confirm Import" }).click();
+    await expect(page.getByText("Data imported successfully")).toBeVisible();
+
+    await page.goto("/transactions");
+    await expect(page.getByText("Showing 3 transactions")).toBeVisible();
+  });
+
+  test("Cancel during decrypt shows no preview afterwards", async ({ page }) => {
+    await gotoApp(page, "/settings/data");
+    await seedExpenses(page, thisMonthWithAdhoc());
+    const backupContent = await exportEncrypted(page, "correcthorse123");
+
+    await page.getByRole("button", { name: "Factory Reset" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
+    await expect(page.getByText("All data cleared. App reset to default state.")).toBeVisible();
+
+    // Hold AES-GCM decryption until the test releases it, so Cancel lands while it is in flight.
+    await page.addInitScript(() => {
+      const decrypt = crypto.subtle.decrypt.bind(crypto.subtle);
+      const gate = Promise.withResolvers<void>();
+      window.__releaseDecrypt = () => gate.resolve();
+      crypto.subtle.decrypt = async (...args: Parameters<SubtleCrypto["decrypt"]>) => {
+        window.__decryptStarted = true;
+        await gate.promise;
+        const plaintext = await decrypt(...args);
+        window.__decryptDone = true;
+        return plaintext;
+      };
+    });
+    await page.goto("/settings/data");
+    await page.setInputFiles('[data-testid="import-file-input"]', {
+      name: "backup.extrack",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.from(backupContent, "utf-8"),
+    });
+    await page.getByLabel("Passphrase").fill("correcthorse123");
+    await page.getByRole("button", { name: "Decrypt" }).click();
+    await page.waitForFunction(() => window.__decryptStarted === true);
+    await page.getByRole("button", { name: "Cancel" }).click();
+    await page.evaluate(() => window.__releaseDecrypt?.());
+    await page.waitForFunction(() => window.__decryptDone === true);
+    await page.waitForTimeout(500); // give an unguarded late result time to render
+
+    await expect(page.getByText("Import Preview")).toHaveCount(0);
+    await expect(page.locator('[data-testid="import-file-input"]')).toBeAttached();
+  });
+
+  test('"Back up now" opens the backup dialog exactly once', async ({ page }) => {
+    await gotoApp(page, "/settings/data");
+    await setPassphrase(page, "correcthorse123");
+
+    await page.getByTestId("csv-import-entry").click();
+    await page.getByRole("button", { name: "Back up now" }).click();
+    await expect(page).toHaveURL(/\/settings\/data$/);
+    const dialog = page.getByRole("dialog", { name: "Backup" });
+    await expect(dialog).toBeVisible();
+
+    const downloadPromise = page.waitForEvent("download");
+    await dialog.getByRole("button", { name: "Create Backup" }).click();
+    await downloadPromise;
+    await expect(page.getByText("Backup saved to device")).toBeVisible();
+    await page.waitForTimeout(1000);
+    await expect(dialog).toHaveCount(0);
+
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Data Management" })).toBeVisible();
+    await page.waitForTimeout(1000);
+    await expect(dialog).toHaveCount(0);
+  });
+
   test("override mode replaces existing data entirely", async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await exportEncrypted(page, "correcthorse123");
 
     await page.goto("/");
@@ -178,7 +279,7 @@ test.describe("data-management", () => {
 
   test("factory reset clears everything", { tag: "@smoke" }, async ({ page }) => {
     await gotoApp(page, "/settings/data");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();

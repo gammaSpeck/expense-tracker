@@ -12,6 +12,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { useTagSuggestions } from "@/hooks/useTagSuggestions";
 import { useDescriptionSuggestions } from "@/hooks/useDescriptionSuggestions";
 import { useImageAttachment } from "@/hooks/useImageAttachment";
+import { isoDateSchema, timeSchema } from "@/db/recordSchemas";
 
 const expenseSchema = z.object({
   value: z
@@ -22,8 +23,8 @@ const expenseSchema = z.object({
   category: z.string().min(1, "Category required"),
   description: z.string().optional(),
   tags: z.array(z.string()).max(4, "Maximum 4 tags"),
-  date: z.string(),
-  time: z.string(),
+  date: isoDateSchema,
+  time: timeSchema,
   isAdhoc: z.boolean(),
   attachment: z.string().optional(),
 });
@@ -50,7 +51,7 @@ function initDefaults(expense?: Expense, duplicate?: Expense): ExpenseFormData {
     date: state.date,
     time: state.time,
     isAdhoc: state.isAdhoc,
-    attachment: state.attachment,
+    attachment: expense?.attachment, // a duplicate never copies the attachment
   };
 }
 

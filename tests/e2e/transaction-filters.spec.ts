@@ -204,4 +204,27 @@ test.describe("transaction filters", () => {
     await expect(page.getByTestId("expense-card")).toHaveCount(2);
     await expect(page.getByText("Shopping", { exact: true })).toBeVisible();
   });
+
+  test("Back from an expense restores the exact filters", async ({ page }) => {
+    await gotoApp(page, "/");
+    await seedExpenses(page, mixed5());
+    await page.goto("/categories");
+    await page.getByRole("tab", { name: "Tags" }).click();
+    await page.getByRole("button", { name: "cafe Used in 1 expense" }).click();
+
+    await expect(page).toHaveURL(/\/transactions$/);
+    await page.getByLabel("Remove filter: #cafe").click();
+    await page.getByLabel("Filters").click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Shopping", exact: true }).click();
+    await dialog.getByRole("button", { name: "Show 2 transactions" }).click();
+
+    await page.getByTestId("expense-card").first().click();
+    await expect(page).toHaveURL(/\/expense\//);
+    await page.goBack();
+
+    await expect(page.getByTestId("expense-card")).toHaveCount(2);
+    await expect(page.getByLabel("Remove filter: Shopping")).toBeVisible();
+    await expect(page.getByLabel("Remove filter: #cafe")).toHaveCount(0);
+  });
 });

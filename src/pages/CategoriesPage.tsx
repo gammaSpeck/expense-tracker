@@ -43,7 +43,7 @@ export default function CategoriesPage() {
         onEdit={setEditCategory}
         onDeleteClick={handleDeleteClick}
         onCategoryClick={(categoryId) =>
-          navigate("/transactions", { state: { filterCategory: categoryId } })
+          navigate("/transactions", { state: { filters: { categories: [categoryId] } } })
         }
       />
 

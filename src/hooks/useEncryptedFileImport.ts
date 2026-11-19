@@ -51,6 +51,7 @@ interface FileSelectDeps {
   onPreviewReady: (preview: ImportPreview) => void;
   setPendingEncryptedText: (text: string | null) => void;
   setManualPassphrase: (value: string) => void;
+  isCurrent: () => boolean; // false once Cancel or a newer file selection superseded this run
 }
 
 async function performFileSelect(file: File, deps: FileSelectDeps) {
@@ -58,6 +59,7 @@ async function performFileSelect(file: File, deps: FileSelectDeps) {
   deps.setManualPassphrase("");
 
   const checked = await readAndCheckFile(file);
+  if (!deps.isCurrent()) return;
   if ("error" in checked) {
     toast.error(checked.error);
     resetFileInput(deps.fileInputRef);
@@ -65,6 +67,7 @@ async function performFileSelect(file: File, deps: FileSelectDeps) {
   }
 
   const plaintext = await decryptWithStoredPassphrase(checked.text);
+  if (!deps.isCurrent()) return;
   if (plaintext !== null) {
     const result = resolvePlaintext(plaintext, deps.onPreviewReady);
     if (result !== "ok") {
@@ -88,6 +91,7 @@ async function performManualDecrypt(deps: ManualDecryptDeps) {
   deps.setIsDecrypting(true);
   try {
     const plaintext = await decryptData(deps.pendingEncryptedText, deps.manualPassphrase);
+    if (!deps.isCurrent()) return;
     const result = resolvePlaintext(plaintext, deps.onPreviewReady);
     if (result === "not-backup") {
       rejectNonBackupPlaintext();
@@ -101,6 +105,7 @@ async function performManualDecrypt(deps: ManualDecryptDeps) {
       deps.setManualPassphrase("");
     }
   } catch (err) {
+    if (!deps.isCurrent()) return;
     captureError("import_failed", err, { stage: "decrypt" });
     toast.error(decryptErrorMessage(err));
   } finally {
@@ -115,24 +120,26 @@ export function useEncryptedFileImport(onPreviewReady: (preview: ImportPreview) 
   const [manualPassphrase, setManualPassphrase] = useState("");
   const [showManualPass, setShowManualPass] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const tokenRef = useRef(0);
 
-  const deps: FileSelectDeps = {
+  const depsFor = (token: number): FileSelectDeps => ({
     fileInputRef,
     onPreviewReady,
     setPendingEncryptedText,
     setManualPassphrase,
-  };
+    isCurrent: () => tokenRef.current === token,
+  });
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
-    await performFileSelect(selectedFile, deps);
+    await performFileSelect(selectedFile, depsFor(++tokenRef.current));
   }
 
   async function handleManualDecrypt() {
-    if (!pendingEncryptedText || !manualPassphrase) return;
+    if (!pendingEncryptedText || !manualPassphrase || isDecrypting) return;
     await performManualDecrypt({
-      ...deps,
+      ...depsFor(tokenRef.current),
       pendingEncryptedText,
       manualPassphrase,
       setIsDecrypting,
@@ -140,6 +147,7 @@ export function useEncryptedFileImport(onPreviewReady: (preview: ImportPreview) 
   }
 
   function resetEncryptedState() {
+    tokenRef.current++; // abandons any in-flight select/decrypt
     setPendingEncryptedText(null);
     setManualPassphrase("");
     resetFileInput(fileInputRef);

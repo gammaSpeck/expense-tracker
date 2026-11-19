@@ -1,7 +1,13 @@
 import Dexie, { Table } from "dexie";
+import type { ZodObject } from "zod";
 import { Expense, Category, TagMetadata } from "@/types/expense";
 import type { DraftExpense, CategoryRule } from "@/types/csvImport";
 import { userPreferences } from "@/db/userPreferences";
+import {
+  categoryRecordSchema,
+  expenseRecordSchema,
+  tagMetadataRecordSchema,
+} from "@/db/recordSchemas";
 
 // Category colors palette
 export const CATEGORY_COLORS = [
@@ -85,6 +91,27 @@ class ExpenseDatabase extends Dexie {
 
 export const db = new ExpenseDatabase();
 
+// Shape guard for every write path. On update, only changed top-level fields are checked,
+// so a legacy bad field (e.g. date "") never blocks an unrelated bulk modify.
+function guardTable<T extends object>(table: Table<T, string>, schema: ZodObject) {
+  const check = (value: unknown, changed?: Set<string>) => {
+    const issue = schema
+      .safeParse(value)
+      .error?.issues.find((i) => !changed || changed.has(String(i.path[0])));
+    if (issue)
+      throw new Error(`Invalid ${table.name} record: ${issue.path.join(".")}: ${issue.message}`);
+  };
+  table.hook("creating", (_key, obj) => check(obj));
+  table.hook("updating", (mods, _key, obj) => {
+    const next = Dexie.deepClone(obj);
+    for (const [keyPath, value] of Object.entries(mods)) Dexie.setByKeyPath(next, keyPath, value);
+    check(next, new Set(Object.keys(mods).map((k) => k.split(".")[0])));
+  });
+}
+guardTable(db.expenses, expenseRecordSchema);
+guardTable(db.categories, categoryRecordSchema);
+guardTable(db.tagMetadata, tagMetadataRecordSchema);
+
 export async function requestPersistentStorage(): Promise<boolean> {
   if (!navigator.storage?.persist) return false;
   if (await navigator.storage.persisted()) return true;
@@ -110,10 +137,7 @@ export type StartupState =
   | { status: "data-loss"; lastSeenExpenseCount: number; installedAt: string; lastSeenAt: string };
 
 export async function initializeDatabase(): Promise<StartupState> {
-  const [expenseCount, categoryCount] = await Promise.all([
-    db.expenses.count(),
-    db.categories.count(),
-  ]);
+  const expenseCount = await db.expenses.count();
   const marker = userPreferences.getInstallMarker();
 
   // Prior install recorded expenses and the table is now empty: do not seed over the evidence.
@@ -126,18 +150,16 @@ export async function initializeDatabase(): Promise<StartupState> {
     };
   }
 
-  const now = new Date().toISOString();
-  let seeded = false;
-  if (categoryCount === 0) {
-    const categories: Category[] = DEFAULT_CATEGORIES.map((cat) => ({
-      ...cat,
-      id: crypto.randomUUID(),
-      createdAt: now,
-    }));
-
-    await db.categories.bulkAdd(categories);
-    seeded = true;
-  }
+  // Count-then-seed in one rw transaction: rw transactions on a store serialize across tabs,
+  // so a second tab booting a fresh install sees the seeded rows instead of re-seeding.
+  const seeded = await db.transaction("rw", db.categories, async () => {
+    if ((await db.categories.count()) > 0) return false;
+    const now = new Date().toISOString();
+    await db.categories.bulkAdd(
+      DEFAULT_CATEGORIES.map((cat) => ({ ...cat, id: crypto.randomUUID(), createdAt: now })),
+    );
+    return true;
+  });
 
   touchInstallMarker(expenseCount);
 
@@ -219,23 +241,18 @@ export async function updateCategory(
 
 export async function deleteCategory(id: string, moveToCategory?: string): Promise<void> {
   const category = await db.categories.get(id);
-
   if (category?.isDefault && category.name === "Others") {
     throw new Error('Cannot delete the default "Others" category');
   }
 
-  if (moveToCategory) {
-    // Move all expenses to the target category
-    const expenses = await db.expenses.where("category").equals(id).toArray();
-    for (const expense of expenses) {
-      await db.expenses.update(expense.id, { category: moveToCategory });
-    }
-  } else {
-    // Delete all expenses in this category
-    await db.expenses.where("category").equals(id).delete();
-  }
+  await db.transaction("rw", [db.expenses, db.categories], async () => {
+    const inCategory = db.expenses.where("category").equals(id);
+    if (moveToCategory) await inCategory.modify({ category: moveToCategory });
+    else await inCategory.delete();
+    await db.categories.delete(id);
+  });
 
-  await db.categories.delete(id);
+  touchInstallMarker(await db.expenses.count());
 }
 
 export async function getAllCategories(): Promise<Category[]> {
@@ -309,19 +326,19 @@ export async function deleteTag(tag: string): Promise<void> {
   await db.tagMetadata.delete(tag);
 }
 
+// Renaming onto an existing tag merges: tags are deduped per expense and the count is recounted.
 export async function renameTag(oldTag: string, newTag: string): Promise<void> {
-  const expenses = await db.expenses.where("tags").equals(oldTag).toArray();
-
-  for (const expense of expenses) {
-    const updatedTags = expense.tags.map((t) => (t === oldTag ? newTag : t));
-    await db.expenses.update(expense.id, { tags: updatedTags });
-  }
-
-  const metadata = await db.tagMetadata.get(oldTag);
-  if (metadata) {
+  await db.transaction("rw", [db.expenses, db.tagMetadata], async () => {
+    await db.expenses
+      .where("tags")
+      .equals(oldTag)
+      .modify((e) => {
+        e.tags = [...new Set(e.tags.map((t) => (t === oldTag ? newTag : t)))];
+      });
     await db.tagMetadata.delete(oldTag);
-    await db.tagMetadata.put({ ...metadata, tag: newTag });
-  }
+    const count = await db.expenses.where("tags").equals(newTag).count();
+    await db.tagMetadata.put({ tag: newTag, count, lastUsed: new Date().toISOString() });
+  });
 }
 
 // Export all data

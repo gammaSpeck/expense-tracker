@@ -1,12 +1,12 @@
 import { test, expect } from "../support/fixtures";
 import { gotoApp } from "../support/app";
 import { seedExpenses } from "../support/db";
-import { thisMonth3, thisMonthNoAdhoc, twelveToday } from "../support/data";
+import { thisMonthWithAdhoc, thisMonthNoAdhoc, twelveToday } from "../support/data";
 
 test.describe("home", () => {
-  test("thisMonth3 summary shows total and excluding-adhoc line", async ({ page }) => {
+  test("thisMonthWithAdhoc summary shows total and excluding-adhoc line", async ({ page }) => {
     await gotoApp(page, "/");
-    await seedExpenses(page, thisMonth3());
+    await seedExpenses(page, thisMonthWithAdhoc());
     await expect(page.getByText("₹4,000", { exact: true })).toBeVisible();
     await expect(page.getByText("Excluding Adhoc: ₹1,500")).toBeVisible();
   });

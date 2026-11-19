@@ -118,8 +118,11 @@ export function useBulkAddController() {
   const handleSetDate = (blockId: string, date: string) =>
     setBlocks((bs) => setBlockDate(bs, blockId, date));
 
-  const handleBack = () => {
-    if (isDirty && !window.confirm("Discard your unsaved entries?")) return;
+  const handleBack = async () => {
+    if (isDirty) {
+      if (!window.confirm("Discard your unsaved entries?")) return;
+      await discardDraft(); // committed before navigating, so a hard reload can't resurrect it
+    }
     navigate(-1);
   };
 

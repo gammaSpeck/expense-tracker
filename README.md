@@ -123,6 +123,12 @@ bun run test:e2e:staging     # @smoke subset against staging
 bun run test:e2e:production  # @smoke subset against production
 ```
 
+**Testing a branch on staging:** `gh workflow run update-staging.yml --ref <branch>` force-pushes
+the branch to `staging` (Netlify redeploys it; the next `feat`/`fix` merge to `main` puts `main`
+back), then `bun run test:e2e:staging` — or `gh workflow run e2e.yml --ref <branch> -f
+environment=staging` to run the same @smoke subset from CI. `sw-update.spec.ts` fakes the "new
+version" itself, so the Update Now flow is covered from a single deploy.
+
 **Environment variables:**
 
 - `E2E_ENV` — `local` (default) | `staging` | `production`. Selects the base URL and whether a
