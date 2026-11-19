@@ -12,6 +12,32 @@ interface ImportPreviewPanelProps {
   onImport: () => void;
 }
 
+/** What the file holds, plus warnings for records the restore will skip or move to Others. */
+function ImportPreviewStats({ preview }: { preview: ImportPreview }) {
+  const { skipped, movedToOthers } = preview;
+  return (
+    <div className="p-3 rounded-lg bg-muted/50 space-y-1 text-sm">
+      <p>📊 {preview.expenseCount} expenses</p>
+      <p>📁 {preview.categoryCount} categories</p>
+      <p>
+        📅 {preview.dateRange.earliest} to {preview.dateRange.latest}
+      </p>
+      {skipped.length > 0 && (
+        <p>
+          ⚠️ {skipped.length} invalid record{skipped.length === 1 ? "" : "s"} will be skipped (bad{" "}
+          {[...new Set(skipped)].join(", ")})
+        </p>
+      )}
+      {movedToOthers > 0 && (
+        <p>
+          ⚠️ {movedToOthers} expense{movedToOthers === 1 ? "" : "s"} will move to Others (category
+          missing or invalid)
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function ImportPreviewPanel({
   preview,
   mode,
@@ -24,25 +50,7 @@ export function ImportPreviewPanel({
     <div className="space-y-4">
       <h3 className="font-medium">Import Preview</h3>
 
-      <div className="p-3 rounded-lg bg-muted/50 space-y-1 text-sm">
-        <p>📊 {preview.expenseCount} expenses</p>
-        <p>📁 {preview.categoryCount} categories</p>
-        <p>
-          📅 {preview.dateRange.earliest} to {preview.dateRange.latest}
-        </p>
-        {preview.skipped.length > 0 && (
-          <p>
-            ⚠️ {preview.skipped.length} invalid record{preview.skipped.length === 1 ? "" : "s"} will
-            be skipped (bad {[...new Set(preview.skipped)].join(", ")})
-          </p>
-        )}
-        {preview.movedToOthers > 0 && (
-          <p>
-            ⚠️ {preview.movedToOthers} expense{preview.movedToOthers === 1 ? "" : "s"} will move to
-            Others (category missing or invalid)
-          </p>
-        )}
-      </div>
+      <ImportPreviewStats preview={preview} />
 
       <div className="space-y-3">
         <Label className="text-sm text-muted-foreground">Import Mode</Label>

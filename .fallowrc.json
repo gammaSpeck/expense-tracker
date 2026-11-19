@@ -67,7 +67,7 @@
       },
       {
         "files": ["src/components/more/import/ImportPreviewPanel.tsx"],
-        "functions": ["ImportPreviewPanel"],
+        "functions": ["ImportPreviewStats"],
         "maxCrap": 45,
         "reason": "Two optional restore warnings (skipped records, expenses moved to Others) with pluralized copy; coverage-blind CRAP on a presentational panel."
       },

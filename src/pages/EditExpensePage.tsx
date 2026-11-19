@@ -32,32 +32,7 @@ export default function EditExpensePage() {
     }
   };
 
-  if (!expense) {
-    return (
-      <div className="px-4 py-6 max-w-lg mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Go back"
-            onClick={() => navigate(-1)}
-            className="h-9 w-9"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold">Edit Expense</h1>
-        </div>
-        {expense === null ? (
-          <div className="space-y-4">
-            <p className="text-muted-foreground">This expense doesn't exist anymore.</p>
-            <Button onClick={() => navigate("/")}>Go to Home</Button>
-          </div>
-        ) : (
-          <p className="text-muted-foreground">Loading...</p>
-        )}
-      </div>
-    );
-  }
+  if (!expense) return <EditExpenseFallback notFound={expense === null} />;
 
   return (
     <div className="px-4 py-6 max-w-lg mx-auto">
@@ -66,6 +41,35 @@ export default function EditExpensePage() {
 
         <ExpenseForm expense={expense} onSuccess={handleSuccess} onCancel={() => navigate(-1)} />
       </div>
+    </div>
+  );
+}
+
+/** Header shell while the expense loads (`undefined`) or when the id matches nothing (`null`). */
+function EditExpenseFallback({ notFound }: { notFound: boolean }) {
+  const navigate = useNavigate();
+  return (
+    <div className="px-4 py-6 max-w-lg mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Go back"
+          onClick={() => navigate(-1)}
+          className="h-9 w-9"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-xl font-semibold">Edit Expense</h1>
+      </div>
+      {notFound ? (
+        <div className="space-y-4">
+          <p className="text-muted-foreground">This expense doesn't exist anymore.</p>
+          <Button onClick={() => navigate("/")}>Go to Home</Button>
+        </div>
+      ) : (
+        <p className="text-muted-foreground">Loading...</p>
+      )}
     </div>
   );
 }

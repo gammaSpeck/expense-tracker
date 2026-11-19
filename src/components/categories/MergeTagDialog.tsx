@@ -8,9 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { TagMerge } from "@/hooks/useTagEditing";
 
 interface MergeTagDialogProps {
-  mergeData: { from: string; into: string; count: number } | null;
+  mergeData: TagMerge | null;
   onOpenChange: () => void;
   onConfirm: () => void;
 }
