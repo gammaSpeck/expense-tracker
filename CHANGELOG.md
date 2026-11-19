@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.9.0...v1.9.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **design-system:** fixed the design system using Shad cn lint ([#82](https://github.com/gammaSpeck/expense-tracker/issues/82)) ([5c20b74](https://github.com/gammaSpeck/expense-tracker/commit/5c20b747a79efbf2379fb7fd7e9f323f1ac8203d))
+* **state:** close ill-defined app states ([#95](https://github.com/gammaSpeck/expense-tracker/issues/95)) ([e0042ab](https://github.com/gammaSpeck/expense-tracker/commit/e0042ab0be657ebaf7a46236e51a3b20c97ee8a2))
+
 ## [1.9.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.8.0...v1.9.0) (2026-09-15)
 
 
