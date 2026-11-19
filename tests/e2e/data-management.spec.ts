@@ -217,6 +217,7 @@ test.describe("data-management", () => {
     await page.getByRole("button", { name: "Cancel" }).click();
     await page.evaluate(() => window.__releaseDecrypt?.());
     await page.waitForFunction(() => window.__decryptDone === true);
+    await page.waitForTimeout(500); // give an unguarded late result time to render
 
     await expect(page.getByText("Import Preview")).toHaveCount(0);
     await expect(page.locator('[data-testid="import-file-input"]')).toBeAttached();
