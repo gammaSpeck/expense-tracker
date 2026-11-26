@@ -33,6 +33,15 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.10.0-large-backup-restore",
+    version: "1.10.0",
+    date: "2026-11-27",
+    type: "fixed",
+    title: "Large backups are no longer refused",
+    body: "ExTrack no longer refuses a large backup. It asks first, and warns when a backup is big enough that restoring may fail on phones with little memory.",
+  },
+
+  {
     id: "1.10.0-export-plain-only",
     version: "1.10.0",
     date: "2026-11-27",

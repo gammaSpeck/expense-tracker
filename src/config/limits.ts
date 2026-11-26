@@ -10,6 +10,12 @@
 export const MAX_CSV_ROWS = 200_000;
 export const MAX_CSV_FILE_BYTES = 50 * 1024 * 1024;
 
+// useEncryptedFileImport.ts: readAndCheckFile; useBackupAction.ts: handleBackup
+// Soft threshold: restore asks before reading a larger file and backup warns above it;
+// neither refuses. Today's 10 MB until the phone test with version-2 photo-heavy backups
+// sets the measured value (phone model in this comment) before release 1.10.0.
+export const MAX_RESTORE_FILE_BYTES = 10 * 1024 * 1024;
+
 // CsvCategoryStep.tsx: IgnoreRuleValueField, CategoryValueList
 // Above this many distinct values, per-value pickers (one Select/CommandItem each) stop
 // rendering eagerly — hundreds of DOM controls for a high-cardinality column would block

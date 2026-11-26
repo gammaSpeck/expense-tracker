@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { importData, touchInstallMarker, db } from "@/db/expenseTrackerDb";
+import { userPreferences } from "@/db/userPreferences";
 import { Expense, Category } from "@/types/expense";
 import { captureError } from "@/lib/telemetry";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ async function performImport(
 ) {
   setIsImporting(true);
   try {
+    userPreferences.markRestoreStarted({ step: "write" });
     if (mode === "override") {
       // Use existing importData function (it clears by default)
       await importData(preview.data);
@@ -29,6 +31,7 @@ async function performImport(
     toast.error("Import failed");
   } finally {
     setIsImporting(false);
+    userPreferences.markRestoreEnded();
   }
 }
 

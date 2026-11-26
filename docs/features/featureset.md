@@ -162,7 +162,8 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
   - **Override**: Replace all existing data
   - **Merge**: Add to existing data, skip duplicates
 - **Import preview**: Shows expense count, category count, date range
-- **File size cap**: 10 MB limit enforced before the file is read into memory
+- **Large files**: the app asks before reading a file over the threshold
+- **Unfinished restore**: at the next start the app says the last restore didn't finish
 - **Validation**: Checks encrypted envelope structure and backup JSON shape before import
 
 #### Clear All Data

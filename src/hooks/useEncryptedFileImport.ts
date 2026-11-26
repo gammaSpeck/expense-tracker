@@ -1,15 +1,26 @@
 import { useRef, useState, type RefObject } from "react";
 import { toast } from "sonner";
+import { MAX_RESTORE_FILE_BYTES } from "@/config/limits";
+import { userPreferences } from "@/db/userPreferences";
 import { isEncryptedFile, decryptData, decryptWithStoredPassphrase } from "@/lib/backup";
-import { buildImportPreview, validateImportFile, type ImportPreview } from "@/lib/importPreview";
+import { buildImportPreview, type ImportPreview } from "@/lib/importPreview";
 import { captureError } from "@/lib/telemetry";
 
-type FileCheck = { text: string } | { error: string };
+const TOO_LARGE_MESSAGE =
+  "This backup may be too large for this device's memory. Try restoring it on a computer.";
 
-/** Validates size + encrypted-file format before any decrypt attempt. */
+type FileCheck = { text: string } | { error: string } | { cancelled: true };
+
+/** Confirms large files, then opens restore marker window 1 and checks the encrypted-file format. */
 async function readAndCheckFile(file: File): Promise<FileCheck> {
-  const sizeError = validateImportFile(file);
-  if (sizeError) return { error: sizeError };
+  if (file.size > MAX_RESTORE_FILE_BYTES) {
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    const proceed = window.confirm(
+      `This file is ${mb} MB. Restoring files this large may fail on phones with little memory. Try anyway?`,
+    );
+    if (!proceed) return { cancelled: true };
+  }
+  userPreferences.markRestoreStarted({ step: "read", bytes: file.size });
   const text = await file.text();
   if (!isEncryptedFile(text)) {
     return { error: "Only encrypted .extrack backup files can be imported" };
@@ -31,11 +42,10 @@ function resolvePlaintext(
   return "ok";
 }
 
-function decryptErrorMessage(err: unknown): string {
+function decryptErrorMessage(err: unknown, isLarge: boolean): string {
   const msg = err instanceof Error ? err.message : "";
-  return msg.includes("Wrong passphrase")
-    ? "Wrong passphrase — try again"
-    : "Decryption failed. The file may be corrupted.";
+  if (msg.includes("Wrong passphrase")) return "Wrong passphrase — try again";
+  return isLarge ? TOO_LARGE_MESSAGE : "Decryption failed. The file may be corrupted.";
 }
 
 function resetFileInput(fileInputRef: RefObject<HTMLInputElement | null>) {
@@ -57,28 +67,42 @@ interface FileSelectDeps {
 async function performFileSelect(file: File, deps: FileSelectDeps) {
   deps.setPendingEncryptedText(null);
   deps.setManualPassphrase("");
+  const isLarge = file.size > MAX_RESTORE_FILE_BYTES;
 
-  const checked = await readAndCheckFile(file);
-  if (!deps.isCurrent()) return;
-  if ("error" in checked) {
-    toast.error(checked.error);
-    resetFileInput(deps.fileInputRef);
-    return;
-  }
-
-  const plaintext = await decryptWithStoredPassphrase(checked.text);
-  if (!deps.isCurrent()) return;
-  if (plaintext !== null) {
-    const result = resolvePlaintext(plaintext, deps.onPreviewReady);
-    if (result !== "ok") {
-      if (result === "not-backup") rejectNonBackupPlaintext();
-      else toast.error("Invalid backup file");
+  try {
+    const checked = await readAndCheckFile(file);
+    if (!deps.isCurrent()) return;
+    if ("cancelled" in checked) {
       resetFileInput(deps.fileInputRef);
+      return;
     }
-    return;
-  }
+    if ("error" in checked) {
+      toast.error(checked.error);
+      resetFileInput(deps.fileInputRef);
+      return;
+    }
 
-  deps.setPendingEncryptedText(checked.text);
+    const plaintext = await decryptWithStoredPassphrase(checked.text);
+    if (!deps.isCurrent()) return;
+    if (plaintext !== null) {
+      const result = resolvePlaintext(plaintext, deps.onPreviewReady);
+      if (result !== "ok") {
+        if (result === "not-backup") rejectNonBackupPlaintext();
+        else toast.error(isLarge ? TOO_LARGE_MESSAGE : "Invalid backup file");
+        resetFileInput(deps.fileInputRef);
+      }
+      return;
+    }
+
+    deps.setPendingEncryptedText(checked.text);
+  } catch (err) {
+    if (!deps.isCurrent()) return;
+    captureError("import_failed", err, { stage: "read" });
+    toast.error(decryptErrorMessage(err, isLarge));
+    resetFileInput(deps.fileInputRef);
+  } finally {
+    userPreferences.markRestoreEnded();
+  }
 }
 
 interface ManualDecryptDeps extends FileSelectDeps {
@@ -89,7 +113,10 @@ interface ManualDecryptDeps extends FileSelectDeps {
 
 async function performManualDecrypt(deps: ManualDecryptDeps) {
   deps.setIsDecrypting(true);
+  const bytes = deps.pendingEncryptedText.length;
+  const isLarge = bytes > MAX_RESTORE_FILE_BYTES;
   try {
+    userPreferences.markRestoreStarted({ step: "decrypt", bytes });
     const plaintext = await decryptData(deps.pendingEncryptedText, deps.manualPassphrase);
     if (!deps.isCurrent()) return;
     const result = resolvePlaintext(plaintext, deps.onPreviewReady);
@@ -99,7 +126,7 @@ async function performManualDecrypt(deps: ManualDecryptDeps) {
       deps.setManualPassphrase("");
       resetFileInput(deps.fileInputRef);
     } else if (result === "invalid") {
-      toast.error("Invalid backup file");
+      toast.error(isLarge ? TOO_LARGE_MESSAGE : "Invalid backup file");
     } else {
       deps.setPendingEncryptedText(null);
       deps.setManualPassphrase("");
@@ -107,9 +134,10 @@ async function performManualDecrypt(deps: ManualDecryptDeps) {
   } catch (err) {
     if (!deps.isCurrent()) return;
     captureError("import_failed", err, { stage: "decrypt" });
-    toast.error(decryptErrorMessage(err));
+    toast.error(decryptErrorMessage(err, isLarge));
   } finally {
     deps.setIsDecrypting(false);
+    userPreferences.markRestoreEnded();
   }
 }
 

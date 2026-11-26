@@ -27,12 +27,15 @@ export interface WhatsNewState {
   lastSeenAt: string; // ISO
 }
 
+export type RestoreMarker = { step: "read" | "decrypt" | "write"; bytes?: number };
+
 const STORAGE_KEYS = {
   currency: "expense-tracker-currency",
   theme: "expense-tracker-theme",
   backupReminder: "expense-tracker-backup-reminder",
   install: "expense-tracker-install",
   whatsNew: "expense-tracker-whats-new",
+  restoreInProgress: "expense-tracker-restore-in-progress",
 } as const;
 
 const WEEKLY_REMINDER_DAY = 0;
@@ -100,6 +103,17 @@ class UserPreferences {
 
     try {
       storage.setItem(key, value);
+    } catch {
+      return;
+    }
+  }
+
+  private removeItem(key: string): void {
+    const storage = this.getStorage();
+    if (!storage) return;
+
+    try {
+      storage.removeItem(key);
     } catch {
       return;
     }
@@ -202,6 +216,26 @@ class UserPreferences {
 
   setWhatsNewState(state: WhatsNewState): void {
     this.setItem(STORAGE_KEYS.whatsNew, JSON.stringify(state));
+  }
+
+  markRestoreStarted(marker: RestoreMarker): void {
+    this.setItem(STORAGE_KEYS.restoreInProgress, JSON.stringify(marker));
+  }
+
+  markRestoreEnded(): void {
+    this.removeItem(STORAGE_KEYS.restoreInProgress);
+  }
+
+  takeInterruptedRestore(): RestoreMarker | null {
+    const rawValue = this.getItem(STORAGE_KEYS.restoreInProgress);
+    if (rawValue === null) return null;
+    this.removeItem(STORAGE_KEYS.restoreInProgress);
+
+    try {
+      return JSON.parse(rawValue) as RestoreMarker;
+    } catch {
+      return null;
+    }
   }
 
   clearAll(): void {

@@ -1,8 +1,13 @@
 import type { Page } from "@playwright/test";
+import { randomBytes } from "node:crypto";
 import { test, expect } from "../support/fixtures";
 import { gotoApp, daysAgo, readDownload, DEFAULT_CATEGORY_NAMES } from "../support/app";
 import { seedExpenses } from "../support/db";
 import { thisMonthWithAdhoc } from "../support/data";
+import { MAX_RESTORE_FILE_BYTES } from "../../src/config/limits";
+
+const RESTORE_MARKER_KEY = "expense-tracker-restore-in-progress";
+const UNFINISHED_RESTORE_TOAST = "Your last restore didn't finish";
 
 declare global {
   interface Window {
@@ -115,6 +120,7 @@ test.describe("data-management", () => {
     await page.getByLabel("Merge (Safe)").check();
     await page.getByRole("button", { name: "Confirm Import" }).click();
     await expect(page.getByText("Data imported successfully")).toBeVisible();
+    expect(await page.evaluate((key) => localStorage.getItem(key), RESTORE_MARKER_KEY)).toBeNull();
 
     await page.goto("/transactions");
     await expect(page.getByText("Showing 3 transactions")).toBeVisible();
@@ -291,5 +297,92 @@ test.describe("data-management", () => {
     for (const name of DEFAULT_CATEGORY_NAMES) {
       await expect(page.getByText(name, { exact: true })).toBeVisible();
     }
+  });
+
+  test("a restore file over the threshold asks first", async ({ page }) => {
+    await gotoApp(page, "/settings/data");
+    const input = page.locator('[data-testid="import-file-input"]');
+    const largeFile = {
+      name: "large.extrack",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.alloc(MAX_RESTORE_FILE_BYTES + 1, "a"),
+    };
+
+    const dialogMessages: string[] = [];
+    page.once("dialog", (dialog) => {
+      dialogMessages.push(dialog.message());
+      void dialog.dismiss();
+    });
+    await input.setInputFiles(largeFile);
+    await expect(input).toHaveValue("");
+    expect(dialogMessages[0]).toContain("Try anyway?");
+    // The persistent-storage warning may appear at startup; nothing else may.
+    await expect(
+      page
+        .locator("[data-sonner-toast]")
+        .filter({ hasNotText: "This browser may delete your data automatically" }),
+    ).toHaveCount(0);
+
+    page.once("dialog", (dialog) => void dialog.accept());
+    await input.setInputFiles(largeFile);
+    await expect(
+      page.getByText("Only encrypted .extrack backup files can be imported"),
+    ).toBeVisible();
+  });
+
+  test("unfinished restore is reported at the next start", async ({ page }) => {
+    await page.addInitScript((key) => {
+      try {
+        localStorage.setItem(key, '{"step":"read","bytes":1}');
+      } catch {
+        // init script also runs on about:blank, where storage access can throw
+      }
+    }, RESTORE_MARKER_KEY);
+    await gotoApp(page, "/");
+    await expect(page.getByText(UNFINISHED_RESTORE_TOAST)).toBeVisible();
+    await expect
+      .poll(() => page.evaluate((key) => localStorage.getItem(key), RESTORE_MARKER_KEY))
+      .toBeNull();
+  });
+
+  test("an unreadable restore marker is dropped silently", async ({ page }) => {
+    await page.addInitScript((key) => {
+      try {
+        localStorage.setItem(key, "{");
+      } catch {
+        // init script also runs on about:blank, where storage access can throw
+      }
+    }, RESTORE_MARKER_KEY);
+    await gotoApp(page, "/");
+    await expect
+      .poll(() => page.evaluate((key) => localStorage.getItem(key), RESTORE_MARKER_KEY))
+      .toBeNull();
+    await expect(page.getByText(UNFINISHED_RESTORE_TOAST)).toHaveCount(0);
+  });
+
+  test("a backup over the threshold warns", async ({ page }) => {
+    await gotoApp(page, "/settings/data");
+    await seedExpenses(
+      page,
+      Array.from({ length: 14 }, (_, i) => ({
+        value: 10 + i,
+        categoryName: "Others",
+        description: `Receipt ${i}`,
+        date: daysAgo(0),
+        time: "10:00",
+        // Random bytes so compression cannot shrink the backup below the threshold.
+        attachment: "data:image/jpeg;base64," + randomBytes(750_000).toString("base64"),
+      })),
+    );
+    await setPassphrase(page, "correcthorse123");
+
+    await page.getByRole("button", { name: "Create Backup" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "Backup" });
+    const downloadPromise = page.waitForEvent("download");
+    await dialog.getByRole("button", { name: "Create Backup" }).click();
+    await downloadPromise;
+    await expect(
+      page.getByText("Restoring it may fail on phones with little memory"),
+    ).toBeVisible();
   });
 });
