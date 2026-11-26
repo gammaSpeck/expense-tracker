@@ -103,6 +103,12 @@
       },
       {
         "files": ["src/hooks/useEncryptedFileImport.ts"],
+        "functions": ["readAndCheckFile"],
+        "maxCrap": 45,
+        "reason": "Large-file confirm and its cancel, the read-failure catch with its too-large vs couldn't-read message, and the non-ExTrack-file check; coverage-blind CRAP on necessary import validation."
+      },
+      {
+        "files": ["src/hooks/useEncryptedFileImport.ts"],
         "functions": ["performFileSelect"],
         "maxCognitive": 20,
         "maxCrap": 135,

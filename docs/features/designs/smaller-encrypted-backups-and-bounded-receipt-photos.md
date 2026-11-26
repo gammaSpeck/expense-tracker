@@ -281,15 +281,16 @@ file picked (useEncryptedFileImport.readAndCheckFile)
 - `decryptWithStoredPassphrase` returns `null` only for the wrong-passphrase
   error, so the typed-passphrase prompt appears only then. Every other error
   is shown at once.
-- Errors become one of four messages. The user-facing texts live in the
+- Errors become one of five messages. The user-facing texts live in the
   Detailed Implementation Plan (file 4):
 
-  | Cause                                                                        | Message shown                                               |
-  | ---------------------------------------------------------------------------- | ----------------------------------------------------------- |
-  | Wrong passphrase (check failed, or decrypt failed on a file without `check`) | wrong passphrase, try again                                 |
-  | Any other failure, file over `MAX_RESTORE_FILE_BYTES`                        | too large for this device's memory; try a computer          |
-  | Any other failure, file within the threshold                                 | decryption failed; the file may be corrupted (today's text) |
-  | Version or browser problem at file selection                                 | the specific message above                                  |
+  | Cause                                                                        | Message shown                                                                 |
+  | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+  | Wrong passphrase (check failed, or decrypt failed on a file without `check`) | wrong passphrase, try again                                                   |
+  | Any other failure, file over `MAX_RESTORE_FILE_BYTES`                        | too large for this device's memory; try a computer                            |
+  | Any other failure, file within the threshold                                 | decryption failed; the file may be corrupted (today's text)                   |
+  | File cannot be read at file selection (`file.text()` fails)                  | couldn't read this file, try again; over the threshold, the too-large message |
+  | Version or browser problem at file selection                                 | the specific message above                                                    |
 
 - A file without `check` (every file written before 1.10.0) cannot tell a wrong
   passphrase from a failure inside decryption itself. It keeps today's
@@ -485,18 +486,18 @@ PR 5  feat  photo pipeline, MAX_ATTACHMENT_BYTES, dependency removal, tests
 
 ### 12. Risks and mitigations
 
-| Risk                                                                                                                                                                                                                | Likelihood                                                               | Mitigation or acceptance                                                            | Revisit when                                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------- |
-| App versions before 1.10.0 show "This file is an encrypted export, not a restorable backup" for a version-2 file, because gzip output does not start with `{`                                                       | Certain on stale devices                                                 | Release note asks users to update each device; CUJ 3 covers the reverse case        | —                                           |
-| One damaged byte fails the whole file, photos and rows alike                                                                                                                                                        | Low                                                                      | Accepted; each day's backup is a separate dated file                                | Damage is reported                          |
-| Threshold rests on one phone                                                                                                                                                                                        | Medium                                                                   | Accepted; the restore marker reports failures                                       | Crash count is non-zero                     |
-| Marker miscounts: a closed tab or a second app tab during a restore over-counts; picking a second file while the first is still being read lets the first run's `finally` clear the second's marker and under-count | Low                                                                      | Accepted; the count is a revisit signal, not a metric; wording says "didn't finish" | Counts look implausible                     |
-| Legacy file without `check` hits a memory failure inside decryption and shows "Wrong passphrase"                                                                                                                    | Low; memory failures more often crash the tab or fail outside decryption | Accepted; new backups carry `check`                                                 | Reports of a right passphrase being refused |
-| Backup sizes sent to PostHog                                                                                                                                                                                        | Certain                                                                  | Rounded up to 100 KB; counts only                                                   | —                                           |
-| Decoding a 48 MP photo runs out of memory on an old phone                                                                                                                                                           | Low                                                                      | The `unreadable` message suggests a screenshot, which is smaller; manual check      | Rejections with reason `unreadable` rise    |
-| Photo stored sideways on Chrome below 112                                                                                                                                                                           | Low                                                                      | Accepted below the supported minimum                                                | —                                           |
-| Drive storage grows with photos × backups                                                                                                                                                                           | Medium                                                                   | Accepted                                                                            | A Drive upload fails for quota              |
-| Multipart upload fails above 5 MB                                                                                                                                                                                   | Unknown                                                                  | Manual test before PR 1                                                             | Test fails                                  |
+| Risk                                                                                                                                                                                                                                                                                                             | Likelihood                                                               | Mitigation or acceptance                                                            | Revisit when                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------- |
+| App versions before 1.10.0 show "This file is an encrypted export, not a restorable backup" for a version-2 file, because gzip output does not start with `{`                                                                                                                                                    | Certain on stale devices                                                 | Release note asks users to update each device; CUJ 3 covers the reverse case        | —                                           |
+| One damaged byte fails the whole file, photos and rows alike                                                                                                                                                                                                                                                     | Low                                                                      | Accepted; each day's backup is a separate dated file                                | Damage is reported                          |
+| Threshold rests on one phone                                                                                                                                                                                                                                                                                     | Medium                                                                   | Accepted; the restore marker reports failures                                       | Crash count is non-zero                     |
+| Marker miscounts: a closed tab or a second app tab during a restore over-counts; picking a second file while the first is still being read lets the first run's `finally` clear the second's marker and under-count, so that restore gets neither the telemetry event nor the startup message if it then crashes | Low                                                                      | Accepted; the count is a revisit signal, not a metric; wording says "didn't finish" | Counts look implausible                     |
+| Legacy file without `check` hits a memory failure inside decryption and shows "Wrong passphrase"                                                                                                                                                                                                                 | Low; memory failures more often crash the tab or fail outside decryption | Accepted; new backups carry `check`                                                 | Reports of a right passphrase being refused |
+| Backup sizes sent to PostHog                                                                                                                                                                                                                                                                                     | Certain                                                                  | Rounded up to 100 KB; counts only                                                   | —                                           |
+| Decoding a 48 MP photo runs out of memory on an old phone                                                                                                                                                                                                                                                        | Low                                                                      | The `unreadable` message suggests a screenshot, which is smaller; manual check      | Rejections with reason `unreadable` rise    |
+| Photo stored sideways on Chrome below 112                                                                                                                                                                                                                                                                        | Low                                                                      | Accepted below the supported minimum                                                | —                                           |
+| Drive storage grows with photos × backups                                                                                                                                                                                                                                                                        | Medium                                                                   | Accepted                                                                            | A Drive upload fails for quota              |
+| Multipart upload fails above 5 MB                                                                                                                                                                                                                                                                                | Unknown                                                                  | Manual test before PR 1                                                             | Test fails                                  |
 
 ## Alternatives Considered
 
@@ -608,7 +609,11 @@ PR 5  feat  photo pipeline, MAX_ATTACHMENT_BYTES, dependency removal, tests
 ### Additional Resources
 
 - MDN, [`createImageBitmap()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap):
-  names `from-image` as the `imageOrientation` default.
+  names `from-image` as the `imageOrientation` default. The review record
+  cites a saved copy of this page (`mdn-createImageBitmap.html`); it was
+  removed before merge because it reproduced MDN's branding, which the
+  article's CC-BY-SA licence does not cover. The compatibility data below is
+  CC0 and stays in the review folder as `mdn-bcd-createImageBitmap.json`.
 - MDN browser-compat-data,
   [`api/_globals/createImageBitmap.json`](https://raw.githubusercontent.com/mdn/browser-compat-data/main/api/_globals/createImageBitmap.json),
   key `api.createImageBitmap.options_imageOrientation_parameter.from-image`:
@@ -757,6 +762,7 @@ contract docs"; they are not part of any PR.
     | other failure                    | "Decryption failed. The file may be corrupted." (today)                                                       |
     | needs newer browser              | "This backup needs a newer browser (Chrome 80+, Firefox 113+ or Safari 16.4+). Restore it on another device." |
     | older CSV export                 | "This file is an encrypted CSV export from an older version and can't be restored."                           |
+    | read failure                     | "Couldn't read this file. Try picking it again." (a file over the threshold gets `TOO_LARGE_MESSAGE`)         |
 
     Only `TOO_LARGE_MESSAGE` becomes a constant; the other rows are inline
     strings. `{mb}` is `(bytes / (1024 * 1024)).toFixed(1)`, written inline
@@ -768,7 +774,10 @@ contract docs"; they are not part of any PR.
     - `readAndCheckFile`: when `file.size > MAX_RESTORE_FILE_BYTES` (from
       `@/config/limits`), `window.confirm` the confirm text; Cancel returns
       `{ cancelled: true }`. Then `userPreferences.markRestoreStarted({
-      step: "read", bytes: file.size })` before `file.text()`.
+      step: "read", bytes: file.size })` before `file.text()`. Wrap
+      `file.text()` in a `try`; its `catch` calls `captureError("import_failed",
+      err, { stage: "read" })` and returns `{ error }` with the read-failure
+      text (decryption has not started, so the decrypt message would be wrong).
     - `decryptErrorMessage(err, isLarge)`: a wrong-passphrase error
       (today's `message.includes("Wrong passphrase")` test, made exact in
       PR 3) → wrong passphrase; otherwise `isLarge` → `TOO_LARGE_MESSAGE`;
@@ -1028,6 +1037,12 @@ contract docs"; they are not part of any PR.
       named "Backup", start `page.waitForEvent("download")`, click
       "Create Backup", then await the download; the warning "Restoring it
       may fail on phones with little memory" is visible.
+      The test then picks the downloaded backup, accepts the size prompt,
+      confirms the import, and asserts "Data imported successfully" and that
+      the marker key is `null` (a large backup restores end to end).
+    - "a file that cannot be read says so": `addInitScript` makes
+      `File.prototype.text` reject with a `NotReadableError`; picking a small
+      file shows the read-failure text.
     - In "encrypted round trip", after the import succeeds,
       `localStorage.getItem("expense-tracker-restore-in-progress")` is
       `null`.

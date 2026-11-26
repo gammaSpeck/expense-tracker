@@ -21,7 +21,19 @@ async function readAndCheckFile(file: File): Promise<FileCheck> {
     if (!proceed) return { cancelled: true };
   }
   userPreferences.markRestoreStarted({ step: "read", bytes: file.size });
-  const text = await file.text();
+  let text: string;
+  try {
+    text = await file.text();
+  } catch (err) {
+    // Decryption has not started: on a large file this is most likely memory, else the file itself.
+    captureError("import_failed", err, { stage: "read" });
+    return {
+      error:
+        file.size > MAX_RESTORE_FILE_BYTES
+          ? TOO_LARGE_MESSAGE
+          : "Couldn't read this file. Try picking it again.",
+    };
+  }
   if (!isEncryptedFile(text)) {
     return { error: "Only encrypted .extrack backup files can be imported" };
   }

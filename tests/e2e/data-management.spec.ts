@@ -360,7 +360,7 @@ test.describe("data-management", () => {
     await expect(page.getByText(UNFINISHED_RESTORE_TOAST)).toHaveCount(0);
   });
 
-  test("a backup over the threshold warns", async ({ page }) => {
+  test("a backup over the threshold warns and still restores", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(
       page,
@@ -374,15 +374,34 @@ test.describe("data-management", () => {
         attachment: "data:image/jpeg;base64," + randomBytes(750_000).toString("base64"),
       })),
     );
-    await setPassphrase(page, "correcthorse123");
-
-    await page.getByRole("button", { name: "Create Backup" }).first().click();
-    const dialog = page.getByRole("dialog", { name: "Backup" });
-    const downloadPromise = page.waitForEvent("download");
-    await dialog.getByRole("button", { name: "Create Backup" }).click();
-    await downloadPromise;
+    const backupContent = await backupToDevice(page, "correcthorse123");
     await expect(
       page.getByText("Restoring it may fail on phones with little memory"),
     ).toBeVisible();
+
+    // Confirming the size prompt restores it with the stored passphrase.
+    page.once("dialog", (dialog) => void dialog.accept());
+    await page.setInputFiles('[data-testid="import-file-input"]', {
+      name: "large.extrack",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.from(backupContent, "utf-8"),
+    });
+    await page.getByRole("button", { name: "Confirm Import" }).click();
+    await expect(page.getByText("Data imported successfully")).toBeVisible();
+    expect(await page.evaluate((key) => localStorage.getItem(key), RESTORE_MARKER_KEY)).toBeNull();
+  });
+
+  test("a file that cannot be read says so", async ({ page }) => {
+    await page.addInitScript(() => {
+      File.prototype.text = () =>
+        Promise.reject(new DOMException("The file could not be read", "NotReadableError"));
+    });
+    await gotoApp(page, "/settings/data");
+    await page.setInputFiles('[data-testid="import-file-input"]', {
+      name: "backup.extrack",
+      mimeType: "application/octet-stream",
+      buffer: Buffer.from('{"foo":1}', "utf-8"),
+    });
+    await expect(page.getByText("Couldn't read this file. Try picking it again.")).toBeVisible();
   });
 });
