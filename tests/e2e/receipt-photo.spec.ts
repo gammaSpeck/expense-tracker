@@ -61,6 +61,20 @@ async function saveExpense(page: Page): Promise<void> {
   await expect(page.getByText("Expense added")).toBeVisible();
 }
 
+/** Reads the saved expense's photo: its data URL, decoded byte size, and long edge in px. */
+async function readStoredPhoto(page: Page) {
+  const [expense] = await readExpenses(page);
+  const attachment = expense.attachment ?? "";
+  const bytes = Buffer.from(attachment.slice(attachment.indexOf(",") + 1), "base64").length;
+  const longEdge = await page.evaluate(async (src) => {
+    const img = new Image();
+    img.src = src;
+    await img.decode();
+    return Math.max(img.naturalWidth, img.naturalHeight);
+  }, attachment);
+  return { attachment, bytes, longEdge };
+}
+
 test.describe("receipt-photo", () => {
   test("Camera-size photo is stored as JPEG within the cap", async ({ page }) => {
     await openAddForm(page);
@@ -70,19 +84,26 @@ test.describe("receipt-photo", () => {
     await expect(page.getByAltText("Attachment preview")).toBeVisible();
     await saveExpense(page);
 
-    const [expense] = await readExpenses(page);
-    const attachment = expense.attachment ?? "";
+    const { attachment, bytes, longEdge } = await readStoredPhoto(page);
     expect(attachment.startsWith("data:image/jpeg;base64,")).toBe(true);
-    const bytes = Buffer.from(attachment.slice(attachment.indexOf(",") + 1), "base64");
-    expect(bytes.length).toBeLessThanOrEqual(524_288);
-
-    const longEdge = await page.evaluate(async (src) => {
-      const img = new Image();
-      img.src = src;
-      await img.decode();
-      return Math.max(img.naturalWidth, img.naturalHeight);
-    }, attachment);
+    expect(bytes).toBeLessThanOrEqual(524_288);
     expect(longEdge).toBeLessThanOrEqual(1600);
+  });
+
+  test("Photo that fits only at the floor is stored at 1200 px", async ({ page }) => {
+    await openAddForm(page);
+    // Measured: 3000 × 2000 noise encodes to ~790 KB at 1600 px/0.75 and ~577 KB at 1600 px/0.6
+    // (both over the cap), ~307 KB at 1200 px/0.6. Only the last ladder step fits.
+    const buffer = await drawImage(page, "noise", 3000, 2000, "image/png");
+    await page.setInputFiles(INPUT, { name: "receipt.png", mimeType: "image/png", buffer });
+
+    await expect(page.getByAltText("Attachment preview")).toBeVisible();
+    await saveExpense(page);
+
+    const { attachment, bytes, longEdge } = await readStoredPhoto(page);
+    expect(attachment.startsWith("data:image/jpeg;base64,")).toBe(true);
+    expect(bytes).toBeLessThanOrEqual(524_288);
+    expect(longEdge).toBe(1200);
   });
 
   test("Photo over the cap at the floor is rejected", async ({ page }) => {
