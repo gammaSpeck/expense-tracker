@@ -11,7 +11,7 @@ Complete CRUD operations for personal expense tracking:
 - **Delete** expenses with confirmation dialog
 - **Duplicate** expenses to quickly add similar transactions
 - **View** detailed expense information with formatted dates and amounts
-- **Attachments** support for images (compressed and stored as base64)
+- **Attachments** support for images (resized, stored as JPEG of at most 0.5 MB as base64)
 
 ### 2. Category System
 
@@ -316,7 +316,7 @@ Fast and efficient user experience:
 - **Dexie.js**: Optimized IndexedDB access
 - **idb-keyval**: Lightweight key-value IndexedDB store for credentials and preferences
 - **React Query**: Efficient data caching
-- **Image compression**: Browser-based compression for attachments
+- **Image compression**: Built-in canvas pipeline resizes attachments to JPEG of at most 0.5 MB
 - **Virtual scrolling**: (Planned for large lists)
 
 ### 16. Developer Experience
@@ -345,7 +345,7 @@ Well-structured codebase:
 - **Animations**: Framer Motion
 - **PWA**: vite-plugin-pwa with Workbox
 - **Date Utils**: date-fns
-- **Image Processing**: browser-image-compression
+- **Image Processing**: Built-in canvas pipeline (`createImageBitmap` + `canvas.toBlob`)
 - **Cryptography**: Web Crypto API (AES-GCM 256, PBKDF2-SHA256) — built into the browser, zero extra packages
 
 ---

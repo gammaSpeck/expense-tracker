@@ -33,3 +33,7 @@ export const TRANSACTIONS_PAGE_SIZE = 100;
 // change (loses exact diagnostic text like the RangeError this feature exists to catch) --
 // deferred pending a product decision.
 export const MAX_TELEMETRY_MESSAGE_LENGTH = 300;
+
+// receiptPhoto.ts: prepareReceiptPhoto
+// Measured on the JPEG `Blob`, before base64.
+export const MAX_ATTACHMENT_BYTES = 512 * 1024;

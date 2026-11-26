@@ -33,6 +33,15 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.10.0-photo-limit",
+    version: "1.10.0",
+    date: "2026-11-27",
+    type: "improved",
+    title: "Receipt photos are kept small",
+    body: "Photos are resized when you attach them so backups stay small. If a photo can't be used, you see why and the expense still saves.",
+  },
+
+  {
     id: "1.10.0-backup-open-messages",
     version: "1.10.0",
     date: "2026-11-27",
