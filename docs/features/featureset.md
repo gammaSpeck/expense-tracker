@@ -124,16 +124,10 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
 
 - **Device-only** — no Drive option; purely a data dump, not reminder-tracked
 - **Format options**: JSON or CSV
-- **Optional encryption**: "Encrypt this export" checkbox (default unchecked)
-  - When checked: encrypts content (regardless of format) and saves as `.extrack`
-  - When checked and no passphrase set: opens passphrase setup inline before saving
-  - When unchecked: saves as plain `.json` or `.csv` as before
 - **Always exports all data** — no date range filtering
 - **JSON export** includes full expense data, category definitions, and export metadata
 - **CSV export** with columns: Date, Time, Category, Description, Value, Tags, IsAdhoc, Attachment
-- **Filename conventions**:
-  - Unencrypted: `extrack-export-YYYY-MM-DD.json` / `.csv`
-  - Encrypted: `extrack-export-YYYY-MM-DD.extrack`
+- **Filename convention**: `extrack-export-YYYY-MM-DD.json` / `.csv`
 
 #### Google Drive Backup
 
@@ -163,7 +157,7 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
 - **Auto-decrypt**: if a passphrase is stored, decryption happens silently on file selection
 - **Manual passphrase fallback**: if no passphrase is stored (new device) or auto-decrypt fails, a passphrase input is shown; the file stays loaded so the user can retry without re-selecting
 - **Wrong passphrase detection**: AES-GCM authentication tag failure maps to a clear "Wrong passphrase — try again" error
-- **CSV export guard**: encrypted CSV exports show an error ("This file is an encrypted export, not a restorable backup") and are rejected
+- **CSV export guard**: encrypted CSV exports from older versions show an error ("This file is an encrypted CSV export from an older version and can't be restored.") and are rejected
 - **Two merge modes** (Override is default):
   - **Override**: Replace all existing data
   - **Merge**: Add to existing data, skip duplicates
@@ -363,7 +357,7 @@ Well-structured codebase:
 - [ ] Split expenses between multiple categories
 - [ ] Receipt OCR for automatic data entry
 - [x] Cloud backup/sync via Google Drive (optional, privacy-first, PKCE OAuth, no backend)
-- [x] End-to-end encryption for backups and exports (AES-GCM 256, PBKDF2-SHA256, `.extrack` format, pure Web Crypto API)
+- [x] End-to-end encryption for backups (AES-GCM 256, PBKDF2-SHA256, `.extrack` format, pure Web Crypto API)
 - [ ] Dashboard widgets/cards customization
 - [ ] More chart types (donut, stacked bar, area)
 - [ ] Expense comparison (month-over-month, year-over-year)

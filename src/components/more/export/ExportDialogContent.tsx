@@ -9,15 +9,12 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { FormatToggle } from "@/components/more/export/FormatToggle";
-import { EncryptToggleRow } from "@/components/more/export/EncryptToggleRow";
 
 interface ExportDialogContentProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   formatType: "csv" | "json";
   setFormatType: (format: "csv" | "json") => void;
-  encrypt: boolean;
-  setEncrypt: (encrypt: boolean) => void;
   isExporting: boolean;
   onExportClick: () => void;
 }
@@ -27,8 +24,6 @@ export function ExportDialogContent({
   onOpenChange,
   formatType,
   setFormatType,
-  encrypt,
-  setEncrypt,
   isExporting,
   onExportClick,
 }: ExportDialogContentProps) {
@@ -47,8 +42,6 @@ export function ExportDialogContent({
             <Label className="text-sm text-muted-foreground">Format</Label>
             <FormatToggle formatType={formatType} onChange={setFormatType} />
           </div>
-
-          <EncryptToggleRow encrypt={encrypt} onChange={setEncrypt} />
 
           <Button onClick={onExportClick} disabled={isExporting} className="w-full">
             <Download className="h-4 w-4 mr-2" />

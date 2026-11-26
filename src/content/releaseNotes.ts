@@ -33,6 +33,15 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.10.0-export-plain-only",
+    version: "1.10.0",
+    date: "2026-11-27",
+    type: "improved",
+    title: "Export saves plain files; Backup makes encrypted ones",
+    body: "Export Data now saves plain JSON or CSV. For an encrypted file, use Create Backup.",
+  },
+
+  {
     id: "1.9.1-transactions-back",
     version: "1.9.1",
     date: "2026-11-11",
