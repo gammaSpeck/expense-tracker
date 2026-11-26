@@ -21,16 +21,15 @@ async function setPassphrase(page: Page, passphrase: string) {
   await expect(page.getByText("Encryption passphrase saved")).toBeVisible();
 }
 
-/** Set a passphrase, take an encrypted export, return its contents. Leaves the page on /settings/data. */
-async function exportEncrypted(page: Page, passphrase: string): Promise<string> {
+/** Set a passphrase, run Create Backup → Save to device, return the file's contents. Leaves the page on /settings/data. */
+async function backupToDevice(page: Page, passphrase: string): Promise<string> {
   await setPassphrase(page, passphrase);
-  await page.getByRole("button", { name: "Export Data" }).first().click();
-  const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Encrypt this export").click();
+  await page.getByRole("button", { name: "Create Backup" }).first().click();
+  const dialog = page.getByRole("dialog", { name: "Backup" });
   const downloadPromise = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "Export Data" }).click();
+  await dialog.getByRole("button", { name: "Create Backup" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^extrack-export-\d{4}-\d{2}-\d{2}\.extrack$/);
+  expect(download.suggestedFilename()).toMatch(/^extrack-backup-\d{4}-\d{2}-\d{2}\.extrack$/);
   return readDownload(download);
 }
 
@@ -91,10 +90,10 @@ test.describe("data-management", () => {
     await expect(page.getByLabel("Change passphrase")).toBeVisible();
   });
 
-  test("encrypted round trip: export, factory reset, merge import", async ({ page }) => {
+  test("encrypted round trip: backup, factory reset, merge import", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, thisMonthWithAdhoc());
-    const backupContent = await exportEncrypted(page, "correcthorse123");
+    const backupContent = await backupToDevice(page, "correcthorse123");
 
     // Factory reset wipes data, categories, and the stored passphrase.
     await page.getByRole("button", { name: "Factory Reset" }).click();
@@ -136,7 +135,7 @@ test.describe("data-management", () => {
   test("wrong manual passphrase is rejected", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, thisMonthWithAdhoc());
-    const backupContent = await exportEncrypted(page, "correcthorse123");
+    const backupContent = await backupToDevice(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
@@ -159,7 +158,7 @@ test.describe("data-management", () => {
       ...thisMonthWithAdhoc(),
       { value: 9, categoryName: "Others", description: "Broken", date: "", time: "10:00" },
     ]);
-    const backupContent = await exportEncrypted(page, "correcthorse123");
+    const backupContent = await backupToDevice(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
@@ -186,7 +185,7 @@ test.describe("data-management", () => {
   test("Cancel during decrypt shows no preview afterwards", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, thisMonthWithAdhoc());
-    const backupContent = await exportEncrypted(page, "correcthorse123");
+    const backupContent = await backupToDevice(page, "correcthorse123");
 
     await page.getByRole("button", { name: "Factory Reset" }).click();
     await page.getByRole("alertdialog").getByRole("button", { name: "Confirm Reset" }).click();
@@ -249,7 +248,7 @@ test.describe("data-management", () => {
   test("override mode replaces existing data entirely", async ({ page }) => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, thisMonthWithAdhoc());
-    const backupContent = await exportEncrypted(page, "correcthorse123");
+    const backupContent = await backupToDevice(page, "correcthorse123");
 
     await page.goto("/");
     await seedExpenses(page, [

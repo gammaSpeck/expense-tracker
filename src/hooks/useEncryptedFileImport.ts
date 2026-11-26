@@ -43,7 +43,7 @@ function resetFileInput(fileInputRef: RefObject<HTMLInputElement | null>) {
 }
 
 function rejectNonBackupPlaintext() {
-  toast.error("This file is an encrypted export, not a restorable backup");
+  toast.error("This file is an encrypted CSV export from an older version and can't be restored.");
 }
 
 interface FileSelectDeps {

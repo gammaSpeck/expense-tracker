@@ -1,5 +1,7 @@
 # Plan: E2EE Backup Encryption
 
+> Export encryption was later removed; Export now saves plain files only ([design](designs/smaller-encrypted-backups-and-bounded-receipt-photos.md)).
+
 ## Decisions Made
 
 - Passphrase stored in idb-keyval (same "expense-tracker-drive" store, key: "encryption-passphrase")
