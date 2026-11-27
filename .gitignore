@@ -51,3 +51,7 @@ graft/
 
 # omp issue->PR agent driver run artifacts (.omp/agent-issue.ts) — regenerable.
 .omp/agent-runs/
+
+
+EGM.md
+*_DRIFT_REPORT.md
