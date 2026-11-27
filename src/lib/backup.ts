@@ -135,11 +135,11 @@ export async function encryptData(plaintext: string, passphrase: string): Promis
 
   // ponytail: version-1 fallback for browsers below the supported minimum (Chrome 112,
   // Firefox 113, Safari/iOS 16.4); remove when backups from such browsers stop appearing.
-  const compress = typeof CompressionStream !== "undefined";
+  const isCompressionStreamAvailable = typeof CompressionStream !== "undefined";
   const ciphertext = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    compress ? await gzip(bytes) : bytes,
+    isCompressionStreamAvailable ? await gzip(bytes) : bytes,
   );
   // Passphrase check: its own IV followed by AES-GCM("extrack"), so the reader can tell a
   // wrong passphrase from a failure inside the ciphertext decrypt.
@@ -151,7 +151,7 @@ export async function encryptData(plaintext: string, passphrase: string): Promis
 
   const envelope: ExtrackEnvelope = {
     format: "extrack-encrypted-backup",
-    version: compress ? "2" : "1",
+    version: isCompressionStreamAvailable ? "2" : "1",
     algorithm: "AES-GCM",
     kdf: "PBKDF2-SHA256",
     iterations: ITERATIONS,
