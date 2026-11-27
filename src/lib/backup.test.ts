@@ -8,6 +8,7 @@ import {
   b64uEncode,
   decryptData,
   decryptWithStoredPassphrase,
+  encryptData,
   readEnvelopeVersion,
 } from "@/lib/backup";
 import { buildImportPreview } from "@/lib/importPreview";
@@ -180,5 +181,34 @@ describe("decryptWithStoredPassphrase", () => {
     await expect(decryptWithStoredPassphrase(JSON.stringify(wrapper))).rejects.toThrow(
       new Error("Backup could not be decrypted"),
     );
+  });
+});
+
+describe("encryptData", () => {
+  it("writes a compressed version-2 wrapper with a passphrase check", async () => {
+    const row = { id: "x", value: 120.5, category: "Food", description: "Lunch", tags: [] };
+    const json = JSON.stringify({
+      version: "1.0",
+      expenses: Array.from({ length: 200 }, () => row),
+    });
+    const encrypted = await encryptData(json, PASSPHRASE);
+    const wrapper = JSON.parse(encrypted);
+    expect(wrapper.version).toBe("2");
+    expect(wrapper.check).toEqual(expect.any(String));
+    await expect(decryptData(encrypted, PASSPHRASE)).resolves.toBe(json);
+    expect(encrypted.length).toBeLessThan(json.length / 2);
+  });
+
+  it("falls back to version 1 with a check when CompressionStream is missing", async () => {
+    vi.stubGlobal("CompressionStream", undefined);
+    try {
+      const encrypted = await encryptData(TEXT, PASSPHRASE);
+      const wrapper = JSON.parse(encrypted);
+      expect(wrapper.version).toBe("1");
+      expect(wrapper.check).toEqual(expect.any(String));
+      await expect(decryptData(encrypted, PASSPHRASE)).resolves.toBe(TEXT);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

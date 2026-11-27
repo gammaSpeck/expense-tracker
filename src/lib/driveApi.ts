@@ -91,6 +91,8 @@ async function findExistingFile(
   accessToken: string,
 ): Promise<string | null> {
   const query = encodeURIComponent(
+    // Must match the mimeType in buildMetadataBlob. The version-2 wrapper is still JSON;
+    // the e2e Drive mock answers every query, so it would not catch a mismatch.
     `name = '${escapeDriveQuery(filename)}' and '${escapeDriveQuery(folderID)}' in parents and mimeType = 'application/json' and trashed = false`,
   );
   const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id)`, {
@@ -115,6 +117,8 @@ function buildMetadataBlob(filename: string, folderID?: string): Blob {
     [
       JSON.stringify({
         name: filename,
+        // Must match the mimeType query in findExistingFile. The version-2 wrapper is still
+        // JSON; the e2e Drive mock answers every query, so it would not catch a mismatch.
         mimeType: "application/json",
         ...(folderID ? { parents: [folderID] } : {}),
       }),

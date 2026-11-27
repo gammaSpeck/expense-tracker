@@ -60,3 +60,12 @@ exists.
 
 After changing UI code, run `bun run lint` and fix every error. Design-system rules
 (`shadcn/*`) are enforced; add a variant, size, or contract rather than overriding classes.
+
+# Code style
+
+Apply to every new or changed name; don't rename untouched code in the same change.
+
+- Booleans (variables, props, fields) start with `is`: `isCompressionStreamAvailable`,
+  `isLarge`, not `compress` or `large`.
+- Function names start with a verb: `readEnvelopeVersion`, `markRestoreStarted`,
+  `prepareReceiptPhoto`, not `envelopeVersion` or `restoreMarker`.

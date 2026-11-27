@@ -309,7 +309,7 @@ Create Backup → exportAllData → createEncryptedBackupFile(data)
      CompressionStream present → gzip → AES-GCM → version "2" + check
      CompressionStream missing → AES-GCM → version "1" + check
  → saveBackupToDevice | uploadBackupToDrive
-     backup_succeeded { …, attachmentCount, bytes rounded up to 100 KB }
+     backup_succeeded { target, expenseCount } (unchanged: no size or photo count)
  → encrypted.length > MAX_RESTORE_FILE_BYTES → warning; the backup is kept
 ```
 
@@ -418,12 +418,12 @@ cannot be restored.
 
 Counts, reasons and capped error text only, as `src/lib/telemetry.ts` requires.
 
-| Event                 | Change                                                                           |
-| --------------------- | -------------------------------------------------------------------------------- |
-| `backup_succeeded`    | Adds `attachmentCount` and `bytes`, rounded up to the next 100 KB.               |
-| `attachment_rejected` | New: `{ reason }`.                                                               |
-| `import_failed`       | Adds `stage: "read"`, and `stage: "crash"` with `step` and, when known, `bytes`. |
-| `export_failed`       | Drops `encrypted`.                                                               |
+| Event                 | Change                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| `backup_succeeded`    | Unchanged. Backup sizes and photo counts are not sent (owner decision, 2026-11-27). |
+| `attachment_rejected` | New: `{ reason }`.                                                                  |
+| `import_failed`       | Adds `stage: "read"`, and `stage: "crash"` with `step` and, when known, `bytes`.    |
+| `export_failed`       | Drops `encrypted`.                                                                  |
 
 ### 9. Security: compress before encrypt
 
@@ -434,8 +434,9 @@ Compression attacks such as CRIME and BREACH need two things:
 - The attacker must then observe the size of many backups, one after each
   change, and adapt.
 
-Google sees one size per backup, and PostHog sees `bytes` rounded up to 100 KB.
-Neither can drive the user to import chosen text and back up again in a loop.
+Google sees one size per backup. PostHog sees no backup size; only an unfinished
+restore reports its file size (`import_failed`, stage `crash`). Neither can drive
+the user to import chosen text and back up again in a loop.
 The passphrase and Drive tokens are not in the backup. Version 1 already reveals
 the plaintext length.
 
@@ -463,8 +464,7 @@ PR 2  feat  remove export toggle; e2e restore tests use Backup → device
 PR 3  feat  reader: readEnvelopeVersion, version and browser checks,
             passphrase check, gunzip, encryptData(plaintext, passphrase),
             version-1 fixture and tests
-PR 4  feat  writer: gzip, version "2", check field, version-1 fallback,
-            backup telemetry fields
+PR 4  feat  writer: gzip, version "2", check field, version-1 fallback
 PR 5  feat  photo pipeline, MAX_ATTACHMENT_BYTES, dependency removal, tests
 ```
 
@@ -493,7 +493,7 @@ PR 5  feat  photo pipeline, MAX_ATTACHMENT_BYTES, dependency removal, tests
 | Threshold rests on one phone                                                                                                                                                                                                                                                                                     | Medium                                                                   | Accepted; the restore marker reports failures                                       | Crash count is non-zero                     |
 | Marker miscounts: a closed tab or a second app tab during a restore over-counts; picking a second file while the first is still being read lets the first run's `finally` clear the second's marker and under-count, so that restore gets neither the telemetry event nor the startup message if it then crashes | Low                                                                      | Accepted; the count is a revisit signal, not a metric; wording says "didn't finish" | Counts look implausible                     |
 | Legacy file without `check` hits a memory failure inside decryption and shows "Wrong passphrase"                                                                                                                                                                                                                 | Low; memory failures more often crash the tab or fail outside decryption | Accepted; new backups carry `check`                                                 | Reports of a right passphrase being refused |
-| Backup sizes sent to PostHog                                                                                                                                                                                                                                                                                     | Certain                                                                  | Rounded up to 100 KB; counts only                                                   | —                                           |
+| File size of an unfinished restore sent to PostHog (`import_failed`, stage `crash`)                                                                                                                                                                                                                              | Certain when a restore doesn't finish                                    | Size only, no content; backup sizes are not sent                                    | —                                           |
 | Decoding a 48 MP photo runs out of memory on an old phone                                                                                                                                                                                                                                                        | Low                                                                      | The `unreadable` message suggests a screenshot, which is smaller; manual check      | Rejections with reason `unreadable` rise    |
 | Photo stored sideways on Chrome below 112                                                                                                                                                                                                                                                                        | Low                                                                      | Accepted below the supported minimum                                                | —                                           |
 | Drive storage grows with photos × backups                                                                                                                                                                                                                                                                        | Medium                                                                   | Accepted                                                                            | A Drive upload fails for quota              |
@@ -857,17 +857,13 @@ contract docs"; they are not part of any PR.
     MB. Restoring it may fail on phones with little memory." and `duration:
     15_000`. The early `return` when `uploadBackupToDrive` returns `null`
     stays before it.
-  - PR 4: compute `attachmentCount` as the number of `data.expenses` with a
-    truthy `attachment` and pass it to both targets.
 
 #### 9. `src/lib/backupTargets.ts` (Modify)
 
 - **Type / Scope**: Drive and device targets.
-- **Proposed Changes**: PR 4: `uploadBackupToDrive(encrypted, filename,
-  accessToken, expenseCount, attachmentCount)` and
-  `saveBackupToDevice(encrypted, filename, expenseCount, attachmentCount)`. Both
-  send `capture("backup_succeeded", { target, expenseCount, attachmentCount,
-  bytes: Math.ceil(encrypted.length / 102_400) * 102_400 })`.
+- **Proposed Changes**: No change. The PR 4 telemetry fields (`attachmentCount`,
+  `bytes`) were dropped in review: backup sizes and photo counts are not sent
+  to PostHog (owner decision, 2026-11-27).
 
 #### 10. `src/lib/driveApi.ts` (Modify)
 
@@ -1153,8 +1149,6 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
   - `[backup.ts:decryptWithStoredPassphrase]` returns `null` only for a
     wrong passphrase (PR 3).
   - Remove `validateImportFile` and the 10 MB sentence (PR 1).
-  - Backup targets take `attachmentCount`, and `backup_succeeded` gains its
-    fields (PR 4).
   - `[receiptPhoto.ts:prepareReceiptPhoto]`, the ladder and
     `MAX_ATTACHMENT_BYTES` (PR 5).
   - Browser APIs `CompressionStream`, `DecompressionStream`,
