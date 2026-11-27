@@ -65,7 +65,7 @@ jobs:
           category: fallow-security
       - name: Health score gate
         if: always()
-        run: bunx fallow health --score --min-score 95
+        run: bunx fallow health --score --min-score 94
 
   check:
     name: Check & unit tests

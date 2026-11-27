@@ -1189,7 +1189,7 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
   PR 2 and PR 5 change UI code, so every error from the repository's
   `shadcn/*` design-system lint rules must be fixed.
 - **CI gates**: `bun run audit:pr` and `bunx fallow health --score
-  --min-score 95` per PR (PR Checks runs both). When either flags a function
+  --min-score 94` per PR (PR Checks runs both). When either flags a function
   this PR changes, add or raise that function's `thresholdOverrides` entry in
   `.fallowrc.json`: set the flagged metric (`maxCrap`, `maxCyclomatic` or
   `maxCognitive`) to the reported value rounded up to the next multiple of 5,
@@ -1199,7 +1199,10 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
   files with more than 10 importers) do. To keep the `@/config` barrel at 10
   importers, `MAX_RESTORE_FILE_BYTES` and `MAX_ATTACHMENT_BYTES` are imported
   from `@/config/limits` in every new consumer (PR 1, PR 5; owner decision,
-  2026-11-27). If a PR still drops the score below 95, stop and ask the owner.
+  2026-11-27). If a PR still drops the score below 94, stop and ask the owner.
+  The gate was 95 until PR 5: `main` reached exactly 95.0 after PR 1, and
+  PR 5's required `attachment_rejected` telemetry import alone drops it to
+  94.9, so the owner lowered the gate to 94 (2026-11-27).
 - **Test Coverage Requirement**: no repository threshold. Each decision in
   `backup.ts` (version check, passphrase check, decrypt failure with and
   without `check`, gunzip failure, compression, fallback) has a case in
