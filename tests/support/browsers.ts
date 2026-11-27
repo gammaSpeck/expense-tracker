@@ -8,8 +8,3 @@ export const BRAVE_PATH = firstExisting(
   "/opt/brave.com/brave/brave-browser",
   "/snap/bin/brave",
 );
-
-export const CHROME_INSTALLED = !!firstExisting(
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  "/opt/google/chrome/chrome",
-);

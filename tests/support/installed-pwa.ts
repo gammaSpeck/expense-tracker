@@ -30,13 +30,13 @@ export type InstalledPwaHandle = {
   isWebkit: boolean;
 };
 
-/** Chromium-family launcher (Brave via executablePath, Chrome via channel) — same recipe both times. */
+/** Brave launched as an installed app window (`--app`), the way the owner installs ExTrack. */
 export async function launchChromiumInstalledPwa(
   userDataDir: string,
-  browserRef: { executablePath?: string; channel?: string },
+  executablePath: string,
 ): Promise<InstalledPwaHandle> {
   const context = await chromium.launchPersistentContext(userDataDir, {
-    ...browserRef,
+    executablePath,
     headless: true,
     args: ["--no-first-run", "--no-default-browser-check", `--app=${BASE_URL}/`],
     ...CHROMIUM_APP_MOBILE_CONTEXT,
@@ -70,7 +70,7 @@ export async function launchWebkitInstalledPwa(userDataDir: string): Promise<Ins
   return { context, page, isWebkit: true };
 }
 
-/** The one journey run by all three specs. Confirmed this session end to end against
+/** The one journey run by both specs (Brave, WebKit). Confirmed this session end to end against
  *  production on the Brave recipe: standalone true, FAB visible via isVisible() (NOT
  *  offsetParent — position:fixed elements report offsetParent===null in Blink), tap
  *  navigates to /add. */

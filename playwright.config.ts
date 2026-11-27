@@ -22,11 +22,10 @@ export default defineConfig({
     {
       name: "chromium-desktop",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /pwa-standalone-.*\.spec\.ts/,
+      testIgnore: /pwa-(standalone-brave|webkit-mobile)\.spec\.ts/,
     },
     { name: "brave-mobile-pwa", testMatch: /pwa-standalone-brave\.spec\.ts/ },
-    { name: "chrome-mobile-pwa", testMatch: /pwa-standalone-chrome\.spec\.ts/ },
-    { name: "safari-mobile-pwa", testMatch: /pwa-standalone-safari\.spec\.ts/ },
+    { name: "webkit-mobile-pwa", testMatch: /pwa-webkit-mobile\.spec\.ts/ },
   ],
   webServer: IS_LOCAL_SERVER
     ? {
