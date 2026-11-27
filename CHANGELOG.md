@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.10.0](https://github.com/gammaSpeck/expense-tracker/compare/v1.9.1...v1.10.0) (2026-11-27)
+
+
+### Features
+
+* **attachments:** keep receipt photos under 0.5 MB ([#99](https://github.com/gammaSpeck/expense-tracker/issues/99)) ([a45b075](https://github.com/gammaSpeck/expense-tracker/commit/a45b07588093245344bb1764871cecd7bfd041dd))
+* **backup:** read compressed backups and explain unreadable ones ([#103](https://github.com/gammaSpeck/expense-tracker/issues/103)) ([275d546](https://github.com/gammaSpeck/expense-tracker/commit/275d54674e8f0ec5719502885b91f75d33fcc415))
+* **backup:** write smaller compressed backups ([#104](https://github.com/gammaSpeck/expense-tracker/issues/104)) ([e5c89e8](https://github.com/gammaSpeck/expense-tracker/commit/e5c89e8d1e4e4b10f1d8e38121e8932426fc8f73))
+* **export:** export plain JSON or CSV only ([#98](https://github.com/gammaSpeck/expense-tracker/issues/98)) ([0e9d364](https://github.com/gammaSpeck/expense-tracker/commit/0e9d364a4a5cf16f764f06c4a45d259346987297))
+
+
+### Bug Fixes
+
+* **backup:** ask before restoring large backups instead of refusing them ([#100](https://github.com/gammaSpeck/expense-tracker/issues/100)) ([c8b0035](https://github.com/gammaSpeck/expense-tracker/commit/c8b003551f167a68288e64a4c7b3575738e620e4))
+
 ## [1.9.1](https://github.com/gammaSpeck/expense-tracker/compare/v1.9.0...v1.9.1) (2026-11-19)
 
 
