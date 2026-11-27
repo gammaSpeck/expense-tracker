@@ -1,0 +1,371 @@
+{
+  "api": {
+    "createImageBitmap": {
+      "__compat": {
+        "mdn_url": "https://developer.mozilla.org/docs/Web/API/Window/createImageBitmap",
+        "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-createimagebitmap-dev",
+        "tags": ["web-features:createimagebitmap"],
+        "support": {
+          "chrome": {
+            "version_added": "50"
+          },
+          "chrome_android": "mirror",
+          "deno": {
+            "version_added": "1.40"
+          },
+          "edge": "mirror",
+          "firefox": {
+            "version_added": "42"
+          },
+          "firefox_android": "mirror",
+          "oculus": "mirror",
+          "opera": "mirror",
+          "opera_android": "mirror",
+          "safari": {
+            "version_added": "15",
+            "impl_url": "https://webkit.org/b/182424"
+          },
+          "safari_ios": "mirror",
+          "samsunginternet_android": "mirror",
+          "webview_android": "mirror",
+          "webview_ios": "mirror"
+        },
+        "status": {
+          "experimental": false,
+          "standard_track": true,
+          "deprecated": false
+        }
+      },
+      "options_colorSpaceConversion_parameter": {
+        "__compat": {
+          "description": "`options.colorSpaceConversion` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-colorspaceconversion",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "58"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "2.2"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "98"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "15"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      },
+      "options_imageOrientation_parameter": {
+        "__compat": {
+          "description": "`options.imageOrientation` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-imageorientation",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "52"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "1.40"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "93"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "15"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        },
+        "from-image": {
+          "__compat": {
+            "description": "Value `from-image`",
+            "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imageorientation-from-image",
+            "tags": ["web-features:createimagebitmap"],
+            "support": {
+              "chrome": {
+                "version_added": "112"
+              },
+              "chrome_android": "mirror",
+              "deno": {
+                "version_added": "1.40"
+              },
+              "edge": "mirror",
+              "firefox": {
+                "version_added": "111"
+              },
+              "firefox_android": "mirror",
+              "oculus": "mirror",
+              "opera": "mirror",
+              "opera_android": "mirror",
+              "safari": {
+                "version_added": "16"
+              },
+              "safari_ios": "mirror",
+              "samsunginternet_android": "mirror",
+              "webview_android": "mirror",
+              "webview_ios": "mirror"
+            },
+            "status": {
+              "experimental": false,
+              "standard_track": true,
+              "deprecated": false
+            }
+          }
+        },
+        "none": {
+          "__compat": {
+            "description": "Value `none`",
+            "support": {
+              "chrome": {
+                "version_added": false
+              },
+              "chrome_android": "mirror",
+              "deno": {
+                "version_added": "1.40"
+              },
+              "edge": "mirror",
+              "firefox": {
+                "version_added": false
+              },
+              "firefox_android": "mirror",
+              "oculus": "mirror",
+              "opera": "mirror",
+              "opera_android": "mirror",
+              "safari": {
+                "version_added": false
+              },
+              "safari_ios": "mirror",
+              "samsunginternet_android": "mirror",
+              "webview_android": "mirror",
+              "webview_ios": "mirror"
+            },
+            "status": {
+              "experimental": true,
+              "standard_track": false,
+              "deprecated": false
+            }
+          }
+        }
+      },
+      "options_premultiplyAlpha_parameter": {
+        "__compat": {
+          "description": "`options.premultiplyAlpha` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-premultiplyalpha",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "52"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "1.40"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "93"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": [
+              {
+                "version_added": "17"
+              },
+              {
+                "version_added": "15",
+                "version_removed": "17",
+                "partial_implementation": true,
+                "notes": "If the source image is an `ImageData` object, then the `premultiplyAlpha` option does nothing. See [bug 237082](https://webkit.org/b/237082)."
+              }
+            ],
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      },
+      "options_resizeHeight_parameter": {
+        "__compat": {
+          "description": "`options.resizeHeight` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-resizeheight",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "54"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "1.40"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "98"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "15"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      },
+      "options_resizeQuality_parameter": {
+        "__compat": {
+          "description": "`options.resizeQuality` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-resizequality",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "54"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "1.40"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "149"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "15"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      },
+      "options_resizeWidth_parameter": {
+        "__compat": {
+          "description": "`options.resizeWidth` parameter",
+          "spec_url": "https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#dom-imagebitmapoptions-resizewidth",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "54"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": "1.40"
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "98"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "15"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      },
+      "svgimageelement_as_source_image": {
+        "__compat": {
+          "description": "`SVGImageElement` as source image",
+          "spec_url": "https://html.spec.whatwg.org/multipage/canvas.html#canvasimagesource",
+          "tags": ["web-features:createimagebitmap"],
+          "support": {
+            "chrome": {
+              "version_added": "59"
+            },
+            "chrome_android": "mirror",
+            "deno": {
+              "version_added": false
+            },
+            "edge": "mirror",
+            "firefox": {
+              "version_added": "65"
+            },
+            "firefox_android": "mirror",
+            "oculus": "mirror",
+            "opera": "mirror",
+            "opera_android": "mirror",
+            "safari": {
+              "version_added": "17.2"
+            },
+            "safari_ios": "mirror",
+            "samsunginternet_android": "mirror",
+            "webview_android": "mirror",
+            "webview_ios": "mirror"
+          },
+          "status": {
+            "experimental": false,
+            "standard_track": true,
+            "deprecated": false
+          }
+        }
+      }
+    }
+  }
+}

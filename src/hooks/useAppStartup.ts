@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { initializeDatabase, requestPersistentStorage } from "@/db/expenseTrackerDb";
+import { userPreferences } from "@/db/userPreferences";
 import { capture, captureError } from "@/lib/telemetry";
 
 export function useAppStartup() {
@@ -13,6 +14,14 @@ export function useAppStartup() {
         const persisted = await requestPersistentStorage().catch(() => false);
         const state = await initializeDatabase();
         capture("app_opened", { persisted, startup: state.status });
+
+        const interruptedRestore = userPreferences.takeInterruptedRestore();
+        if (interruptedRestore) {
+          capture("import_failed", { stage: "crash", ...interruptedRestore });
+          toast.warning(
+            "Your last restore didn't finish. The file may be too large for this device's memory. Try restoring it on a computer.",
+          );
+        }
 
         if (!persisted) {
           // Hard navigation (not `navigate()`) — this fires before the router's

@@ -67,8 +67,3 @@ export function buildImportPreview(jsonText: string): ImportPreview | null {
     return null;
   }
 }
-
-export function validateImportFile(file: File): string | null {
-  if (file.size > 10 * 1024 * 1024) return "File too large (max 10 MB)";
-  return null;
-}

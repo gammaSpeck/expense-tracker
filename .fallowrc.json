@@ -72,10 +72,16 @@
         "reason": "Two optional restore warnings (skipped records, expenses moved to Others) with pluralized copy; coverage-blind CRAP on a presentational panel."
       },
       {
+        "files": ["src/hooks/useAppStartup.ts"],
+        "functions": ["<arrow>"],
+        "maxCrap": 35,
+        "reason": "Startup effect: persisted-storage warning, data-loss dialog, startup-failure catch, plus the unfinished-restore marker toast and crash telemetry; coverage-blind CRAP on independent startup checks."
+      },
+      {
         "files": ["src/hooks/useBackupAction.ts"],
         "functions": ["handleBackup"],
-        "maxCrap": 75,
-        "reason": "Drive-vs-device destination branching plus session-expired vs generic auth-error classification -- necessary error handling, not a code smell."
+        "maxCrap": 95,
+        "reason": "Drive-vs-device destination branching plus session-expired vs generic auth-error classification, plus the over-restore-threshold size warning after a successful save -- necessary error handling, not a code smell."
       },
       {
         "files": ["src/hooks/useBackupReminderSchedule.ts"],
@@ -97,15 +103,22 @@
       },
       {
         "files": ["src/hooks/useEncryptedFileImport.ts"],
+        "functions": ["readAndCheckFile"],
+        "maxCrap": 45,
+        "reason": "Large-file confirm and its cancel, the read-failure catch with its too-large vs couldn't-read message, and the non-ExTrack-file check; coverage-blind CRAP on necessary import validation."
+      },
+      {
+        "files": ["src/hooks/useEncryptedFileImport.ts"],
         "functions": ["performFileSelect"],
-        "maxCrap": 60,
-        "reason": "File-check error / null-decrypt / resolvePlaintext-result branches plus the stale-selection guards after each await (Cancel or a newer file must win); necessary import validation."
+        "maxCognitive": 20,
+        "maxCrap": 135,
+        "reason": "File-check error / null-decrypt / resolvePlaintext-result branches plus the stale-selection guards after each await (Cancel or a newer file must win), plus the large-file confirm-cancelled branch, the too-large message on an invalid large file and the read-error catch with its restore-marker finally; necessary import validation."
       },
       {
         "files": ["src/hooks/useEncryptedFileImport.ts"],
         "functions": ["performManualDecrypt"],
-        "maxCrap": 45,
-        "reason": "not-backup / invalid / ok result branches, decrypt-error toast, and the stale-attempt guards that keep a cancelled decrypt from surfacing a preview or error; necessary import flow."
+        "maxCrap": 60,
+        "reason": "not-backup / invalid / ok result branches, decrypt-error toast, and the stale-attempt guards that keep a cancelled decrypt from surfacing a preview or error, plus the too-large message on an invalid large file; necessary import flow."
       },
       {
         "files": ["src/hooks/useExpenseFormController.ts"],

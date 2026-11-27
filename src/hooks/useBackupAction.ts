@@ -5,6 +5,7 @@
 // response for the file this app just uploaded, always a
 // https://drive.google.com/... URL.
 import { useState } from "react";
+import { MAX_RESTORE_FILE_BYTES } from "@/config/limits";
 import { exportAllData } from "@/db/expenseTrackerDb";
 import { createEncryptedBackupFile } from "@/lib/backup";
 import { captureError } from "@/lib/telemetry";
@@ -62,6 +63,12 @@ export function useBackupAction(onSuccess: (() => void) | undefined, onDone: () 
         });
       } else {
         saveBackupToDevice(encrypted, filename, data.expenses.length);
+      }
+
+      if (encrypted.length > MAX_RESTORE_FILE_BYTES) {
+        const mb = (encrypted.length / (1024 * 1024)).toFixed(1);
+        const warning = `This backup is ${mb} MB. Restoring it may fail on phones with little memory.`;
+        toast.warning(warning, { duration: 15_000 });
       }
 
       setSaveTo("device");
