@@ -246,6 +246,18 @@
         "functions": ["<arrow>"],
         "maxCrap": 35,
         "reason": "IconPicker's per-icon map callback: missing-icon guard, selected-state class/style branches; coverage-blind CRAP on a presentational grid renderer, not accidental complexity."
+      },
+      {
+        "files": ["src/lib/receiptPhoto.ts"],
+        "functions": ["prepareReceiptPhoto"],
+        "maxCrap": 60,
+        "reason": "Receipt photo pipeline: decode failure (HEIC unsupported vs unreadable), three-step resize ladder, non-JPEG/null blob guard, size-cap check, too-large fallthrough and bitmap.close in finally; coverage-blind CRAP, each branch is a distinct rejection reason."
+      },
+      {
+        "files": ["src/hooks/useImageAttachment.ts"],
+        "functions": ["handleImageUpload"],
+        "maxCrap": 35,
+        "reason": "No-file guard, success vs rejection, and ReceiptPhotoError-reason vs unreadable fallback for the toast and attachment_rejected telemetry; coverage-blind CRAP."
       }
     ]
   },

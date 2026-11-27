@@ -164,7 +164,6 @@ bun run audit:pr          # PR-gate verdict, scoped to changed files (what CI ru
 - **Lucide React** (icons)
 - **Recharts** (charts)
 - **date-fns** (date utils)
-- **browser-image-compression** (attachments)
 - **React Hook Form + Zod** (forms/validation)
 
 ---

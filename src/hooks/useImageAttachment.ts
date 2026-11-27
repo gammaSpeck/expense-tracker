@@ -1,8 +1,21 @@
 import { useState } from "react";
 import type { UseFormSetValue } from "react-hook-form";
-import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import { ExpenseFormData } from "@/types/expense";
+import {
+  prepareReceiptPhoto,
+  ReceiptPhotoError,
+  type ReceiptPhotoRejection,
+} from "@/lib/receiptPhoto";
+import { capture } from "@/lib/telemetry";
+
+const REJECTION_MESSAGES: Record<ReceiptPhotoRejection, string> = {
+  "too-large":
+    "This photo is too detailed to save under 0.5 MB. Crop closer to the receipt and try again.",
+  unsupported:
+    "This browser can't open HEIC photos. Take a screenshot of the photo or save it as a JPEG, then try again.",
+  unreadable: "Couldn't open this photo. Try a JPEG or PNG, or take a screenshot of it.",
+};
 
 export function useImageAttachment(
   setValue: UseFormSetValue<ExpenseFormData>,
@@ -11,26 +24,19 @@ export function useImageAttachment(
   const [imagePreview, setImagePreview] = useState<string | undefined>(initialAttachment);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
 
     try {
-      const options = {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-      };
-      const compressed = await imageCompression(file, options);
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        setValue("attachment", base64);
-        setImagePreview(base64);
-      };
-      reader.readAsDataURL(compressed);
-    } catch {
-      toast.error("Failed to compress image");
+      const dataUrl = await prepareReceiptPhoto(file);
+      setValue("attachment", dataUrl);
+      setImagePreview(dataUrl);
+    } catch (err) {
+      input.value = "";
+      const reason = err instanceof ReceiptPhotoError ? err.reason : "unreadable";
+      capture("attachment_rejected", { reason });
+      toast.error(REJECTION_MESSAGES[reason]);
     }
   };
 
