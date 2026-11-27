@@ -123,6 +123,9 @@ test.describe("data-management", () => {
     await gotoApp(page, "/settings/data");
     await seedExpenses(page, thisMonthWithAdhoc());
     const backupContent = await backupToDevice(page, "correcthorse123");
+    const wrapper = JSON.parse(backupContent);
+    expect(wrapper.version).toBe("2");
+    expect(wrapper.check).toEqual(expect.any(String));
 
     // Factory reset wipes data, categories, and the stored passphrase.
     await page.getByRole("button", { name: "Factory Reset" }).click();
@@ -462,5 +465,18 @@ test.describe("data-management", () => {
       ),
     ).toBeVisible();
     await expect(page.getByPlaceholder("Enter backup passphrase")).toHaveCount(0);
+  });
+
+  test("a browser without CompressionStream writes a version-1 backup with a check", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Reflect.deleteProperty(window, "CompressionStream");
+    });
+    await gotoApp(page, "/settings/data");
+    await seedExpenses(page, thisMonthWithAdhoc());
+    const wrapper = JSON.parse(await backupToDevice(page, "correcthorse123"));
+    expect(wrapper.version).toBe("1");
+    expect(wrapper.check).toEqual(expect.any(String));
   });
 });

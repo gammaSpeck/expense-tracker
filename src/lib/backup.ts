@@ -81,6 +81,14 @@ async function gunzip(bytes: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayB
   );
 }
 
+async function gzip(bytes: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
+  return new Uint8Array(
+    await new Response(
+      new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip")),
+    ).arrayBuffer(),
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Public passphrase management
 // ---------------------------------------------------------------------------
@@ -121,23 +129,36 @@ export function buildBackupEnvelope(data: { expenses: Expense[]; categories: Cat
 export async function encryptData(plaintext: string, passphrase: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array<ArrayBuffer>;
   const iv = crypto.getRandomValues(new Uint8Array(12)) as Uint8Array<ArrayBuffer>;
+  const checkIv = crypto.getRandomValues(new Uint8Array(12)) as Uint8Array<ArrayBuffer>;
   const key = await deriveKey(passphrase, salt);
+  const bytes = new TextEncoder().encode(plaintext) as Uint8Array<ArrayBuffer>;
 
+  // ponytail: version-1 fallback for browsers below the supported minimum (Chrome 112,
+  // Firefox 113, Safari/iOS 16.4); remove when backups from such browsers stop appearing.
+  const compress = typeof CompressionStream !== "undefined";
   const ciphertext = await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
-    new TextEncoder().encode(plaintext),
+    compress ? await gzip(bytes) : bytes,
+  );
+  // Passphrase check: its own IV followed by AES-GCM("extrack"), so the reader can tell a
+  // wrong passphrase from a failure inside the ciphertext decrypt.
+  const check = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv: checkIv },
+    key,
+    new TextEncoder().encode("extrack"),
   );
 
   const envelope: ExtrackEnvelope = {
     format: "extrack-encrypted-backup",
-    version: "1",
+    version: compress ? "2" : "1",
     algorithm: "AES-GCM",
     kdf: "PBKDF2-SHA256",
     iterations: ITERATIONS,
     salt: b64uEncode(salt),
     iv: b64uEncode(iv),
     ciphertext: b64uEncode(new Uint8Array(ciphertext) as Uint8Array<ArrayBuffer>),
+    check: b64uEncode(new Uint8Array([...checkIv, ...new Uint8Array(check)])),
   };
 
   return JSON.stringify(envelope, null, 2);

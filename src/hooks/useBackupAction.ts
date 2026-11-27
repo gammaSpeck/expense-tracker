@@ -27,6 +27,7 @@ export function useBackupAction(onSuccess: (() => void) | undefined, onDone: () 
     try {
       const data = await exportAllData();
       const { filename, encrypted } = await createEncryptedBackupFile(data);
+      const attachmentCount = data.expenses.filter((e) => e.attachment).length;
 
       if (saveTo === "drive") {
         let accessToken: string;
@@ -52,6 +53,7 @@ export function useBackupAction(onSuccess: (() => void) | undefined, onDone: () 
           filename,
           accessToken,
           data.expenses.length,
+          attachmentCount,
         );
         if (!result) return;
 
@@ -62,7 +64,7 @@ export function useBackupAction(onSuccess: (() => void) | undefined, onDone: () 
           },
         });
       } else {
-        saveBackupToDevice(encrypted, filename, data.expenses.length);
+        saveBackupToDevice(encrypted, filename, data.expenses.length, attachmentCount);
       }
 
       if (encrypted.length > MAX_RESTORE_FILE_BYTES) {

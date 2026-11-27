@@ -16,6 +16,7 @@ export async function uploadBackupToDrive(
   filename: string,
   accessToken: string,
   expenseCount: number,
+  attachmentCount: number,
 ): Promise<{ webViewLink: string } | null> {
   const blob = new Blob([encrypted], { type: "application/octet-stream" });
   const creds = await getDriveCredentials();
@@ -29,7 +30,12 @@ export async function uploadBackupToDrive(
   const { webViewLink } = await uploadFileToDrive(blob, filename, folderID, accessToken);
 
   markBackupCompleted("drive");
-  capture("backup_succeeded", { target: "drive", expenseCount });
+  capture("backup_succeeded", {
+    target: "drive",
+    expenseCount,
+    attachmentCount,
+    bytes: Math.ceil(encrypted.length / 102_400) * 102_400,
+  });
   return { webViewLink };
 }
 
@@ -37,10 +43,16 @@ export function saveBackupToDevice(
   encrypted: string,
   filename: string,
   expenseCount: number,
+  attachmentCount: number,
 ): void {
   downloadFile(encrypted, filename, "application/octet-stream");
 
   markBackupCompleted("device");
-  capture("backup_succeeded", { target: "device", expenseCount });
+  capture("backup_succeeded", {
+    target: "device",
+    expenseCount,
+    attachmentCount,
+    bytes: Math.ceil(encrypted.length / 102_400) * 102_400,
+  });
   toast.success("Backup saved to device");
 }

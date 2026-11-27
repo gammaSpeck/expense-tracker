@@ -93,16 +93,18 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
   ```json
   {
     "format": "extrack-encrypted-backup",
-    "version": "1",
+    "version": "2",
     "algorithm": "AES-GCM",
     "kdf": "PBKDF2-SHA256",
     "iterations": 600000,
     "salt": "<base64url-16bytes>",
     "iv": "<base64url-12bytes>",
-    "ciphertext": "<base64url>"
+    "ciphertext": "<base64url>",
+    "check": "<base64url>"
   }
   ```
 - **Forward compatibility**: iterations are stored per-file so future algorithm upgrades don't break old files
+- **Versions**: new backups are version `"2"` (gzip-compressed before encryption) and carry `check`, a small encrypted passphrase check; version `"1"` files (no compression, and no `check` before 1.10.0) are still read
 - **Unknown versions**: a backup whose `version` this app does not know (made by a newer ExTrack) is rejected when the file is picked, before any passphrase prompt; a version this browser cannot read gets a needs-newer-browser message
 - **Passphrase UX** (Encryption card):
   - **Unset state**: shows `Passphrase: Unset` with a "Set Passphrase" button; clicking opens the setup modal
@@ -115,6 +117,7 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
 #### Backup
 
 - **Always encrypted** — backups are written as `.extrack` files; no plaintext backup pathway exists
+- **Compressed before encryption** — the backup data is gzip-compressed, then encrypted; a browser without `CompressionStream` (below Chrome 80, Firefox 113, Safari 16.4) writes an uncompressed version-1 file instead
 - **Save to device** or **Google Drive** (when connected)
 - **Drive not connected**: shows a "Connect Drive" button that starts the OAuth flow inline — no separate settings screen required
 - **Filename convention**: `extrack-backup-YYYY-MM-DD.extrack`
@@ -157,7 +160,7 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
 - **`.extrack` files only** — only encrypted backup files can be imported (plain JSON exports are not importable)
 - **Auto-decrypt**: if a passphrase is stored, decryption happens silently on file selection
 - **Manual passphrase fallback**: if no passphrase is stored (new device) or the stored one is wrong, a passphrase input is shown; the file stays loaded so the user can retry without re-selecting
-- **Wrong passphrase detection**: AES-GCM authentication tag failure maps to a clear "Wrong passphrase — try again" error
+- **Wrong passphrase detection**: the file's passphrase check maps a wrong passphrase to a clear "Wrong passphrase — try again" error, distinct from a damaged file; files without a check (made before 1.10.0) keep today's behaviour, where any AES-GCM authentication tag failure reads as a wrong passphrase
 - **CSV export guard**: encrypted CSV exports from older versions show an error ("This file is an encrypted CSV export from an older version and can't be restored.") and are rejected
 - **Two merge modes** (Override is default):
   - **Override**: Replace all existing data

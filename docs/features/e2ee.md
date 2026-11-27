@@ -1,6 +1,6 @@
 # Plan: E2EE Backup Encryption
 
-> Export encryption was later removed; Export now saves plain files only ([design](designs/smaller-encrypted-backups-and-bounded-receipt-photos.md)).
+> Export encryption was later removed; Export now saves plain files only ([design](designs/smaller-encrypted-backups-and-bounded-receipt-photos.md)). The backup format is now version 2.
 
 ## Decisions Made
 

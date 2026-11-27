@@ -33,6 +33,15 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.10.0-smaller-backups",
+    version: "1.10.0",
+    date: "2026-11-27",
+    type: "improved",
+    title: "Backups are smaller",
+    body: "Backup files are now smaller, and older backups still restore. Update ExTrack on any device before restoring a new backup there.",
+  },
+
+  {
     id: "1.10.0-photo-limit",
     version: "1.10.0",
     date: "2026-11-27",

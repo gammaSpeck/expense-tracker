@@ -157,13 +157,14 @@ Every backup is saved as a `.extrack` file, a self-describing JSON envelope:
 ```json
 {
   "format": "extrack-encrypted-backup",
-  "version": "1",
+  "version": "2",
   "algorithm": "AES-GCM",
   "kdf": "PBKDF2-SHA256",
   "iterations": 600000,
   "salt": "<base64url : 16 bytes>",
   "iv": "<base64url : 12 bytes>",
-  "ciphertext": "<base64url>"
+  "ciphertext": "<base64url>",
+  "check": "<base64url>"
 }
 ```
 
