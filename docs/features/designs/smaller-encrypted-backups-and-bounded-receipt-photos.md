@@ -739,7 +739,11 @@ contract docs"; they are not part of any PR.
       backups from such browsers stop appearing. Both branches add
       `check`: a fresh random 12-byte IV followed by AES-GCM(key, IV,
       UTF-8 `"extrack"`), base64url-encoded.
-  - Unchanged: `buildBackupEnvelope`, the key derivation, `ITERATIONS`.
+  - Unchanged: `buildBackupEnvelope`, the key derivation (PBKDF2-SHA256,
+    AES-GCM 256), `ITERATIONS`. In PR 3, `decryptData` calls the private
+    `deriveKey` with the file's `iterations` (a new optional parameter that
+    defaults to `ITERATIONS`) instead of its inline copy of the same
+    derivation; this keeps `decryptData` under fallow's 60-line unit size.
 
 #### 3. `src/lib/importPreview.ts` (Modify)
 

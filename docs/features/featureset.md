@@ -103,6 +103,7 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
   }
   ```
 - **Forward compatibility**: iterations are stored per-file so future algorithm upgrades don't break old files
+- **Unknown versions**: a backup whose `version` this app does not know (made by a newer ExTrack) is rejected when the file is picked, before any passphrase prompt; a version this browser cannot read gets a needs-newer-browser message
 - **Passphrase UX** (Encryption card):
   - **Unset state**: shows `Passphrase: Unset` with a "Set Passphrase" button; clicking opens the setup modal
   - **Set state**: shows masked `●●●●●●●●●●●●` with an Eye icon (reveal) and Pencil icon (change)
@@ -155,7 +156,7 @@ All backups are always end-to-end encrypted. No unencrypted backup file ever lea
 
 - **`.extrack` files only** — only encrypted backup files can be imported (plain JSON exports are not importable)
 - **Auto-decrypt**: if a passphrase is stored, decryption happens silently on file selection
-- **Manual passphrase fallback**: if no passphrase is stored (new device) or auto-decrypt fails, a passphrase input is shown; the file stays loaded so the user can retry without re-selecting
+- **Manual passphrase fallback**: if no passphrase is stored (new device) or the stored one is wrong, a passphrase input is shown; the file stays loaded so the user can retry without re-selecting
 - **Wrong passphrase detection**: AES-GCM authentication tag failure maps to a clear "Wrong passphrase — try again" error
 - **CSV export guard**: encrypted CSV exports from older versions show an error ("This file is an encrypted CSV export from an older version and can't be restored.") and are rejected
 - **Two merge modes** (Override is default):
