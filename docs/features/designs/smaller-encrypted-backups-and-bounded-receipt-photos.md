@@ -995,6 +995,7 @@ contract docs"; they are not part of any PR.
   | 7   | 3   | `readEnvelopeVersion`                                                                                                            | `"2"` for a wrapper; `null` for `{"foo":1}`, a wrong `format`, a numeric `version`, and non-JSON text                                                                                                                              |
   | 8   | 4   | writer round trip                                                                                                                | `encryptData(json, pass)` yields `version` `"2"` and a `check`; `decryptData` returns the original; for 200 repeated rows the wrapper is under half the plaintext length                                                           |
   | 9   | 4   | fallback with `globalThis.CompressionStream` removed for the test                                                                | yields `version` `"1"` with a `check`; `decryptData` returns the original                                                                                                                                                          |
+  | 10  | 3   | `decryptWithStoredPassphrase` with `idb-keyval` mocked (added in review)                                                         | `null` for a wrong stored passphrase; rejects with "Backup could not be decrypted" when the check passes and one ciphertext byte is flipped                                                                                        |
 
 #### 20. `tests/fixtures/backup-v1.extrack` (Create)
 
@@ -1182,7 +1183,7 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
 ### Verification Plan
 
 - **Compilation/Build**: `bun run build` per PR.
-- **Unit Tests**: `bun run test`. PR 3 adds file 19 cases 1–7; PR 4 adds
+- **Unit Tests**: `bun run test`. PR 3 adds file 19 cases 1–7 and 10; PR 4 adds
   cases 8–9.
 - **Static Analysis & Linting**: `bun run check` and `bun run lint` per PR. PR 1,
   PR 2 and PR 5 change UI code, so every error from the repository's

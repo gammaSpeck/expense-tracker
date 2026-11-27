@@ -1,15 +1,25 @@
 import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
-import { describe, expect, it } from "vite-plus/test";
+import { describe, expect, it, vi } from "vite-plus/test";
 import {
   NEWER_VERSION_MESSAGE,
   WRONG_PASSPHRASE_MESSAGE,
   b64uDecode,
   b64uEncode,
   decryptData,
+  decryptWithStoredPassphrase,
   readEnvelopeVersion,
 } from "@/lib/backup";
 import { buildImportPreview } from "@/lib/importPreview";
+
+// decryptWithStoredPassphrase reads the stored passphrase from IndexedDB through idb-keyval.
+const stored = vi.hoisted(() => ({ passphrase: undefined as string | undefined }));
+vi.mock("idb-keyval", () => ({
+  createStore: () => ({}),
+  get: async () => stored.passphrase,
+  set: async () => {},
+  del: async () => {},
+}));
 
 const PASSPHRASE = "correcthorse123";
 const TEXT = JSON.stringify({ exportDate: "2026-01-01", version: "1.0", expenses: [] });
@@ -148,5 +158,27 @@ describe("readEnvelopeVersion", () => {
     expect(readEnvelopeVersion(JSON.stringify({ ...wrapper, format: "other" }))).toBeNull();
     expect(readEnvelopeVersion(JSON.stringify({ ...wrapper, version: 2 }))).toBeNull();
     expect(readEnvelopeVersion("not json")).toBeNull();
+  });
+});
+
+describe("decryptWithStoredPassphrase", () => {
+  const v2Wrapper = () =>
+    buildWrapper({ version: "2", passphrase: PASSPHRASE, plaintext: gzip(TEXT), check: true });
+
+  it("returns null for a wrong stored passphrase, so the typed-passphrase prompt appears", async () => {
+    stored.passphrase = "wrong-passphrase";
+    const wrapper = await v2Wrapper();
+    await expect(decryptWithStoredPassphrase(JSON.stringify(wrapper))).resolves.toBeNull();
+  });
+
+  it("throws instead of prompting when the check passes and the ciphertext fails", async () => {
+    stored.passphrase = PASSPHRASE;
+    const wrapper = await v2Wrapper();
+    const bytes = b64uDecode(wrapper.ciphertext);
+    bytes[0] ^= 1;
+    wrapper.ciphertext = b64uEncode(bytes);
+    await expect(decryptWithStoredPassphrase(JSON.stringify(wrapper))).rejects.toThrow(
+      new Error("Backup could not be decrypted"),
+    );
   });
 });
