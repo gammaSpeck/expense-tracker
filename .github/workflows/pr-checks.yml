@@ -9,10 +9,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect code changes
+    # Release PRs only bump package.json and CHANGELOG.md; their code was already tested on main.
+    if: ${{ !startsWith(github.head_ref, 'release-please--') }}
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      isCodeChanged: ${{ steps.diff.outputs.isCodeChanged }}
+    steps:
+      - id: diff
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.number }}
+          TARGET_REPO: ${{ github.repository }}
+        run: |
+          # Docs and CI-only changes skip E2E; the E2E pipeline's own files still count as code.
+          non_code='\.md$|^docs/|^graft/|^LICENSE$|^\.github/'
+          e2e_tooling='^\.github/(workflows/(e2e|pr-checks)\.yml|actions/e2e-setup/)'
+          if ! files=$(gh pr diff "$PR" --repo "$TARGET_REPO" --name-only); then
+            echo "Could not list changed files; running E2E to be safe."
+            echo "isCodeChanged=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          code_count=$(printf '%s\n' "$files" | grep -Evc "$non_code" || true)
+          tooling_count=$(printf '%s\n' "$files" | grep -Ec "$e2e_tooling" || true)
+          if [ "$code_count" -gt 0 ] || [ "$tooling_count" -gt 0 ]; then
+            echo "isCodeChanged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Only docs/CI files changed; skipping E2E."
+            echo "isCodeChanged=false" >> "$GITHUB_OUTPUT"
+          fi
+
   e2e:
-    if: >-
-      startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/') ||
-      github.actor == 'dependabot[bot]'
+    needs: changes
+    if: needs.changes.outputs.isCodeChanged == 'true'
     uses: ./.github/workflows/e2e.yml
     with:
       environment: local
