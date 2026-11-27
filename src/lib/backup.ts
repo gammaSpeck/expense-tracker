@@ -20,14 +20,20 @@ const ITERATIONS = 600_000;
 
 interface ExtrackEnvelope {
   format: "extrack-encrypted-backup";
-  version: "1";
+  version: string;
   algorithm: "AES-GCM";
   kdf: "PBKDF2-SHA256";
   iterations: number;
   salt: string;
   iv: string;
   ciphertext: string;
+  check?: string;
 }
+
+export const KNOWN_BACKUP_VERSIONS: readonly string[] = ["1", "2"];
+export const NEWER_VERSION_MESSAGE =
+  "This backup was made by a newer version of ExTrack. Close and reopen the app, and accept the update if asked.";
+export const WRONG_PASSPHRASE_MESSAGE = "Wrong passphrase — decryption failed";
 
 const B64_CHUNK = 0x8000; // 32 KiB of args per call — far under any engine's argument limit
 
@@ -45,7 +51,11 @@ export function b64uDecode(str: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0)) as Uint8Array<ArrayBuffer>;
 }
 
-async function deriveKey(passphrase: string, salt: Uint8Array<ArrayBuffer>): Promise<CryptoKey> {
+async function deriveKey(
+  passphrase: string,
+  salt: Uint8Array<ArrayBuffer>,
+  iterations = ITERATIONS,
+): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -55,11 +65,19 @@ async function deriveKey(passphrase: string, salt: Uint8Array<ArrayBuffer>): Pro
     ["deriveKey"],
   );
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations: ITERATIONS },
+    { name: "PBKDF2", hash: "SHA-256", salt, iterations },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
     ["encrypt", "decrypt"],
+  );
+}
+
+async function gunzip(bytes: Uint8Array<ArrayBuffer>): Promise<Uint8Array<ArrayBuffer>> {
+  return new Uint8Array(
+    await new Response(
+      new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip")),
+    ).arrayBuffer(),
   );
 }
 
@@ -100,10 +118,7 @@ export function buildBackupEnvelope(data: { expenses: Expense[]; categories: Cat
 // Encrypt / Decrypt
 // ---------------------------------------------------------------------------
 
-export async function encryptData(plaintext: string): Promise<string> {
-  const passphrase = await getStoredPassphrase();
-  if (!passphrase) throw new Error("No encryption passphrase set");
-
+export async function encryptData(plaintext: string, passphrase: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array<ArrayBuffer>;
   const iv = crypto.getRandomValues(new Uint8Array(12)) as Uint8Array<ArrayBuffer>;
   const key = await deriveKey(passphrase, salt);
@@ -139,6 +154,10 @@ export async function decryptData(encryptedJson: string, passphrase?: string): P
   if (envelope.format !== "extrack-encrypted-backup") {
     throw new Error("Not an encrypted backup file");
   }
+  // Before key derivation, so an unknown version never costs the 600,000-iteration PBKDF2.
+  if (!KNOWN_BACKUP_VERSIONS.includes(envelope.version)) {
+    throw new Error(NEWER_VERSION_MESSAGE);
+  }
 
   const resolvedPassphrase = passphrase ?? (await getStoredPassphrase());
   if (!resolvedPassphrase) throw new Error("No passphrase provided");
@@ -147,46 +166,64 @@ export async function decryptData(encryptedJson: string, passphrase?: string): P
   const iv = b64uDecode(envelope.iv);
   const ciphertext = b64uDecode(envelope.ciphertext);
 
-  // Use iterations stored in the file for forward-compatibility
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(resolvedPassphrase),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
-  const key = await crypto.subtle.deriveKey(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations: envelope.iterations },
-    keyMaterial,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["decrypt"],
-  );
+  // The file's own iteration count, for forward-compatibility.
+  const key = await deriveKey(resolvedPassphrase, salt, envelope.iterations);
 
+  if (envelope.check) {
+    // The GCM tag authenticates the check, so a successful decrypt proves the passphrase.
+    const check = b64uDecode(envelope.check);
+    try {
+      await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: check.subarray(0, 12) },
+        key,
+        check.subarray(12),
+      );
+    } catch {
+      throw new Error(WRONG_PASSPHRASE_MESSAGE);
+    }
+  }
+
+  let plaintext: Uint8Array<ArrayBuffer>;
   try {
-    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
-    return new TextDecoder().decode(plaintext);
+    plaintext = new Uint8Array(
+      await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext),
+    );
   } catch {
-    throw new Error("Wrong passphrase — decryption failed");
+    // Without a check, a failed decrypt cannot tell a wrong passphrase from anything else.
+    throw new Error(envelope.check ? "Backup could not be decrypted" : WRONG_PASSPHRASE_MESSAGE);
+  }
+
+  if (envelope.version === "2") {
+    try {
+      plaintext = await gunzip(plaintext);
+    } catch {
+      throw new Error("Backup decrypted but could not be unpacked");
+    }
+  }
+  return new TextDecoder().decode(plaintext);
+}
+
+/** The wrapper's `version` when `content` is an ExTrack encrypted backup, else `null`. */
+export function readEnvelopeVersion(content: string): string | null {
+  try {
+    const parsed = JSON.parse(content) as { format?: unknown; version?: unknown };
+    return parsed.format === "extrack-encrypted-backup" && typeof parsed.version === "string"
+      ? parsed.version
+      : null;
+  } catch {
+    return null;
   }
 }
 
-export function isEncryptedFile(content: string): boolean {
-  try {
-    const parsed = JSON.parse(content) as { format?: string };
-    return parsed.format === "extrack-encrypted-backup";
-  } catch {
-    return false;
-  }
-}
-
+/** `null` when no passphrase is stored or it is wrong; every other error is re-thrown. */
 export async function decryptWithStoredPassphrase(text: string): Promise<string | null> {
   const stored = await getStoredPassphrase();
   if (!stored) return null;
   try {
     return await decryptData(text, stored);
-  } catch {
-    return null;
+  } catch (err) {
+    if (err instanceof Error && err.message === WRONG_PASSPHRASE_MESSAGE) return null;
+    throw err;
   }
 }
 
@@ -196,7 +233,9 @@ export async function createEncryptedBackupFile(data: {
 }): Promise<{ filename: string; encrypted: string }> {
   const dateToken = format(new Date(), "yyyy-MM-dd");
   const filename = `extrack-backup-${dateToken}.extrack`;
-  const encrypted = await encryptData(buildBackupEnvelope(data));
+  const passphrase = await getStoredPassphrase();
+  if (!passphrase) throw new Error("No encryption passphrase set");
+  const encrypted = await encryptData(buildBackupEnvelope(data), passphrase);
   return { filename, encrypted };
 }
 

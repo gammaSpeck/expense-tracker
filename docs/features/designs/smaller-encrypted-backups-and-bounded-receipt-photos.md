@@ -739,7 +739,11 @@ contract docs"; they are not part of any PR.
       backups from such browsers stop appearing. Both branches add
       `check`: a fresh random 12-byte IV followed by AES-GCM(key, IV,
       UTF-8 `"extrack"`), base64url-encoded.
-  - Unchanged: `buildBackupEnvelope`, the key derivation, `ITERATIONS`.
+  - Unchanged: `buildBackupEnvelope`, the key derivation (PBKDF2-SHA256,
+    AES-GCM 256), `ITERATIONS`. In PR 3, `decryptData` calls the private
+    `deriveKey` with the file's `iterations` (a new optional parameter that
+    defaults to `ITERATIONS`) instead of its inline copy of the same
+    derivation; this keeps `decryptData` under fallow's 60-line unit size.
 
 #### 3. `src/lib/importPreview.ts` (Modify)
 
@@ -991,6 +995,7 @@ contract docs"; they are not part of any PR.
   | 7   | 3   | `readEnvelopeVersion`                                                                                                            | `"2"` for a wrapper; `null` for `{"foo":1}`, a wrong `format`, a numeric `version`, and non-JSON text                                                                                                                              |
   | 8   | 4   | writer round trip                                                                                                                | `encryptData(json, pass)` yields `version` `"2"` and a `check`; `decryptData` returns the original; for 200 repeated rows the wrapper is under half the plaintext length                                                           |
   | 9   | 4   | fallback with `globalThis.CompressionStream` removed for the test                                                                | yields `version` `"1"` with a `check`; `decryptData` returns the original                                                                                                                                                          |
+  | 10  | 3   | `decryptWithStoredPassphrase` with `idb-keyval` mocked (added in review)                                                         | `null` for a wrong stored passphrase; rejects with "Backup could not be decrypted" when the check passes and one ciphertext byte is flipped                                                                                        |
 
 #### 20. `tests/fixtures/backup-v1.extrack` (Create)
 
@@ -1178,13 +1183,13 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
 ### Verification Plan
 
 - **Compilation/Build**: `bun run build` per PR.
-- **Unit Tests**: `bun run test`. PR 3 adds file 19 cases 1–7; PR 4 adds
+- **Unit Tests**: `bun run test`. PR 3 adds file 19 cases 1–7 and 10; PR 4 adds
   cases 8–9.
 - **Static Analysis & Linting**: `bun run check` and `bun run lint` per PR. PR 1,
   PR 2 and PR 5 change UI code, so every error from the repository's
   `shadcn/*` design-system lint rules must be fixed.
 - **CI gates**: `bun run audit:pr` and `bunx fallow health --score
-  --min-score 95` per PR (PR Checks runs both). When either flags a function
+  --min-score 94` per PR (PR Checks runs both). When either flags a function
   this PR changes, add or raise that function's `thresholdOverrides` entry in
   `.fallowrc.json`: set the flagged metric (`maxCrap`, `maxCyclomatic` or
   `maxCognitive`) to the reported value rounded up to the next multiple of 5,
@@ -1194,7 +1199,10 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
   files with more than 10 importers) do. To keep the `@/config` barrel at 10
   importers, `MAX_RESTORE_FILE_BYTES` and `MAX_ATTACHMENT_BYTES` are imported
   from `@/config/limits` in every new consumer (PR 1, PR 5; owner decision,
-  2026-11-27). If a PR still drops the score below 95, stop and ask the owner.
+  2026-11-27). If a PR still drops the score below 94, stop and ask the owner.
+  The gate was 95 until PR 5: `main` reached exactly 95.0 after PR 1, and
+  PR 5's required `attachment_rejected` telemetry import alone drops it to
+  94.9, so the owner lowered the gate to 94 (2026-11-27).
 - **Test Coverage Requirement**: no repository threshold. Each decision in
   `backup.ts` (version check, passphrase check, decrypt failure with and
   without `check`, gunzip failure, compression, fallback) has a case in

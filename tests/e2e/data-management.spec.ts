@@ -8,6 +8,30 @@ import { MAX_RESTORE_FILE_BYTES } from "../../src/config/limits";
 
 const RESTORE_MARKER_KEY = "expense-tracker-restore-in-progress";
 const UNFINISHED_RESTORE_TOAST = "Your last restore didn't finish";
+// Copied from src/lib/backup.ts, which this spec cannot import (it opens IndexedDB stores).
+const NEWER_VERSION_MESSAGE =
+  "This backup was made by a newer version of ExTrack. Close and reopen the app, and accept the update if asked.";
+
+/** An ExTrack wrapper with placeholder crypto fields: file selection rejects it before decrypting. */
+function placeholderWrapper(version: string) {
+  return {
+    name: "backup.extrack",
+    mimeType: "application/octet-stream",
+    buffer: Buffer.from(
+      JSON.stringify({
+        format: "extrack-encrypted-backup",
+        version,
+        algorithm: "AES-GCM",
+        kdf: "PBKDF2-SHA256",
+        iterations: 600000,
+        salt: "placeholder",
+        iv: "placeholder",
+        ciphertext: "placeholder",
+      }),
+      "utf-8",
+    ),
+  };
+}
 
 declare global {
   interface Window {
@@ -403,5 +427,40 @@ test.describe("data-management", () => {
       buffer: Buffer.from('{"foo":1}', "utf-8"),
     });
     await expect(page.getByText("Couldn't read this file. Try picking it again.")).toBeVisible();
+  });
+
+  test("a backup from a newer ExTrack is rejected before any passphrase prompt", async ({
+    page,
+  }) => {
+    await gotoApp(page, "/settings/data");
+    const input = page.locator('[data-testid="import-file-input"]');
+    const passphraseField = page.getByPlaceholder("Enter backup passphrase");
+
+    await input.setInputFiles(placeholderWrapper("3"));
+    await expect(page.getByText(NEWER_VERSION_MESSAGE)).toBeVisible();
+    await expect(passphraseField).toHaveCount(0);
+
+    // Wait out the first toast so the next assertion sees the second pick's message.
+    await expect(page.getByText(NEWER_VERSION_MESSAGE)).toHaveCount(0);
+    await setPassphrase(page, "correcthorse123");
+    await input.setInputFiles(placeholderWrapper("3"));
+    await expect(page.getByText(NEWER_VERSION_MESSAGE)).toBeVisible();
+    await expect(passphraseField).toHaveCount(0);
+  });
+
+  test("a version-2 backup on a browser without DecompressionStream asks for a newer browser", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Reflect.deleteProperty(window, "DecompressionStream");
+    });
+    await gotoApp(page, "/settings/data");
+    await page.setInputFiles('[data-testid="import-file-input"]', placeholderWrapper("2"));
+    await expect(
+      page.getByText(
+        "This backup needs a newer browser (Chrome 80+, Firefox 113+ or Safari 16.4+). Restore it on another device.",
+      ),
+    ).toBeVisible();
+    await expect(page.getByPlaceholder("Enter backup passphrase")).toHaveCount(0);
   });
 });

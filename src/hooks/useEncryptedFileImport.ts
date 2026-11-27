@@ -2,7 +2,14 @@ import { useRef, useState, type RefObject } from "react";
 import { toast } from "sonner";
 import { MAX_RESTORE_FILE_BYTES } from "@/config/limits";
 import { userPreferences } from "@/db/userPreferences";
-import { isEncryptedFile, decryptData, decryptWithStoredPassphrase } from "@/lib/backup";
+import {
+  KNOWN_BACKUP_VERSIONS,
+  NEWER_VERSION_MESSAGE,
+  WRONG_PASSPHRASE_MESSAGE,
+  readEnvelopeVersion,
+  decryptData,
+  decryptWithStoredPassphrase,
+} from "@/lib/backup";
 import { buildImportPreview, type ImportPreview } from "@/lib/importPreview";
 import { captureError } from "@/lib/telemetry";
 
@@ -11,7 +18,7 @@ const TOO_LARGE_MESSAGE =
 
 type FileCheck = { text: string } | { error: string } | { cancelled: true };
 
-/** Confirms large files, then opens restore marker window 1 and checks the encrypted-file format. */
+/** Confirms large files, then opens restore marker window 1 and checks the wrapper's version. */
 async function readAndCheckFile(file: File): Promise<FileCheck> {
   if (file.size > MAX_RESTORE_FILE_BYTES) {
     const mb = (file.size / (1024 * 1024)).toFixed(1);
@@ -34,8 +41,16 @@ async function readAndCheckFile(file: File): Promise<FileCheck> {
           : "Couldn't read this file. Try picking it again.",
     };
   }
-  if (!isEncryptedFile(text)) {
+  const version = readEnvelopeVersion(text);
+  if (version === null) {
     return { error: "Only encrypted .extrack backup files can be imported" };
+  }
+  if (!KNOWN_BACKUP_VERSIONS.includes(version)) return { error: NEWER_VERSION_MESSAGE };
+  if (version === "2" && typeof DecompressionStream === "undefined") {
+    return {
+      error:
+        "This backup needs a newer browser (Chrome 80+, Firefox 113+ or Safari 16.4+). Restore it on another device.",
+    };
   }
   return { text };
 }
@@ -56,7 +71,7 @@ function resolvePlaintext(
 
 function decryptErrorMessage(err: unknown, isLarge: boolean): string {
   const msg = err instanceof Error ? err.message : "";
-  if (msg.includes("Wrong passphrase")) return "Wrong passphrase — try again";
+  if (msg === WRONG_PASSPHRASE_MESSAGE) return "Wrong passphrase — try again";
   return isLarge ? TOO_LARGE_MESSAGE : "Decryption failed. The file may be corrupted.";
 }
 

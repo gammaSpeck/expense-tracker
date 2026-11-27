@@ -33,6 +33,15 @@ export interface ReleaseNote {
 // tests, nothing a user can see.
 export const RELEASE_NOTES: readonly ReleaseNote[] = [
   {
+    id: "1.10.0-backup-open-messages",
+    version: "1.10.0",
+    date: "2026-11-27",
+    type: "improved",
+    title: "Clearer messages when a backup can't be opened",
+    body: "If a backup comes from a newer ExTrack or needs a newer browser, ExTrack now says so before asking for your passphrase.",
+  },
+
+  {
     id: "1.10.0-large-backup-restore",
     version: "1.10.0",
     date: "2026-11-27",
