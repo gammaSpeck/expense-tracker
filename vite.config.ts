@@ -228,6 +228,55 @@ export default defineConfig(({ mode }) => {
           },
           plugins: ["typescript", "react"],
         },
+        // E2E specs check results on screen or in exported files, never in app storage, so a
+        // storage swap (IndexedDB → SQLite) only rewrites tests/support. Seed via tests/support/db.ts.
+        {
+          files: ["tests/e2e/**"],
+          rules: {
+            "no-restricted-globals": [
+              "error",
+              ...["indexedDB", "localStorage", "sessionStorage"].map((name) => ({
+                name,
+                message: "Assert on screen or in an exported file; seed via tests/support/db.ts.",
+              })),
+            ],
+            "no-restricted-imports": [
+              "error",
+              {
+                paths: [
+                  {
+                    name: "../support/db",
+                    importNames: ["readExpenses"],
+                    message:
+                      "Assert on screen or in an exported file, not by reading the database.",
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        // ponytail: specs that already touch storage. This list may only shrink: drop a file
+        // once its storage reads are replaced, never add one.
+        {
+          files: [
+            "tests/e2e/backup-reminder.spec.ts",
+            "tests/e2e/bulk-add.spec.ts",
+            "tests/e2e/categories.spec.ts",
+            "tests/e2e/csv-import.spec.ts",
+            "tests/e2e/data-loss.spec.ts",
+            "tests/e2e/data-management.spec.ts",
+            "tests/e2e/drive-oauth.spec.ts",
+            "tests/e2e/expense-crud.spec.ts",
+            "tests/e2e/receipt-photo.spec.ts",
+            "tests/e2e/settings.spec.ts",
+            "tests/e2e/tags.spec.ts",
+            "tests/e2e/whats-new.spec.ts",
+          ],
+          rules: {
+            "no-restricted-globals": "off",
+            "no-restricted-imports": "off",
+          },
+        },
       ],
     },
     fmt: {
