@@ -792,9 +792,10 @@ contract docs"; they are not part of any PR.
       else calls `captureError("import_failed", err, { stage: "read" })`,
       `toast.error(decryptErrorMessage(err, file.size >
       MAX_RESTORE_FILE_BYTES))`, and resets the input. The `finally`
-      calls `userPreferences.markRestoreEnded()`. `{ error }` and
-      `{ cancelled }` results send no telemetry; only errors thrown
-      during file selection reach `captureError`.
+      calls `userPreferences.markRestoreEnded()`. Apart from the
+      `file.text()` read failure above, which reports `stage: "read"`,
+      `{ error }` and `{ cancelled }` results send no telemetry; only
+      errors thrown during file selection reach `captureError`.
     - A `resolvePlaintext` result of `"invalid"` on a file over the
       threshold shows `TOO_LARGE_MESSAGE` instead of "Invalid backup
       file" in `performFileSelect` and `performManualDecrypt`.
@@ -914,9 +915,9 @@ contract docs"; they are not part of any PR.
         `file.type` is `image/heic` or `image/heif` or the name ends in
         `.heic`/`.heif` (case-insensitive); otherwise `unreadable`.
     2.  For each step: scale so the long edge is at most the step's edge and
-        never larger than the original; a canvas of that size; a null 2D
-        context → `unreadable`; fill white; `drawImage`; `toBlob("image/jpeg",
-        quality)` in a promise.
+        never larger than the original; a canvas of that size, each side
+        rounded and at least 1 px; a null 2D context → `unreadable`; fill
+        white; `drawImage`; `toBlob("image/jpeg", quality)` in a promise.
     3.  A null blob or `blob.type !== "image/jpeg"` → `unreadable`. `blob.size
         <= MAX_ATTACHMENT_BYTES` → `FileReader.readAsDataURL` in a promise,
         return.
@@ -992,6 +993,7 @@ contract docs"; they are not part of any PR.
   | 8   | 4   | writer round trip                                                                                                                | `encryptData(json, pass)` yields `version` `"2"` and a `check`; `decryptData` returns the original; for 200 repeated rows the wrapper is under half the plaintext length                                                           |
   | 9   | 4   | fallback with `globalThis.CompressionStream` removed for the test                                                                | yields `version` `"1"` with a `check`; `decryptData` returns the original                                                                                                                                                          |
   | 10  | 3   | `decryptWithStoredPassphrase` with `idb-keyval` mocked (added in review)                                                         | `null` for a wrong stored passphrase; rejects with "Backup could not be decrypted" when the check passes and one ciphertext byte is flipped                                                                                        |
+  | 11  | 3   | version 1 without `check`, right passphrase, one ciphertext byte flipped (added after drift review)                              | rejects with `WRONG_PASSPHRASE_MESSAGE`: a file without `check` cannot tell a wrong passphrase from other decrypt failures                                                                                                         |
 
 #### 20. `tests/fixtures/backup-v1.extrack` (Create)
 
@@ -1082,6 +1084,7 @@ contract docs"; they are not part of any PR.
   | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | Camera-size photo is stored as JPEG within the cap           | 3000 × 2000 gradient                                                                                                                    | preview visible; after Save, the `attachment` starts `data:image/jpeg;base64,`, decodes to at most 524,288 bytes and has a long edge of at most 1600 px |
   | Photo over the cap at the floor is rejected                  | 1200 × 1200 opaque random noise (never downscaled; measured about 825 KB at quality 0.75 and 641 KB at 0.6, over the cap at every step) | too-large message; no preview; input empty; after Save the expense has no `attachment`                                                                  |
+  | Photo that fits only at the floor is stored at 1200 px       | 3000 × 2000 opaque random noise PNG (measured about 790 KB and 577 KB at the two 1600 px steps, about 307 KB at 1200 px / 0.6)          | preview visible; after Save, the `attachment` is JPEG, at most 524,288 bytes, with a long edge of exactly 1200 px                                       |
   | Undecodable files show the unsupported or unreadable message | `receipt.heic` (`image/heic`) and `receipt.jpg`, both non-image bytes                                                                   | unsupported message, then unreadable message; input empty after each                                                                                    |
 
 #### 23. `docs/features/featureset.md` (Modify)
@@ -1178,7 +1181,7 @@ Updated by the owner after the named PR merges. Anchors use `[file:symbol]`.
 
 - **Compilation/Build**: `bun run build` per PR.
 - **Unit Tests**: `bun run test`. PR 3 adds file 19 cases 1–7 and 10; PR 4 adds
-  cases 8–9.
+  cases 8–9; case 11 was added after the drift review.
 - **Static Analysis & Linting**: `bun run check` and `bun run lint` per PR. PR 1,
   PR 2 and PR 5 change UI code, so every error from the repository's
   `shadcn/*` design-system lint rules must be fixed.
