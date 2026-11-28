@@ -149,6 +149,21 @@ describe("decryptData", () => {
       new Error("Backup decrypted but could not be unpacked"),
     );
   });
+
+  it("reports any ciphertext failure as a wrong passphrase when the file has no check", async () => {
+    // Files written before 1.10.0 carry no check, so a failed decrypt cannot be told apart.
+    const wrapper = await buildWrapper({
+      version: "1",
+      passphrase: PASSPHRASE,
+      plaintext: utf8(TEXT),
+    });
+    const bytes = b64uDecode(wrapper.ciphertext);
+    bytes[0] ^= 1;
+    wrapper.ciphertext = b64uEncode(bytes);
+    await expect(decryptData(JSON.stringify(wrapper), PASSPHRASE)).rejects.toThrow(
+      new Error(WRONG_PASSPHRASE_MESSAGE),
+    );
+  });
 });
 
 describe("readEnvelopeVersion", () => {
