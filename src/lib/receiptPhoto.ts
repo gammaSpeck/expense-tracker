@@ -37,8 +37,9 @@ function encodeJpeg(bitmap: ImageBitmap, edge: number, quality: number): Promise
   // Never upscale.
   const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
+  // At least 1 px: a very thin image would otherwise round its short side to 0 and fail toBlob.
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new ReceiptPhotoError("unreadable");
   // White fill: transparent PNG pixels would otherwise turn black as JPEG.
