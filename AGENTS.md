@@ -56,6 +56,17 @@ exists.
   the patch for a fix, from the `version` in `package.json`).
 - Never hand-edit `CHANGELOG.md`; release-please generates it from commits.
 
+# EGM artifacts
+
+EGM artifact directory: docs/features/designs
+
+- One folder per feature, `docs/features/designs/<feature>-review/`, holds the
+  brainstorm brief (`concepts_brief.md`), `design_draft.md`, and every reviewer
+  report and resolution.
+- The finished design document goes to `docs/features/designs/<feature>.md`.
+- Never write EGM artifacts to the repository root. Pass the brief's path to
+  `egm-draft`, which otherwise looks for `./concepts_brief.md`.
+
 # Design system
 
 After changing UI code, run `bun run lint` and fix every error. Design-system rules
